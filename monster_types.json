@@ -1,0 +1,122 @@
+[
+    {
+      "name": "Goblin",
+      "hit_dice": {
+        "num_dice": 1,
+        "roll_dice": 6,
+        "bonus": 0
+      },
+      "ac": 12,
+      "damage_dice": {
+        "num_dice": 1,
+        "roll_dice": 4,
+        "bonus": 0
+      },
+      "level": 1,
+      "spellcasting": false
+    },
+    {
+      "name": "Kobold",
+      "hit_dice": {
+        "num_dice": 1,
+        "roll_dice": 4,
+        "bonus": 0
+      },
+      "ac": 13,
+      "damage_dice": {
+        "num_dice": 1,
+        "roll_dice": 3,
+        "bonus": 0
+      },
+      "level": 1,
+      "spellcasting": false
+    },
+    {
+      "name": "Orc",
+      "hit_dice": {
+        "num_dice": 2,
+        "roll_dice": 8,
+        "bonus": 2
+      },
+      "ac": 14,
+      "damage_dice": {
+        "num_dice": 1,
+        "roll_dice": 8,
+        "bonus": 2
+      },
+      "level": 2,
+      "spellcasting": false
+    },
+    {
+      "name": "Skeleton",
+      "hit_dice": {
+        "num_dice": 1,
+        "roll_dice": 8,
+        "bonus": 0
+      },
+      "ac": 13,
+      "damage_dice": {
+        "num_dice": 1,
+        "roll_dice": 6,
+        "bonus": 0
+      },
+      "level": 1,
+      "spellcasting": false
+    },
+    {
+      "name": "Zombie",
+      "hit_dice": {
+        "num_dice": 2,
+        "roll_dice": 8,
+        "bonus": 2
+      },
+      "ac": 10,
+      "damage_dice": {
+        "num_dice": 1,
+        "roll_dice": 6,
+        "bonus": 0
+      },
+      "level": 1,
+      "spellcasting": false
+    },
+    {
+      "name": "Wizard",
+      "hit_dice": {
+        "num_dice": 2,
+        "roll_dice": 6,
+        "bonus": 2
+      },
+      "ac": 12,
+      "damage_dice": {
+        "num_dice": 1,
+        "roll_dice": 4,
+        "bonus": 0
+      },
+      "level": 3,
+      "spellcasting": true
+    },
+    {
+      "name": "Ogre",
+      "hit_dice": {"num_dice": 4, "roll_dice": 10, "bonus": 8},
+      "ac": 15,
+      "damage_dice": {"num_dice": 2, "roll_dice": 8, "bonus": 4},
+      "level": 4,
+      "spellcasting": false
+    },
+    {
+      "name": "Bandit",
+      "hit_dice": {"num_dice": 2, "roll_dice": 8, "bonus": 0},
+      "ac": 13,
+      "damage_dice": {"num_dice": 1, "roll_dice": 6, "bonus": 1},
+      "level": 1,
+      "spellcasting": false
+    },
+    {
+      "name": "Dragon Whelp",
+      "hit_dice": {"num_dice": 6, "roll_dice": 8, "bonus": 10},
+      "ac": 16,
+      "damage_dice": {"num_dice": 3, "roll_dice": 8, "bonus": 3},
+      "level": 6,
+      "spellcasting": false
+    }
+  ]

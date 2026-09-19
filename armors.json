@@ -1,0 +1,7 @@
+[
+  {"name": "Leather Armor", "bonus": 2},
+  {"name": "Robe", "bonus": 1},
+  {"name": "Chainmail Armor", "bonus": 3},
+  {"name": "Cloth Armor", "bonus": 1},
+  {"name": "Scale Armor", "bonus": 4}
+]

@@ -1,0 +1,5 @@
+[
+  {"name": "Human", "str_mod": 0, "int_mod": 2},
+  {"name": "Dwarf", "str_mod": 2, "int_mod": 0},
+  {"name": "Elf", "str_mod": 0, "int_mod": 2}
+]

@@ -1,0 +1,114 @@
+[
+    {
+      "name": "Fire Bolt",
+      "level": 1,
+      "damage_dice": {
+        "num_dice": 1,
+        "roll_dice": 6,
+        "bonus": 0
+      },
+      "effect": "fire damage",
+      "save_dc": 13,
+      "description": "A fiery bolt strikes the target"
+    },
+    {
+      "name": "Heal",
+      "level": 2,
+      "damage_dice": {
+        "num_dice": 2,
+        "roll_dice": 8,
+        "bonus": 2
+      },
+      "effect": "heal",
+      "save_dc": 14,
+      "description": "Heals the target for damage dealt"
+    },
+    {
+      "name": "Lightning Bolt",
+      "level": 3,
+      "damage_dice": {
+        "num_dice": 1,
+        "roll_dice": 12,
+        "bonus": 0
+      },
+      "effect": "lightning damage",
+      "save_dc": 15,
+      "description": "A bolt of lightning strikes the target"
+    },
+    {
+      "name": "Magic Missile",
+      "level": 1,
+      "damage_dice": {
+        "num_dice": 3,
+        "roll_dice": 4,
+        "bonus": 0
+      },
+      "effect": "force damage",
+      "save_dc": 12,
+      "description": "Three magic missiles strike the target"
+    },
+    {
+      "name": "Healing Word",
+      "level": 1,
+      "damage_dice": {"num_dice": 1, "roll_dice": 4, "bonus": 2},
+      "effect": "heal",
+      "save_dc": 12,
+      "description": "A quick, short-range heal"
+    },
+    {
+      "name": "Scorching Ray",
+      "level": 2,
+      "damage_dice": {"num_dice": 2, "roll_dice": 6, "bonus": 0},
+      "effect": "fire damage",
+      "save_dc": 14,
+      "description": "Multiple rays of fire hit the target"
+    },
+    {
+      "name": "Bless",
+      "level": 1,
+      "damage_dice": {},
+      "effect": "buff",
+      "save_dc": 0,
+      "description": "Party-wide minor buff (not implemented fully)"
+    },
+    {
+      "name": "Sleep",
+      "level": 1,
+      "damage_dice": {},
+      "effect": "sleep",
+      "save_dc": 12,
+      "description": "Puts the target to sleep for a short time"
+    },
+    {
+      "name": "Cure Wounds",
+      "level": 1,
+      "damage_dice": {"num_dice": 1, "roll_dice": 8, "bonus": 0},
+      "effect": "heal",
+      "save_dc": 12,
+      "description": "A touch that heals minor wounds"
+    },
+    {
+      "name": "Fireball",
+      "level": 3,
+      "damage_dice": {"num_dice": 6, "roll_dice": 6, "bonus": 0},
+      "effect": "fire damage",
+      "save_dc": 15,
+      "description": "A fiery explosion that damages all in an area"
+    },
+    {
+      "name": "Ice Lance",
+      "level": 1,
+      "damage_dice": {"num_dice": 1, "roll_dice": 8, "bonus": 0},
+      "effect": "cold damage",
+      "save_dc": 12,
+      "description": "A lance of ice that pierces the target"
+    },
+    {
+      "name": "Greater Heal",
+      "level": 3,
+      "damage_dice": {"num_dice": 4, "roll_dice": 8, "bonus": 4},
+      "effect": "heal",
+      "save_dc": 16,
+      "description": "A powerful healing spell"
+    }
+  ]

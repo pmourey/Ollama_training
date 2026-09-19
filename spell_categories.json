@@ -1,0 +1,7 @@
+{
+  "Wizard": ["fire damage", "lightning damage", "force damage", "sleep"],
+  "Cleric": ["heal"],
+  "Druid": ["heal", "sleep"],
+  "Sorcerer": ["fire damage", "force damage"],
+  "Bard": ["force damage", "sleep"]
+}
