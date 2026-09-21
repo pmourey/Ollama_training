@@ -8,7 +8,6 @@
         "bonus": 0
       },
       "effect": "fire damage",
-      "save_dc": 13,
       "description": "A fiery bolt strikes the target"
     },
     {
@@ -20,7 +19,6 @@
         "bonus": 2
       },
       "effect": "heal",
-      "save_dc": 14,
       "description": "Heals the target for damage dealt"
     },
     {
@@ -31,8 +29,11 @@
         "roll_dice": 12,
         "bonus": 0
       },
+      "dc": {
+        "dc_type": "dex",
+        "dc_success": "half"
+      },
       "effect": "lightning damage",
-      "save_dc": 15,
       "description": "A bolt of lightning strikes the target"
     },
     {
@@ -44,7 +45,6 @@
         "bonus": 0
       },
       "effect": "force damage",
-      "save_dc": 12,
       "description": "Three magic missiles strike the target"
     },
     {
@@ -52,7 +52,6 @@
       "level": 1,
       "damage_dice": {"num_dice": 1, "roll_dice": 4, "bonus": 2},
       "effect": "heal",
-      "save_dc": 12,
       "description": "A quick, short-range heal"
     },
     {
@@ -60,7 +59,6 @@
       "level": 2,
       "damage_dice": {"num_dice": 2, "roll_dice": 6, "bonus": 0},
       "effect": "fire damage",
-      "save_dc": 14,
       "description": "Multiple rays of fire hit the target"
     },
     {
@@ -68,7 +66,6 @@
       "level": 1,
       "damage_dice": {},
       "effect": "buff",
-      "save_dc": 0,
       "description": "Party-wide minor buff (not implemented fully)"
     },
     {
@@ -76,7 +73,6 @@
       "level": 1,
       "damage_dice": {},
       "effect": "sleep",
-      "save_dc": 12,
       "description": "Puts the target to sleep for a short time"
     },
     {
@@ -84,7 +80,6 @@
       "level": 1,
       "damage_dice": {"num_dice": 1, "roll_dice": 8, "bonus": 0},
       "effect": "heal",
-      "save_dc": 12,
       "description": "A touch that heals minor wounds"
     },
     {
@@ -92,7 +87,10 @@
       "level": 3,
       "damage_dice": {"num_dice": 6, "roll_dice": 6, "bonus": 0},
       "effect": "fire damage",
-      "save_dc": 15,
+      "dc": {
+        "dc_type": "dex",
+        "dc_success": "half"
+      },
       "description": "A fiery explosion that damages all in an area"
     },
     {
@@ -100,7 +98,10 @@
       "level": 1,
       "damage_dice": {"num_dice": 1, "roll_dice": 8, "bonus": 0},
       "effect": "cold damage",
-      "save_dc": 12,
+      "dc": {
+        "dc_type": "dex",
+        "dc_success": "half"
+      },
       "description": "A lance of ice that pierces the target"
     },
     {
@@ -108,7 +109,6 @@
       "level": 3,
       "damage_dice": {"num_dice": 4, "roll_dice": 8, "bonus": 4},
       "effect": "heal",
-      "save_dc": 16,
       "description": "A powerful healing spell"
     }
   ]
