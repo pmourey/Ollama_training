@@ -5,7 +5,7 @@ import json
 import os
 from dataclasses import dataclass, field
 from enum import Enum
-from random import randint, choice
+from random import randint, choice, sample
 from typing import List, Dict, Any
 
 
@@ -19,7 +19,6 @@ class ClassType(Enum):
 	DRUID = 'Druid'
 	SORCERER = 'Sorcerer'
 	PALADIN = 'Paladin'
-
 
 
 class RaceType(Enum):
@@ -108,8 +107,12 @@ class Spell:
 	level: int
 	damage_dice: Dict[str, int]  # e.g., {"num_dice": 1, "roll_dice": 6}
 	effect: str  # e.g., "fire damage", "heal"
-	save_dc: int  # Difficulty class for saving throws
+	dc_type: str
+	dc_success: bool
 	description: str
+
+	def __eq__(self, other):
+		return self.name == other.name
 
 
 class SpellCaster:
@@ -225,11 +228,18 @@ class Character:
 		proficiency_bonus = 2 + ((self.level - 1) // 4)
 		return self.abilities.str_mod + proficiency_bonus
 
+	def saving_throw(self, dc_type: str, dc: int) -> bool:
+		"""Perform a saving throw against a spell or effect"""
+		# Simple saving throw based on wisdom modifier
+		roll = randint(1, 20)
+		modifiers = {'str': self.abilities.str_mod, 'int': self.abilities.int_mod, 'wis': self.abilities.wis_mod, 'dex': self.abilities.dex_mod, 'con': self.abilities.con_mod}
+		return roll + modifiers[dc_type] >= dc
+
 
 class Hero(SpellCaster, Character):
 	"""Hero character combining Character dataclass with SpellCaster mixin"""
 
-	def __init__(self, id: int, name: str, level: int, hp: int, max_hp: int, gold: int, xp: int, *, class_type: ClassType, race: Race, armor: Armor, weapon: Weapon, shield: Shield, inventory: List[Equipment] | None = None, abilities: Abilities | None = None, spells: List[Spell] | None = None, max_spell_slots: int = 0, current_spell_slots: int = 0):
+	def __init__(self, id: int, name: str, level: int, hp: int, max_hp: int, gold: int, xp: int, *, class_type: ClassType, race: Race, armor: Armor, weapon: Weapon, shield: Shield, inventory: List[Equipment] | None = None, abilities: Abilities | None = None, spells: List[Spell] | None = None, spellcasting_ability='', max_spell_slots: int = 0, current_spell_slots: int = 0):
 		# Initialize dataclass part
 		if abilities is None:
 			abilities = Abilities()
@@ -239,6 +249,7 @@ class Hero(SpellCaster, Character):
 
 		# Hero-specific attributes
 		self.class_type: ClassType = class_type
+		self.spellcasting_ability = spellcasting_ability
 		self.race: Race = race
 		self.armor: Armor = armor
 		self.weapon: Weapon = weapon
@@ -249,6 +260,16 @@ class Hero(SpellCaster, Character):
 		# spells: if explicit list provided use it; otherwise infer by class categories
 		allowed_spells = spell_categories.get(self.class_type.value, [])
 		return [s for s in spells if s.name in allowed_spells]
+
+	@property
+	def dc_value(self):
+		# TODO Your Spell Save DC = 8 + your Spellcasting Ability modifier + your Proficiency Bonus + any Special Modifiers (???)
+		def prof_bonus_char(x):
+			return x // 4 + 1
+
+		modifiers = {'str': self.abilities.str_mod, 'int': self.abilities.int_mod, 'wis': self.abilities.wis_mod, 'dex': self.abilities.dex_mod, 'con': self.abilities.con_mod}
+		spell_casting_ability_modifier: int = modifiers.get(self.spellcasting_ability, 0)
+		return 8 + spell_casting_ability_modifier + prof_bonus_char(self.level)
 
 	@property
 	def thac0(self) -> int:
@@ -340,12 +361,6 @@ class Hero(SpellCaster, Character):
 		"""Calculate initiative roll for combat order"""
 		return randint(1, 20) + self.abilities.dex_mod
 
-	def saving_throw(self, dc: int) -> bool:
-		"""Perform a saving throw against a spell or effect"""
-		# Simple saving throw based on wisdom modifier
-		roll = randint(1, 20)
-		return roll + self.abilities.wis_mod >= dc
-
 
 @dataclass
 class DamageDice:
@@ -424,12 +439,6 @@ class Monster(Character):
 		"""Calculate initiative roll for combat order"""
 		return randint(1, 20) + self.abilities.dex_mod
 
-	def saving_throw(self, dc: int) -> bool:
-		"""Perform a saving throw against a spell or effect"""
-		# Monster saving throw based on wisdom modifier
-		roll = randint(1, 20)
-		return roll + self.abilities.wis_mod >= dc
-
 
 class SpellLoader:
 	"""Handles loading spells from JSON files"""
@@ -443,7 +452,13 @@ class SpellLoader:
 
 			spells = []
 			for spell_dict in spell_data:
-				spell = Spell(name=spell_dict['name'], level=spell_dict['level'], damage_dice=spell_dict.get('damage_dice', {}), effect=spell_dict['effect'], save_dc=spell_dict['save_dc'], description=spell_dict.get('description', ''))
+				dc = spell_dict.get('dc', None)
+				dc_type = ''
+				dc_success = False
+				if dc:
+					dc_type = dc.get('dc_type')
+					dc_success = dc.get('dc_success')
+				spell = Spell(name=spell_dict['name'], level=spell_dict['level'], damage_dice=spell_dict.get('damage_dice', {}), effect=spell_dict['effect'], dc_type=dc_type, dc_success=dc_success, description=spell_dict.get('description', ''))
 				spells.append(spell)
 
 			return spells
@@ -518,7 +533,7 @@ class BattleSystem:
 		return faces_that_hit / 20.0
 
 	@staticmethod
-	def resolve_spell_effect(caster: SpellCaster, target: Character, spell: Spell) -> str:
+	def resolve_spell_effect(caster: Hero, target: Character, spell: Spell) -> str:
 		"""Resolve the effect of a spell on the target"""
 		if spell.effect == "heal":
 			# Healing spell
@@ -539,21 +554,25 @@ class BattleSystem:
 			damage += spell.damage_dice.get("bonus", 0)
 
 			# Check if target makes saving throw (any character with saving_throw)
-			if hasattr(target, 'saving_throw') and target.saving_throw(spell.save_dc):
-				half = max(1, damage // 2)
-				target.hp -= half
-				return f"[Spell] {target.name} saves against {spell.name} and takes half damage ({half} HP)!"
+			if spell.dc_type and target.saving_throw(spell.dc_type, caster.dc_value):
+				hp_loss = max(1, damage // 2) if spell.dc_success == 'half' else 0
+				if hp_loss:
+					target.hp -= hp_loss
+					return f"[Spell] {target.name} saves against {spell.name} and takes half damage ({hp_loss} HP)!"
+				else:
+					return f"[Spell] {target.name} saves against {spell.name} and takes no damage!"
+
 			else:
 				target.hp -= damage
 				return f"[Spell] {caster.name} casts {spell.name} and deals {damage} damage to {target.name}!"
 
 		elif spell.effect == "sleep":
 			# Sleep spell - requires saving throw
-			if hasattr(target, 'saving_throw') and target.saving_throw(spell.save_dc):
-				return f"[Spell] {target.name} saves against {spell.name} and remains awake!"
-			else:
-				target.condition = Condition.UNCONSCIOUS
-				return f"[Spell] {target.name} falls asleep due to {spell.name}!"
+			# if hasattr(target, 'saving_throw') and target.saving_throw(spell.dc_type, caster.dc_value):
+			# 	return f"[Spell] {target.name} saves against {spell.name} and remains awake!"
+			# else:
+			target.condition = Condition.UNCONSCIOUS
+			return f"[Spell] {target.name} falls asleep due to {spell.name}!"
 
 		return f"[Spell] {caster.name} casts {spell.name} on {target.name}!"
 
@@ -658,7 +677,7 @@ class BattleSystem:
 					if allies_to_heal:
 						spell = max(healing_spells, key=lambda x: x.level)
 						low_ally = min(allies_to_heal, key=lambda a: a.hp)
-						#print(low_ally, spell)
+						# print(low_ally, spell)
 						try:
 							return attacker.cast_spell(spell, low_ally)
 						except TypeError:
@@ -802,10 +821,10 @@ def create_sample_party(spells: List[Spell] | None = None, classes: list | None 
 	gandalf_slots = gandalf_class.get('base_spell_slots', 3) if gandalf_class else 3
 
 	return [Hero(id=1, name="Aragorn", level=1, hp=10, max_hp=10, gold=100, xp=0, class_type=ClassType.FIGHTER, race=Race(type=RaceType.HUMAN), armor=aragorn_armor, weapon=aragorn_weapon, shield=aragorn_shield, abilities=Abilities(strength=14, intelligence=10, dexterity=12, wisdom=10, agility=12, constitution=13), spells=[]), Hero(id=2, name="Gandalf", level=1, hp=8, max_hp=8, gold=50, xp=0, class_type=ClassType.WIZARD, race=Race(type=RaceType.HUMAN), armor=gandalf_armor, weapon=gandalf_weapon, shield=gandalf_shield, abilities=Abilities(strength=8, intelligence=16, dexterity=10, wisdom=14, agility=10, constitution=12), spells=spells, max_spell_slots=gandalf_slots, current_spell_slots=gandalf_slots),
-		Hero(id=3, name="Legolas", level=1, hp=9, max_hp=9, gold=75, xp=0, class_type=ClassType.RANGER, race=Race(type=RaceType.ELF), armor=Armor(name="Leather Armor", bonus=2), weapon=Weapon(name="Bow", damage=6), shield=Shield(name="None", bonus=0), abilities=Abilities(strength=12, intelligence=12, dexterity=16, wisdom=12, agility=14, constitution=12), spells=[]),  # Ranger has no spells
-		Hero(id=4, name="Frodo", level=1, hp=7, max_hp=7, gold=30, xp=0, class_type=ClassType.ROGUE, race=Race(type=RaceType.HOBBIT), armor=Armor(name="Leather Armor", bonus=2), weapon=Weapon(name="Dagger", damage=4), shield=Shield(name="None", bonus=0), abilities=Abilities(strength=10, intelligence=12, dexterity=14, wisdom=12, agility=14, constitution=10), spells=[]),  # Rogue has no spells
-		Hero(id=5, name="Boromir", level=1, hp=10, max_hp=10, gold=80, xp=0, class_type=ClassType.FIGHTER, race=Race(type=RaceType.HUMAN), armor=Armor(name="Chainmail", bonus=3), weapon=Weapon(name="Sword", damage=6), shield=Shield(name="Wooden Shield", bonus=1), abilities=Abilities(strength=14, intelligence=10, dexterity=12, wisdom=10, agility=12, constitution=13), spells=[]),  # Fighter has no spells
-	]
+	        Hero(id=3, name="Legolas", level=1, hp=9, max_hp=9, gold=75, xp=0, class_type=ClassType.RANGER, race=Race(type=RaceType.ELF), armor=Armor(name="Leather Armor", bonus=2), weapon=Weapon(name="Bow", damage=6), shield=Shield(name="None", bonus=0), abilities=Abilities(strength=12, intelligence=12, dexterity=16, wisdom=12, agility=14, constitution=12), spells=[]),  # Ranger has no spells
+	        Hero(id=4, name="Frodo", level=1, hp=7, max_hp=7, gold=30, xp=0, class_type=ClassType.ROGUE, race=Race(type=RaceType.HOBBIT), armor=Armor(name="Leather Armor", bonus=2), weapon=Weapon(name="Dagger", damage=4), shield=Shield(name="None", bonus=0), abilities=Abilities(strength=10, intelligence=12, dexterity=14, wisdom=12, agility=14, constitution=10), spells=[]),  # Rogue has no spells
+	        Hero(id=5, name="Boromir", level=1, hp=10, max_hp=10, gold=80, xp=0, class_type=ClassType.FIGHTER, race=Race(type=RaceType.HUMAN), armor=Armor(name="Chainmail", bonus=3), weapon=Weapon(name="Sword", damage=6), shield=Shield(name="Wooden Shield", bonus=1), abilities=Abilities(strength=14, intelligence=10, dexterity=12, wisdom=10, agility=12, constitution=13), spells=[]),  # Fighter has no spells
+	        ]
 
 
 def build_party_from_heroes(heroes_data, spells, classes, races, weapons, armors, shields, spell_categories, party_size=5):
@@ -838,7 +857,8 @@ def build_party_from_heroes(heroes_data, spells, classes, races, weapons, armors
 		shield = Shield(name=h.get('shield', 'None'), bonus=next((s['bonus'] for s in shields if s['name'] == h.get('shield')), 0))
 
 		# determine spell slots
-		hero = Hero(id=h.get('id', 0), name=h.get('name', 'Hero'), level=h.get('level', 1), hp=h.get('hp', 10), max_hp=h.get('max_hp', 10), gold=h.get('gold', 0), xp=h.get('xp', 0), class_type=cls or ClassType.FIGHTER, race=race, armor=armor, weapon=weapon, shield=shield, abilities=abilities)
+		spellcasting_ability = [c.get('spellcasting_ability', '') for c in classes if c.get('name').lower() == class_str.lower()][0]
+		hero = Hero(id=h.get('id', 0), name=h.get('name', 'Hero'), level=h.get('level', 1), hp=h.get('hp', 10), max_hp=h.get('max_hp', 10), gold=h.get('gold', 0), xp=h.get('xp', 0), class_type=cls or ClassType.FIGHTER, race=race, armor=armor, weapon=weapon, shield=shield, abilities=abilities, spellcasting_ability=spellcasting_ability)
 		allowed_spells = hero.allowed_spells(spell_categories, spells)
 		# print(h.get('name'), class_str, allowed_spells)
 		hero.spells = sample(allowed_spells, min(randint(1, 2), len(allowed_spells)))
@@ -905,9 +925,10 @@ def end_combat_msg(party, monsters, num_combats, killed_monsters):
 			elif isinstance(getattr(hero, 'race', None), Enum):
 				race_name = hero.race.value
 			spell_slots = f', Spells slots: {hero.current_spell_slots}/{hero.max_spell_slots}' if hero.spells else ''
+			spells = '|'.join([f'{s.level}:{s.name}' for s in hero.spells])
 			print(f"  {hero.name}: Lvl {hero.level} {cls_name} {race_name} (AC {hero.armor_class} - THACO: {hero.thac0}) "
 			      f"- STR: {hero.str} INT: {hero.int} DEX: {hero.dex} CON: {hero.con} WIS: {hero.wis} "
-			      f"- HP {hero.hp}/{hero.max_hp} - {hero.condition.value.upper()}, XP {hero.xp}, Gold {hero.gold}{spell_slots}")
+			      f"- HP {hero.hp}/{hero.max_hp} - {hero.condition.value.upper()}, XP {hero.xp}, Gold {hero.gold}{spell_slots} - {spells}")
 	else:
 		print(f"All {len(party)} characters in party has died!")
 
@@ -1007,21 +1028,29 @@ def start_combat(party: List[Hero], monsters: List[Monster]):
 			input(f"End of round {round_num}. Press Enter to continue...")
 
 
-def level_up(party):
-	for char in party:
-		if char.is_dead:
-			continue
-		if char.xp // 500 >= char.level:
-			char.level += 1
-			hp_gained = randint(1, 10)
-			char.max_hp += hp_gained
-			char.hp += hp_gained
-			if char.spells:
-				for i in range(10):
-					if i <= char.level // 2:
-						char.max_spell_slots[i] = min(char.max_spell_slots[i] + randint(1, 3), 9)
-						char.current_spell_slots[i] = char.max_spell_slots[i]
+def level_up(char, spells):
+	char.level += 1
+	hp_gained = randint(1, 10)
+	char.max_hp += hp_gained
+	char.hp += hp_gained
+	max_spell_level = max(1, (char.level + 1) // 2)
+	for i in range(max_spell_level):
+		char.max_spell_slots[i] = min(char.max_spell_slots[i] + randint(1, 3), 9)
+		char.current_spell_slots[i] = char.max_spell_slots[i]
+	new_spells = [s for s in spells if s not in char.spells and s.level <= max_spell_level]
+	if new_spells:
+		# Application des règles selon la classe (Modèle standard 100% déterministe)
+		if char.class_type == ClassType.WIZARD:
+			# Le Wizard apprend toujours 2 sorts
+			new_spells = sample(new_spells, min(2, len(new_spells)))
 
+		elif char.class_type in [ClassType.SORCERER, ClassType.BARD, ClassType.RANGER]:
+			# Ces classes apprennent généralement 1 sort par niveau
+			new_spells = sample(new_spells, 1)
+		if char.spells:
+			char.spells += new_spells
+		else:
+			char.spells = new_spells
 
 def uprint(msg: str = ''):
 	if not BATCH_MODE:
@@ -1040,14 +1069,17 @@ if __name__ == '__main__':
 
 	BATCH_MODE = True
 	end_game = False
-	max_combats = 150
+	max_combats = 1000
 	num_combats = 0
-	max_monsters = 3
+	max_monsters = 2
 	killed_monsters = 0
 	killed_by_level = {m.name: 0 for m in monster_types}
 	spells_cast = {s.name: 0 for s in spells}
 	while not end_game and num_combats < max_combats:
-		level_up(party)
+		for char in party:
+			if char.xp // 500 >= char.level:
+				allowed_spells = char.allowed_spells(spell_categories, spells)
+				level_up(char, allowed_spells)
 		num_combats += 1
 		if num_combats % 50 == 0:
 			for char in party:
@@ -1071,4 +1103,3 @@ if __name__ == '__main__':
 	end_combat_msg(party, monsters, num_combats, killed_monsters)
 	print("killed: ", killed_by_level)
 	print("spells: ", spells_cast)
-
