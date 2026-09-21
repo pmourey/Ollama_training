@@ -21,10 +21,6 @@ class ClassType(Enum):
 	PALADIN = 'Paladin'
 
 
-class MonsterKind(Enum):
-	GOBLIN = 'Goblin'
-	KOBOLD = 'Kobold'
-
 
 class RaceType(Enum):
 	HUMAN = 'Human'
@@ -258,20 +254,20 @@ class Hero(SpellCaster, Character):
 	def thac0(self) -> int:
 		"""Calcule le THAC0 de base selon le niveau et la classe (Règles AD&D 2e)."""
 		# 1. Groupe des Guerriers (Fighter, Ranger, Paladin) -> -1 par niveau
-		if self in [ClassType.FIGHTER, ClassType.RANGER, ClassType.PALADIN]:
+		if self.class_type in [ClassType.FIGHTER, ClassType.RANGER, ClassType.PALADIN]:
 			result = max(1, 20 - (self.level - 1))
 
 		# 2. Groupe des Prêtres (Cleric, Druid) -> -2 tous les 3 niveaux
-		elif self in [ClassType.CLERIC, ClassType.DRUID]:
+		elif self.class_type in [ClassType.CLERIC, ClassType.DRUID]:
 			result = max(1, 20 - ((self.level - 1) // 3) * 2)
 
 		# 3. Groupe des Roublards (Rogue/Voleur, Bard) -> -1 tous les 2 niveaux
-		elif self in [ClassType.ROGUE, ClassType.BARD]:
+		elif self.class_type in [ClassType.ROGUE, ClassType.BARD]:
 			result = max(1, 20 - (self.level - 1) // 2)
 
 		# 4. Groupe des Magiciens (Wizard/Mage, Sorcerer*) -> -1 tous les 3 niveaux
 		# *Note : Le Sorcerer n'existait pas en AD&D 2e pur, mais suit le groupe Magicien
-		elif self in [ClassType.WIZARD, ClassType.SORCERER]:
+		elif self.class_type in [ClassType.WIZARD, ClassType.SORCERER]:
 			result = max(1, 20 - (self.level - 1) // 3)
 		else:
 			result = 20
