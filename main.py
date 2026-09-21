@@ -857,7 +857,8 @@ def create_sample_monsters(monster_types: List[MonsterType], count: int = 3):
 		monster_type = choice(monster_types)
 
 		# Create monster with appropriate stats
-		monster = Monster(id=i + 1, name=f"{monster_type.name}", level=monster_type.level, hp=monster_type.hit_dice.roll, max_hp=monster_type.hit_dice.roll, gold=randint(1, 10), xp=randint(5, 15) * (monster_type.level + 1), abilities=Abilities(strength=8 + monster_type.level, intelligence=8, dexterity=10 + monster_type.level, wisdom=10, agility=10 + monster_type.level, constitution=10 + monster_type.level), type=monster_type, ac=monster_type.ac, damage=monster_type.damage)
+		hp = monster_type.hit_dice.roll
+		monster = Monster(id=i + 1, name=f"{monster_type.name}", level=monster_type.level, hp=hp, max_hp=hp, gold=randint(1, 10), xp=randint(5, 15) * (monster_type.level + 1), abilities=Abilities(strength=8 + monster_type.level, intelligence=8, dexterity=10 + monster_type.level, wisdom=10, agility=10 + monster_type.level, constitution=10 + monster_type.level), type=monster_type, ac=monster_type.ac, damage=monster_type.damage)
 		monsters.append(monster)
 
 	return monsters
@@ -1039,7 +1040,7 @@ if __name__ == '__main__':
 
 	BATCH_MODE = True
 	end_game = False
-	max_combats = 100
+	max_combats = 150
 	num_combats = 0
 	max_monsters = 3
 	killed_monsters = 0
