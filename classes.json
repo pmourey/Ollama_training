@@ -1,11 +1,11 @@
 [
-  {"name": "Wizard", "description": "Spellcaster, uses intelligence for spellcasting", "base_spell_slots": 3},
+  {"name": "Wizard", "description": "Spellcaster, uses intelligence for spellcasting", "spellcasting_ability": "int", "base_spell_slots": 3},
   {"name": "Fighter", "description": "Melee combatant, uses strength", "base_spell_slots": 0},
-  {"name": "Cleric", "description": "Healer and support spellcaster", "base_spell_slots": 3},
+  {"name": "Cleric", "description": "Healer and support spellcaster", "spellcasting_ability": "wis", "base_spell_slots": 3},
   {"name": "Ranger", "description": "Ranged/skirmisher, light spell access in some builds", "base_spell_slots": 0},
   {"name": "Rogue", "description": "Stealthy melee/ranged combatant", "base_spell_slots": 0},
-  {"name": "Bard", "description": "Support caster and skillmaster", "base_spell_slots": 1},
-  {"name": "Druid", "description": "Nature caster and shapeshifter", "base_spell_slots": 2},
-  {"name": "Sorcerer", "description": "Innate spellcaster", "base_spell_slots": 3},
-  {"name": "Paladin", "description": "Holy warrior with limited spells", "base_spell_slots": 1}
+  {"name": "Bard", "description": "Support caster and skillmaster", "spellcasting_ability": "cha", "base_spell_slots": 1},
+  {"name": "Druid", "description": "Nature caster and shapeshifter", "spellcasting_ability": "wis", "base_spell_slots": 2},
+  {"name": "Sorcerer", "description": "Innate spellcaster", "spellcasting_ability": "cha", "base_spell_slots": 3},
+  {"name": "Paladin", "description": "Holy warrior with limited spells", "spellcasting_ability": "cha", "base_spell_slots": 1}
 ]
