@@ -1,114 +1,2001 @@
 [
-    {
-      "name": "Fire Bolt",
-      "level": 1,
-      "damage_dice": {
-        "num_dice": 1,
-        "roll_dice": 6,
-        "bonus": 0
+  {
+    "class": "Wizard",
+    "spells": [
+      {
+        "name": "Fire Bolt",
+        "level": 1,
+        "damage_dice": {
+          "num_dice": 1,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "fire damage",
+        "description": "A fiery bolt strikes the target."
       },
-      "effect": "fire damage",
-      "description": "A fiery bolt strikes the target"
-    },
-    {
-      "name": "Heal",
-      "level": 2,
-      "damage_dice": {
-        "num_dice": 2,
-        "roll_dice": 8,
-        "bonus": 2
+      {
+        "name": "Magic Missile",
+        "level": 1,
+        "damage_dice": {
+          "num_dice": 3,
+          "roll_dice": 4,
+          "bonus": 0
+        },
+        "effect": "force damage",
+        "description": "Three unmissable force darts."
       },
-      "effect": "heal",
-      "description": "Heals the target for damage dealt"
-    },
-    {
-      "name": "Lightning Bolt",
-      "level": 3,
-      "damage_dice": {
-        "num_dice": 1,
-        "roll_dice": 12,
-        "bonus": 0
+      {
+        "name": "Shield",
+        "level": 1,
+        "damage_dice": {},
+        "effect": "shield",
+        "description": "An invisible barrier that increases AC temporarily."
       },
-      "dc": {
-        "dc_type": "dex",
-        "dc_success": "half"
+      {
+        "name": "Scorching Ray",
+        "level": 2,
+        "damage_dice": {
+          "num_dice": 2,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "fire damage",
+        "description": "Multiple fire rays shoot at targets."
       },
-      "effect": "lightning damage",
-      "description": "A bolt of lightning strikes the target"
-    },
-    {
-      "name": "Magic Missile",
-      "level": 1,
-      "damage_dice": {
-        "num_dice": 3,
-        "roll_dice": 4,
-        "bonus": 0
+      {
+        "name": "Acid Arrow",
+        "level": 2,
+        "damage_dice": {
+          "num_dice": 4,
+          "roll_dice": 4,
+          "bonus": 0
+        },
+        "effect": "acid damage",
+        "description": "A magical arrow that corrodes on impact."
       },
-      "effect": "force damage",
-      "description": "Three magic missiles strike the target"
-    },
-    {
-      "name": "Healing Word",
-      "level": 1,
-      "damage_dice": {"num_dice": 1, "roll_dice": 4, "bonus": 2},
-      "effect": "heal",
-      "description": "A quick, short-range heal"
-    },
-    {
-      "name": "Scorching Ray",
-      "level": 2,
-      "damage_dice": {"num_dice": 2, "roll_dice": 6, "bonus": 0},
-      "effect": "fire damage",
-      "description": "Multiple rays of fire hit the target"
-    },
-    {
-      "name": "Bless",
-      "level": 1,
-      "damage_dice": {},
-      "effect": "buff",
-      "description": "Party-wide minor buff (not implemented fully)"
-    },
-    {
-      "name": "Sleep",
-      "level": 1,
-      "damage_dice": {},
-      "effect": "sleep",
-      "description": "Puts the target to sleep for a short time"
-    },
-    {
-      "name": "Cure Wounds",
-      "level": 1,
-      "damage_dice": {"num_dice": 1, "roll_dice": 8, "bonus": 0},
-      "effect": "heal",
-      "description": "A touch that heals minor wounds"
-    },
-    {
-      "name": "Fireball",
-      "level": 3,
-      "damage_dice": {"num_dice": 6, "roll_dice": 6, "bonus": 0},
-      "effect": "fire damage",
-      "dc": {
-        "dc_type": "dex",
-        "dc_success": "half"
+      {
+        "name": "Blindness",
+        "level": 2,
+        "damage_dice": {},
+        "effect": "blind",
+        "dc": {
+          "dc_type": "con",
+          "dc_success": "none"
+        },
+        "description": "Blinds a creature mentally."
       },
-      "description": "A fiery explosion that damages all in an area"
-    },
-    {
-      "name": "Ice Lance",
-      "level": 1,
-      "damage_dice": {"num_dice": 1, "roll_dice": 8, "bonus": 0},
-      "effect": "cold damage",
-      "dc": {
-        "dc_type": "dex",
-        "dc_success": "half"
+      {
+        "name": "Fireball",
+        "level": 3,
+        "damage_dice": {
+          "num_dice": 8,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "fire damage",
+        "dc": {
+          "dc_type": "dex",
+          "dc_success": "half"
+        },
+        "description": "A massive fiery explosion."
       },
-      "description": "A lance of ice that pierces the target"
-    },
-    {
-      "name": "Greater Heal",
-      "level": 3,
-      "damage_dice": {"num_dice": 4, "roll_dice": 8, "bonus": 4},
-      "effect": "heal",
-      "description": "A powerful healing spell"
-    }
-  ]
+      {
+        "name": "Lightning Bolt",
+        "level": 3,
+        "damage_dice": {
+          "num_dice": 8,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "lightning damage",
+        "dc": {
+          "dc_type": "dex",
+          "dc_success": "half"
+        },
+        "description": "A stroke of lightning forming a line."
+      },
+      {
+        "name": "Slow",
+        "level": 3,
+        "damage_dice": {},
+        "effect": "disadvantage",
+        "dc": {
+          "dc_type": "wis",
+          "dc_success": "none"
+        },
+        "description": "Alters time to slow down and weaken enemies."
+      },
+      {
+        "name": "Ice Storm",
+        "level": 4,
+        "damage_dice": {
+          "num_dice": 4,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "cold damage",
+        "dc": {
+          "dc_type": "dex",
+          "dc_success": "half"
+        },
+        "description": "Hail stones smash from the sky."
+      },
+      {
+        "name": "Blight",
+        "level": 4,
+        "damage_dice": {
+          "num_dice": 8,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "necrotic damage",
+        "dc": {
+          "dc_type": "con",
+          "dc_success": "half"
+        },
+        "description": "Necrotic energy withers a creature."
+      },
+      {
+        "name": "Phantasmal Killer",
+        "level": 4,
+        "damage_dice": {
+          "num_dice": 4,
+          "roll_dice": 10,
+          "bonus": 0
+        },
+        "effect": "psychic damage",
+        "dc": {
+          "dc_type": "wis",
+          "dc_success": "none"
+        },
+        "description": "Illusion evoking a target's deepest fears."
+      },
+      {
+        "name": "Cone of Cold",
+        "level": 5,
+        "damage_dice": {
+          "num_dice": 8,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "cold damage",
+        "dc": {
+          "dc_type": "con",
+          "dc_success": "half"
+        },
+        "description": "A blast of cold air erupts from your hands."
+      },
+      {
+        "name": "Cloudkill",
+        "level": 5,
+        "damage_dice": {
+          "num_dice": 5,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "poison damage",
+        "dc": {
+          "dc_type": "con",
+          "dc_success": "half"
+        },
+        "description": "A poisonous fog that moves away from you."
+      },
+      {
+        "name": "Hold Monster",
+        "level": 5,
+        "damage_dice": {},
+        "effect": "paralyze",
+        "dc": {
+          "dc_type": "wis",
+          "dc_success": "none"
+        },
+        "description": "Paralyzes a creature in place."
+      },
+      {
+        "name": "Disintegrate",
+        "level": 6,
+        "damage_dice": {
+          "num_dice": 10,
+          "roll_dice": 6,
+          "bonus": 40
+        },
+        "effect": "force damage",
+        "dc": {
+          "dc_type": "dex",
+          "dc_success": "none"
+        },
+        "description": "A green ray that turns matter to dust."
+      },
+      {
+        "name": "Chain Lightning",
+        "level": 6,
+        "damage_dice": {
+          "num_dice": 10,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "lightning damage",
+        "dc": {
+          "dc_type": "dex",
+          "dc_success": "half"
+        },
+        "description": "Lightning strikes a target and leaps to others."
+      },
+      {
+        "name": "Sunbeam",
+        "level": 6,
+        "damage_dice": {
+          "num_dice": 6,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "radiant damage",
+        "dc": {
+          "dc_type": "con",
+          "dc_success": "half"
+        },
+        "description": "A flash of radiant light blinds and burns."
+      },
+      {
+        "name": "Delayed Blast Fireball",
+        "level": 7,
+        "damage_dice": {
+          "num_dice": 12,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "fire damage",
+        "dc": {
+          "dc_type": "dex",
+          "dc_success": "half"
+        },
+        "description": "A fireball that builds power over time."
+      },
+      {
+        "name": "Finger of Death",
+        "level": 7,
+        "damage_dice": {
+          "num_dice": 7,
+          "roll_dice": 8,
+          "bonus": 30
+        },
+        "effect": "necrotic damage",
+        "dc": {
+          "dc_type": "con",
+          "dc_success": "half"
+        },
+        "description": "Sends negative energy to snap life force."
+      },
+      {
+        "name": "Prismatic Spray",
+        "level": 7,
+        "damage_dice": {
+          "num_dice": 10,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "radiant damage",
+        "dc": {
+          "dc_type": "dex",
+          "dc_success": "half"
+        },
+        "description": "Eight multicolored rays flash outwards."
+      },
+      {
+        "name": "Sunburst",
+        "level": 8,
+        "damage_dice": {
+          "num_dice": 12,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "radiant damage",
+        "dc": {
+          "dc_type": "con",
+          "dc_success": "half"
+        },
+        "description": "Brilliant flashing light burns and blinds area."
+      },
+      {
+        "name": "Incendiary Cloud",
+        "level": 8,
+        "damage_dice": {
+          "num_dice": 14,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "fire damage",
+        "dc": {
+          "dc_type": "dex",
+          "dc_success": "half"
+        },
+        "description": "A swirling cloud of white-hot embers."
+      },
+      {
+        "name": "Mind Blank",
+        "level": 8,
+        "damage_dice": {},
+        "effect": "buff",
+        "description": "Protects a mind from all mental alteration."
+      },
+      {
+        "name": "Meteor Swarm",
+        "level": 9,
+        "damage_dice": {
+          "num_dice": 20,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "fire damage",
+        "dc": {
+          "dc_type": "dex",
+          "dc_success": "half"
+        },
+        "description": "Blazing meteors plummet to earth."
+      },
+      {
+        "name": "Time Stop",
+        "level": 9,
+        "damage_dice": {},
+        "effect": "buff",
+        "description": "You stop time for brief turns."
+      },
+      {
+        "name": "Power Word Kill",
+        "level": 9,
+        "damage_dice": {
+          "num_dice": 10,
+          "roll_dice": 12,
+          "bonus": 50
+        },
+        "effect": "force damage",
+        "description": "A word that kills a low HP entity instantly."
+      },
+      {
+        "name": "Arcane Cataclysm",
+        "level": 10,
+        "damage_dice": {
+          "num_dice": 30,
+          "roll_dice": 10,
+          "bonus": 0
+        },
+        "effect": "force damage",
+        "dc": {
+          "dc_type": "int",
+          "dc_success": "none"
+        },
+        "description": "Unleashes cosmic magic that tears reality apart."
+      },
+      {
+        "name": "Absolute Zero",
+        "level": 10,
+        "damage_dice": {
+          "num_dice": 25,
+          "roll_dice": 10,
+          "bonus": 0
+        },
+        "effect": "cold damage",
+        "dc": {
+          "dc_type": "con",
+          "dc_success": "half"
+        },
+        "description": "Freezes all kinetic motion instantly."
+      },
+      {
+        "name": "Wish Spell",
+        "level": 10,
+        "damage_dice": {},
+        "effect": "cleanse",
+        "description": "Rewrites the laws of combat completely."
+      }
+    ]
+  },
+  {
+    "class": "Cleric",
+    "spells": [
+      {
+        "name": "Healing Word",
+        "level": 1,
+        "damage_dice": {
+          "num_dice": 1,
+          "roll_dice": 4,
+          "bonus": 4
+        },
+        "effect": "heal",
+        "description": "Quick ranged burst heal."
+      },
+      {
+        "name": "Cure Wounds",
+        "level": 1,
+        "damage_dice": {
+          "num_dice": 1,
+          "roll_dice": 8,
+          "bonus": 4
+        },
+        "effect": "heal",
+        "description": "Touch heal."
+      },
+      {
+        "name": "Guiding Bolt",
+        "level": 1,
+        "damage_dice": {
+          "num_dice": 4,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "radiant damage",
+        "description": "Flash of light that opens target up."
+      },
+      {
+        "name": "Heal",
+        "level": 2,
+        "damage_dice": {
+          "num_dice": 2,
+          "roll_dice": 8,
+          "bonus": 4
+        },
+        "effect": "heal",
+        "description": "Moderate divine mending."
+      },
+      {
+        "name": "Spiritual Weapon",
+        "level": 2,
+        "damage_dice": {
+          "num_dice": 1,
+          "roll_dice": 8,
+          "bonus": 3
+        },
+        "effect": "force damage",
+        "description": "Summons a floating spectral weapon."
+      },
+      {
+        "name": "Lesser Restoration",
+        "level": 2,
+        "damage_dice": {},
+        "effect": "cleanse",
+        "description": "Cleanses a condition or debuff."
+      },
+      {
+        "name": "Greater Heal",
+        "level": 3,
+        "damage_dice": {
+          "num_dice": 4,
+          "roll_dice": 8,
+          "bonus": 4
+        },
+        "effect": "heal",
+        "description": "Powerful light-infused healing."
+      },
+      {
+        "name": "Spirit Guardians",
+        "level": 3,
+        "damage_dice": {
+          "num_dice": 3,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "radiant damage",
+        "dc": {
+          "dc_type": "wis",
+          "dc_success": "half"
+        },
+        "description": "Angels swirl around protecting the area."
+      },
+      {
+        "name": "Bestow Curse",
+        "level": 3,
+        "damage_dice": {},
+        "effect": "disadvantage",
+        "dc": {
+          "dc_type": "wis",
+          "dc_success": "none"
+        },
+        "description": "Afflicts a creature with a dark hex."
+      },
+      {
+        "name": "Sacred Radiance",
+        "level": 4,
+        "damage_dice": {
+          "num_dice": 4,
+          "roll_dice": 6,
+          "bonus": 4
+        },
+        "effect": "radiant damage",
+        "dc": {
+          "num_dice": 0,
+          "roll_dice": 0,
+          "bonus": 0
+        },
+        "description": "Divine light purges corruption."
+      },
+      {
+        "name": "Death Ward",
+        "level": 4,
+        "damage_dice": {},
+        "effect": "buff",
+        "description": "Ward protecting against fatal damage once."
+      },
+      {
+        "name": "Guardian of Faith",
+        "level": 4,
+        "damage_dice": {
+          "num_dice": 4,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "radiant damage",
+        "description": "A spectral sentinel strikes invaders."
+      },
+      {
+        "name": "Mass Cure Wounds",
+        "level": 5,
+        "damage_dice": {
+          "num_dice": 3,
+          "roll_dice": 8,
+          "bonus": 5
+        },
+        "effect": "heal",
+        "description": "Healing wave over all allies."
+      },
+      {
+        "name": "Flame Strike",
+        "level": 5,
+        "damage_dice": {
+          "num_dice": 4,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "fire damage",
+        "dc": {
+          "dc_type": "dex",
+          "dc_success": "half"
+        },
+        "description": "Vertical column of fire roars down."
+      },
+      {
+        "name": "Insect Plague",
+        "level": 5,
+        "damage_dice": {
+          "num_dice": 4,
+          "roll_dice": 10,
+          "bonus": 0
+        },
+        "effect": "poison damage",
+        "dc": {
+          "dc_type": "con",
+          "dc_success": "half"
+        },
+        "description": "Swarm of biting locusts hits the zone."
+      },
+      {
+        "name": "Harm",
+        "level": 6,
+        "damage_dice": {
+          "num_dice": 14,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "necrotic damage",
+        "dc": {
+          "dc_type": "con",
+          "dc_success": "half"
+        },
+        "description": "Devastating disease inflicts dark wounds."
+      },
+      {
+        "name": "Heal Divine",
+        "level": 6,
+        "damage_dice": {
+          "num_dice": 10,
+          "roll_dice": 8,
+          "bonus": 20
+        },
+        "effect": "heal",
+        "description": "Massive top tier flat health injection."
+      },
+      {
+        "name": "Blade Barrier",
+        "level": 6,
+        "damage_dice": {
+          "num_dice": 6,
+          "roll_dice": 10,
+          "bonus": 0
+        },
+        "effect": "thunder damage",
+        "dc": {
+          "dc_type": "dex",
+          "dc_success": "half"
+        },
+        "description": "Wall of spinning, razor-sharp blades."
+      },
+      {
+        "name": "Divine Word",
+        "level": 7,
+        "damage_dice": {
+          "num_dice": 10,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "radiant damage",
+        "dc": {
+          "dc_type": "cha",
+          "dc_success": "none"
+        },
+        "description": "Utterance of power that crushes infidels."
+      },
+      {
+        "name": "Resurrection",
+        "level": 7,
+        "damage_dice": {},
+        "effect": "cleanse",
+        "description": "Brings back a dead target to life."
+      },
+      {
+        "name": "Fire of Judgment",
+        "level": 7,
+        "damage_dice": {
+          "num_dice": 8,
+          "roll_dice": 6,
+          "bonus": 10
+        },
+        "effect": "fire damage",
+        "description": "Purging fire that filters out holy entities."
+      },
+      {
+        "name": "Holy Aura",
+        "level": 8,
+        "damage_dice": {},
+        "effect": "shield",
+        "description": "Divine protection blocks evil attacks."
+      },
+      {
+        "name": "Earthquake",
+        "level": 8,
+        "damage_dice": {
+          "num_dice": 10,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "thunder damage",
+        "dc": {
+          "dc_type": "dex",
+          "dc_success": "half"
+        },
+        "description": "Tremors tear down obstacles."
+      },
+      {
+        "name": "Unholy Blight",
+        "level": 8,
+        "damage_dice": {
+          "num_dice": 8,
+          "roll_dice": 8,
+          "bonus": 8
+        },
+        "effect": "necrotic damage",
+        "description": "Corrupts the battlefield ground."
+      },
+      {
+        "name": "Mass Heal",
+        "level": 9,
+        "damage_dice": {
+          "num_dice": 20,
+          "roll_dice": 8,
+          "bonus": 50
+        },
+        "effect": "heal",
+        "description": "Flood of light fully restores party health."
+      },
+      {
+        "name": "Gate",
+        "level": 9,
+        "damage_dice": {},
+        "effect": "buff",
+        "description": "Opens a dimensional rift to request aid."
+      },
+      {
+        "name": "Storm of Judgment",
+        "level": 9,
+        "damage_dice": {
+          "num_dice": 12,
+          "roll_dice": 10,
+          "bonus": 0
+        },
+        "effect": "radiant damage",
+        "description": "Meteorite-like light shower falls down."
+      },
+      {
+        "name": "Avatar of the Deities",
+        "level": 10,
+        "damage_dice": {
+          "num_dice": 20,
+          "roll_dice": 12,
+          "bonus": 20
+        },
+        "effect": "radiant damage",
+        "description": "Direct divine manifestation smites all foes."
+      },
+      {
+        "name": "Absolute Salvation",
+        "level": 10,
+        "damage_dice": {},
+        "effect": "cleanse",
+        "description": "Immunity to all debuffs and 100% group heal."
+      },
+      {
+        "name": "Eldritch Purge",
+        "level": 10,
+        "damage_dice": {
+          "num_dice": 15,
+          "roll_dice": 10,
+          "bonus": 30
+        },
+        "effect": "necrotic damage",
+        "description": "Sacrifices light to unleash terrible cosmic dark energy."
+      }
+    ]
+  },
+  {
+    "class": "Bard",
+    "spells": [
+      {
+        "name": "Sleep",
+        "level": 1,
+        "damage_dice": {},
+        "effect": "sleep",
+        "description": "Puts targets into temporary magical slumber."
+      },
+      {
+        "name": "Dissonant Whispers",
+        "level": 1,
+        "damage_dice": {
+          "num_dice": 3,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "psychic damage",
+        "dc": {
+          "dc_type": "wis",
+          "dc_success": "half"
+        },
+        "description": "Whispers that induce heavy mental pain."
+      },
+      {
+        "name": "Healing Word",
+        "level": 1,
+        "damage_dice": {
+          "num_dice": 1,
+          "roll_dice": 4,
+          "bonus": 2
+        },
+        "effect": "heal",
+        "description": "A witty song that acts as a fast heal."
+      },
+      {
+        "name": "Vicious Mockery",
+        "level": 2,
+        "damage_dice": {
+          "num_dice": 2,
+          "roll_dice": 4,
+          "bonus": 0
+        },
+        "effect": "psychic damage",
+        "dc": {
+          "dc_type": "wis",
+          "dc_success": "none"
+        },
+        "description": "Insults so heavy they cause actual damage."
+      },
+      {
+        "name": "Shatter",
+        "level": 2,
+        "damage_dice": {
+          "num_dice": 3,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "thunder damage",
+        "dc": {
+          "dc_type": "con",
+          "dc_success": "half"
+        },
+        "description": "Sonic boom that shatters armor and focus."
+      },
+      {
+        "name": "Calm Emotions",
+        "level": 2,
+        "damage_dice": {},
+        "effect": "cleanse",
+        "description": "Suppresses mental control effects."
+      },
+      {
+        "name": "Hypnotic Pattern",
+        "level": 3,
+        "damage_dice": {},
+        "effect": "sleep",
+        "dc": {
+          "dc_type": "wis",
+          "dc_success": "none"
+        },
+        "description": "Twisting pattern of colors incapacitates targets."
+      },
+      {
+        "name": "Fear",
+        "level": 3,
+        "damage_dice": {},
+        "effect": "disadvantage",
+        "dc": {
+          "dc_type": "wis",
+          "dc_success": "none"
+        },
+        "description": "Projects nightmarish phantoms."
+      },
+      {
+        "name": "Stinking Cloud",
+        "level": 3,
+        "damage_dice": {},
+        "effect": "blind",
+        "dc": {
+          "dc_type": "con",
+          "dc_success": "none"
+        },
+        "description": "Disgusting gas blinds and chokes targets."
+      },
+      {
+        "name": "Compulsive Dance",
+        "level": 4,
+        "damage_dice": {},
+        "effect": "disadvantage",
+        "dc": {
+          "dc_type": "wis",
+          "dc_success": "none"
+        },
+        "description": "Forces targets to skip loops dance style."
+      },
+      {
+        "name": "Confusion",
+        "level": 4,
+        "damage_dice": {},
+        "effect": "blind",
+        "dc": {
+          "dc_type": "wis",
+          "dc_success": "none"
+        },
+        "description": "Scrambles minds making actions erratic."
+      },
+      {
+        "name": "Shout of Discord",
+        "level": 4,
+        "damage_dice": {
+          "num_dice": 4,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "thunder damage",
+        "description": "Disruptive shriek harms balance."
+      },
+      {
+        "name": "Synaptic Static",
+        "level": 5,
+        "damage_dice": {
+          "num_dice": 8,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "psychic damage",
+        "dc": {
+          "dc_type": "int",
+          "dc_success": "half"
+        },
+        "description": "A psychic explosion that scrambled analytical thoughts."
+      },
+      {
+        "name": "Hold Monster",
+        "level": 5,
+        "damage_dice": {},
+        "effect": "paralyze",
+        "dc": {
+          "dc_type": "wis",
+          "dc_success": "none"
+        },
+        "description": "Captivates an enemy keeping it frozen."
+      },
+      {
+        "name": "Mass Cure Wounds",
+        "level": 5,
+        "damage_dice": {
+          "num_dice": 3,
+          "roll_dice": 8,
+          "bonus": 3
+        },
+        "effect": "heal",
+        "description": "Enchanting melody mends all friendly players."
+      },
+      {
+        "name": "Shout of Triumph",
+        "level": 6,
+        "damage_dice": {
+          "num_dice": 6,
+          "roll_dice": 10,
+          "bonus": 0
+        },
+        "effect": "thunder damage",
+        "dc": {
+          "dc_type": "con",
+          "dc_success": "half"
+        },
+        "description": "Booming blast pushes targets back and breaks walls."
+      },
+      {
+        "name": "Eyebite",
+        "level": 6,
+        "damage_dice": {},
+        "effect": "sleep",
+        "dc": {
+          "dc_type": "wis",
+          "dc_success": "none"
+        },
+        "description": "Your eyes terrify or put targets to sleep."
+      },
+      {
+        "name": "Otto's Irresistible Dance",
+        "level": 6,
+        "damage_dice": {},
+        "effect": "paralyze",
+        "description": "Inescapable dance locks any entity."
+      },
+      {
+        "name": "Power Word: Pain",
+        "level": 7,
+        "damage_dice": {
+          "num_dice": 12,
+          "roll_dice": 4,
+          "bonus": 10
+        },
+        "effect": "psychic damage",
+        "description": "Spoken word induces devastating pain waves."
+      },
+      {
+        "name": "Ethereal Melody",
+        "level": 7,
+        "damage_dice": {},
+        "effect": "shield",
+        "description": "Sings an ethereal rhythm shifting party into safety."
+      },
+      {
+        "name": "Regenerate",
+        "level": 7,
+        "damage_dice": {
+          "num_dice": 4,
+          "roll_dice": 8,
+          "bonus": 15
+        },
+        "effect": "heal",
+        "description": "Slow, powerful ongoing health regeneration."
+      },
+      {
+        "name": "Feeblemind",
+        "level": 8,
+        "damage_dice": {
+          "num_dice": 10,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "psychic damage",
+        "dc": {
+          "dc_type": "int",
+          "dc_success": "none"
+        },
+        "description": "Shatters intelligence leaving target incompetent."
+      },
+      {
+        "name": "Power Word: Stun",
+        "level": 8,
+        "damage_dice": {},
+        "effect": "paralyze",
+        "description": "Stuns target immediately if low health."
+      },
+      {
+        "name": "Mind Blank",
+        "level": 8,
+        "damage_dice": {},
+        "effect": "buff",
+        "description": "Full immunities to thought manipulation."
+      },
+      {
+        "name": "Psychic Scream",
+        "level": 9,
+        "damage_dice": {
+          "num_dice": 14,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "psychic damage",
+        "dc": {
+          "dc_type": "int",
+          "dc_success": "half"
+        },
+        "description": "Explodes enemy heads mentally."
+      },
+      {
+        "name": "Foresight",
+        "level": 9,
+        "damage_dice": {},
+        "effect": "buff",
+        "description": "Gives flawless prescience combat advantage."
+      },
+      {
+        "name": "Power Word Kill",
+        "level": 9,
+        "damage_dice": {
+          "num_dice": 10,
+          "roll_dice": 12,
+          "bonus": 50
+        },
+        "effect": "force damage",
+        "description": "Final musical rest that shuts down life."
+      },
+      {
+        "name": "Grand Finale",
+        "level": 10,
+        "damage_dice": {
+          "num_dice": 20,
+          "roll_dice": 10,
+          "bonus": 10
+        },
+        "effect": "thunder damage",
+        "description": "Symphony so high it collapses internal bodies."
+      },
+      {
+        "name": " Cacophony of Pandemonium",
+        "level": 10,
+        "damage_dice": {
+          "num_dice": 15,
+          "roll_dice": 10,
+          "bonus": 20
+        },
+        "effect": "psychic damage",
+        "description": "Unleashes madness onto the field."
+      },
+      {
+        "name": "Requiem of Eternity",
+        "level": 10,
+        "damage_dice": {},
+        "effect": "paralyze",
+        "description": "Ultimate song freezes the entire enemy team indefinitely."
+      }
+    ]
+  },
+  {
+    "class": "Druid",
+    "spells": [
+      {
+        "name": "Ice Lance",
+        "level": 1,
+        "damage_dice": {
+          "num_dice": 1,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "cold damage",
+        "description": "Piercing elemental icicle throw."
+      },
+      {
+        "name": "Entangle",
+        "level": 1,
+        "damage_dice": {},
+        "effect": "disadvantage",
+        "dc": {
+          "dc_type": "str",
+          "dc_success": "none"
+        },
+        "description": "Vines grab target ankles."
+      },
+      {
+        "name": "Cure Wounds",
+        "level": 1,
+        "damage_dice": {
+          "num_dice": 1,
+          "roll_dice": 8,
+          "bonus": 2
+        },
+        "effect": "heal",
+        "description": "Nature touch healing."
+      },
+      {
+        "name": "Flame Blade",
+        "level": 2,
+        "damage_dice": {
+          "num_dice": 3,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "fire damage",
+        "description": "Summons a fiery beam sword."
+      },
+      {
+        "name": "Moonbeam",
+        "level": 2,
+        "damage_dice": {
+          "num_dice": 2,
+          "roll_dice": 10,
+          "bonus": 0
+        },
+        "effect": "radiant damage",
+        "dc": {
+          "dc_type": "con",
+          "dc_success": "half"
+        },
+        "description": "Silver light shines burning monsters."
+      },
+      {
+        "name": "Healing Spirit",
+        "level": 2,
+        "damage_dice": {
+          "num_dice": 1,
+          "roll_dice": 6,
+          "bonus": 2
+        },
+        "effect": "heal",
+        "description": "Nature spirit heals zone walkers."
+      },
+      {
+        "name": "Call Lightning",
+        "level": 3,
+        "damage_dice": {
+          "num_dice": 3,
+          "roll_dice": 10,
+          "bonus": 0
+        },
+        "effect": "lightning damage",
+        "dc": {
+          "dc_type": "dex",
+          "dc_success": "half"
+        },
+        "description": "Storm strikes specific enemies."
+      },
+      {
+        "name": "Erupting Earth",
+        "level": 3,
+        "damage_dice": {
+          "num_dice": 3,
+          "roll_dice": 12,
+          "bonus": 0
+        },
+        "effect": "thunder damage",
+        "dc": {
+          "dc_type": "dex",
+          "dc_success": "half"
+        },
+        "description": "Rocks explode outward."
+      },
+      {
+        "name": "Dispel Magic",
+        "level": 3,
+        "damage_dice": {},
+        "effect": "cleanse",
+        "description": "Dissolves active magical effects."
+      },
+      {
+        "name": "Ice Storm",
+        "level": 4,
+        "damage_dice": {
+          "num_dice": 4,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "cold damage",
+        "description": "Freezing slush drops down."
+      },
+      {
+        "name": "Blight",
+        "level": 4,
+        "damage_dice": {
+          "num_dice": 8,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "necrotic damage",
+        "description": "Drains the inner moisture of entities."
+      },
+      {
+        "name": "Grasping Vine",
+        "level": 4,
+        "damage_dice": {},
+        "effect": "paralyze",
+        "description": "Giant tentacle root ties target up."
+      },
+      {
+        "name": "Insect Plague",
+        "level": 5,
+        "damage_dice": {
+          "num_dice": 4,
+          "roll_dice": 10,
+          "bonus": 0
+        },
+        "effect": "poison damage",
+        "description": "Locust clouds eat flesh and poison health."
+      },
+      {
+        "name": "Wrath of Nature",
+        "level": 5,
+        "damage_dice": {
+          "num_dice": 4,
+          "roll_dice": 10,
+          "bonus": 0
+        },
+        "effect": "thunder damage",
+        "description": "Trees and rocks slap enemies."
+      },
+      {
+        "name": "Antilife Shell",
+        "level": 5,
+        "damage_dice": {},
+        "effect": "shield",
+        "description": "Barrier prevents living monsters from coming close."
+      },
+      {
+        "name": "Sunbeam",
+        "level": 6,
+        "damage_dice": {
+          "num_dice": 6,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "radiant damage",
+        "description": "Blinds and disintegrates with pure sun."
+      },
+      {
+        "name": "Wall of Thorns",
+        "level": 6,
+        "damage_dice": {
+          "num_dice": 7,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "acid damage",
+        "description": "Sharp roots secrete acid burns."
+      },
+      {
+        "name": "Heal Nature",
+        "level": 6,
+        "damage_dice": {
+          "num_dice": 10,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "heal",
+        "description": "Earth core energy patches vital points."
+      },
+      {
+        "name": "Fire Storm",
+        "level": 7,
+        "damage_dice": {
+          "num_dice": 7,
+          "roll_dice": 10,
+          "bonus": 0
+        },
+        "effect": "fire damage",
+        "description": "Flames cover widespread encounter tiles."
+      },
+      {
+        "name": "Reverse Gravity",
+        "level": 7,
+        "damage_dice": {},
+        "effect": "disadvantage",
+        "description": "Flips physics to disorient enemies."
+      },
+      {
+        "name": "Whirlwind",
+        "level": 7,
+        "damage_dice": {
+          "num_dice": 10,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "thunder damage",
+        "description": "Tornado catches and smashes bodies."
+      },
+      {
+        "name": "Earthquake",
+        "level": 8,
+        "damage_dice": {
+          "num_dice": 10,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "thunder damage",
+        "description": "Ground shakes collapsing armor structures."
+      },
+      {
+        "name": "Sunburst",
+        "level": 8,
+        "damage_dice": {
+          "num_dice": 12,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "radiant damage",
+        "description": "Sun explosion purges darkness."
+      },
+      {
+        "name": "Animal Shapes",
+        "level": 8,
+        "damage_dice": {},
+        "effect": "buff",
+        "description": "Transforms party into mighty mythical beasts."
+      },
+      {
+        "name": "Storm of Vengeance",
+        "level": 9,
+        "damage_dice": {
+          "num_dice": 12,
+          "roll_dice": 6,
+          "bonus": 12
+        },
+        "effect": "lightning damage",
+        "description": "Acid rain mixed with lightning storm."
+      },
+      {
+        "name": "Shapechange",
+        "level": 9,
+        "damage_dice": {},
+        "effect": "buff",
+        "description": "Player gains a massive boss statblock form."
+      },
+      {
+        "name": "Foresight Nature",
+        "level": 9,
+        "damage_dice": {},
+        "effect": "shield",
+        "description": "Winds tell you where danger comes from."
+      },
+      {
+        "name": "Nature's Judgment",
+        "level": 10,
+        "damage_dice": {
+          "num_dice": 25,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "acid damage",
+        "description": "Volcanic moss completely dissolves target."
+      },
+      {
+        "name": "Primal Cataclysm",
+        "level": 10,
+        "damage_dice": {
+          "num_dice": 20,
+          "roll_dice": 12,
+          "bonus": 0
+        },
+        "effect": "thunder damage",
+        "description": "Continental plate shift breaks bones."
+      },
+      {
+        "name": "Gaia's Blessing",
+        "level": 10,
+        "damage_dice": {},
+        "effect": "cleanse",
+        "description": "The earth cures all ailments completely."
+      }
+    ]
+  },
+  {
+    "class": "Sorcerer",
+    "spells": [
+      {
+        "name": "Magic Missile",
+        "level": 1,
+        "damage_dice": {
+          "num_dice": 3,
+          "roll_dice": 4,
+          "bonus": 0
+        },
+        "effect": "force damage",
+        "description": "Homing sparks of pure energy."
+      },
+      {
+        "name": "Burning Hands",
+        "level": 1,
+        "damage_dice": {
+          "num_dice": 3,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "fire damage",
+        "dc": {
+          "dc_type": "dex",
+          "dc_success": "half"
+        },
+        "description": "Cone of wild raw flames."
+      },
+      {
+        "name": "Shield Wild",
+        "level": 1,
+        "damage_dice": {},
+        "effect": "shield",
+        "description": "Flashes barrier protection."
+      },
+      {
+        "name": "Shatter",
+        "level": 2,
+        "damage_dice": {
+          "num_dice": 3,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "thunder damage",
+        "description": "Loud ringing explosion breaks items."
+      },
+      {
+        "name": "Scorching Ray",
+        "level": 2,
+        "damage_dice": {
+          "num_dice": 2,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "fire damage",
+        "description": "Multiple fiery bolts fly out."
+      },
+      {
+        "name": "Melf's Minute Meteors",
+        "level": 2,
+        "damage_dice": {
+          "num_dice": 2,
+          "roll_dice": 4,
+          "bonus": 0
+        },
+        "effect": "fire damage",
+        "description": "Tiny floating magma bits attack."
+      },
+      {
+        "name": "Lightning Bolt",
+        "level": 3,
+        "damage_dice": {
+          "num_dice": 8,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "lightning damage",
+        "description": "Fires a sharp line of electricity."
+      },
+      {
+        "name": "Fireball Wild",
+        "level": 3,
+        "damage_dice": {
+          "num_dice": 8,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "fire damage",
+        "description": "Arcane massive explosion boom."
+      },
+      {
+        "name": "Haste",
+        "level": 3,
+        "damage_dice": {},
+        "effect": "buff",
+        "description": "Gives double actions and extra turn speed."
+      },
+      {
+        "name": "Vitriolic Sphere",
+        "level": 4,
+        "damage_dice": {
+          "num_dice": 7,
+          "roll_dice": 4,
+          "bonus": 0
+        },
+        "effect": "acid damage",
+        "description": "Corrosive plasma splash ball."
+      },
+      {
+        "name": "Ice Storm Sorcery",
+        "level": 4,
+        "damage_dice": {
+          "num_dice": 4,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "cold damage",
+        "description": "Freezing hail blasts down."
+      },
+      {
+        "name": "Blight Force",
+        "level": 4,
+        "damage_dice": {
+          "num_dice": 8,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "necrotic damage",
+        "description": "Raw unholy cells rot away blood."
+      },
+      {
+        "name": "Immolation",
+        "level": 5,
+        "damage_dice": {
+          "num_dice": 8,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "fire damage",
+        "description": "Ignites internal soul burning inside out."
+      },
+      {
+        "name": "Cone of Cold Sorcery",
+        "level": 5,
+        "damage_dice": {
+          "num_dice": 8,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "cold damage",
+        "description": "Frosty heavy ice mist flow."
+      },
+      {
+        "name": "Hold Monster Wild",
+        "level": 5,
+        "damage_dice": {},
+        "effect": "paralyze",
+        "description": "Raw charisma forces entity down."
+      },
+      {
+        "name": "Chain Lightning Sorcery",
+        "level": 6,
+        "damage_dice": {
+          "num_dice": 10,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "lightning damage",
+        "description": "Electricity chains across all close mobs."
+      },
+      {
+        "name": "Disintegrate Wild",
+        "level": 6,
+        "damage_dice": {
+          "num_dice": 10,
+          "roll_dice": 6,
+          "bonus": 40
+        },
+        "effect": "force damage",
+        "description": "Melts bones with chaotic space power."
+      },
+      {
+        "name": "Sunbeam Wild",
+        "level": 6,
+        "damage_dice": {
+          "num_dice": 6,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "radiant damage",
+        "description": "Focuses cosmic starlight burn."
+      },
+      {
+        "name": "Prismatic Spray Sorcery",
+        "level": 7,
+        "damage_dice": {
+          "num_dice": 10,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "radiant damage",
+        "description": "Chaotic spectrum beam blasts everything."
+      },
+      {
+        "name": "Delayed Fireball",
+        "level": 7,
+        "damage_dice": {
+          "num_dice": 12,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "fire damage",
+        "description": "Magma orbs sit ready to pop."
+      },
+      {
+        "name": "Finger of Ruin",
+        "level": 7,
+        "damage_dice": {
+          "num_dice": 7,
+          "roll_dice": 8,
+          "bonus": 30
+        },
+        "effect": "necrotic damage",
+        "description": "Death touch kills raw code elements."
+      },
+      {
+        "name": "Incendiary Cloud Sorcery",
+        "level": 8,
+        "damage_dice": {
+          "num_dice": 14,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "fire damage",
+        "description": "Blazing fog smoke fills maps."
+      },
+      {
+        "name": "Sunburst Wild",
+        "level": 8,
+        "damage_dice": {
+          "num_dice": 12,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "radiant damage",
+        "description": "Supernova burst cooks targets."
+      },
+      {
+        "name": "Power Word Stun Sorcery",
+        "level": 8,
+        "damage_dice": {},
+        "effect": "paralyze",
+        "description": "Chaotic yell shocks mind processes."
+      },
+      {
+        "name": "Meteor Swarm Sorcery",
+        "level": 9,
+        "damage_dice": {
+          "num_dice": 20,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "fire damage",
+        "description": "Calls planetary crust parts down."
+      },
+      {
+        "name": "Wish Wild",
+        "level": 9,
+        "damage_dice": {},
+        "effect": "buff",
+        "description": "Garners any buff slot instant execution."
+      },
+      {
+        "name": "Power Word Kill Sorcery",
+        "level": 9,
+        "damage_dice": {
+          "num_dice": 10,
+          "roll_dice": 12,
+          "bonus": 50
+        },
+        "effect": "force damage",
+        "description": "A snap that cancels life lines."
+      },
+      {
+        "name": "Chaos Overload",
+        "level": 10,
+        "damage_dice": {
+          "num_dice": 30,
+          "roll_dice": 4,
+          "bonus": 10
+        },
+        "effect": "force damage",
+        "description": "Converts pure raw magic fonts directly to extreme damage."
+      },
+      {
+        "name": "Annihilation Ray",
+        "level": 10,
+        "damage_dice": {
+          "num_dice": 25,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "necrotic damage",
+        "description": "Dark cosmic rays dissolve cells."
+      },
+      {
+        "name": "Elemental Singularity",
+        "level": 10,
+        "damage_dice": {
+          "num_dice": 20,
+          "roll_dice": 10,
+          "bonus": 0
+        },
+        "effect": "acid damage",
+        "description": "Black hole made of toxic materials draws targets."
+      }
+    ]
+  },
+  {
+    "class": "Paladin",
+    "spells": [
+      {
+        "name": "Bless",
+        "level": 1,
+        "damage_dice": {},
+        "effect": "buff",
+        "description": "Holy prayers grant team bonus dice."
+      },
+      {
+        "name": "Cure Wounds Light",
+        "level": 1,
+        "damage_dice": {
+          "num_dice": 1,
+          "roll_dice": 8,
+          "bonus": 2
+        },
+        "effect": "heal",
+        "description": "Minor lay on hands heal."
+      },
+      {
+        "name": "Searing Smite",
+        "level": 1,
+        "damage_dice": {
+          "num_dice": 1,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "fire damage",
+        "description": "Sets active weapon ablaze."
+      },
+      {
+        "name": "Divine Smite",
+        "level": 2,
+        "damage_dice": {
+          "num_dice": 2,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "radiant damage",
+        "description": "Infuses blade with raw holy fire."
+      },
+      {
+        "name": "Thunderous Smite",
+        "level": 2,
+        "damage_dice": {
+          "num_dice": 2,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "thunder damage",
+        "description": "Attack rings with loud force knocking back."
+      },
+      {
+        "name": "Shield of Faith",
+        "level": 2,
+        "damage_dice": {},
+        "effect": "shield",
+        "description": "Gains massive faith protection to AC."
+      },
+      {
+        "name": "Blinding Smite",
+        "level": 3,
+        "damage_dice": {
+          "num_dice": 3,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "radiant damage",
+        "dc": {
+          "dc_type": "con",
+          "dc_success": "none"
+        },
+        "description": "Flashes blade out to blind target eyes."
+      },
+      {
+        "name": "Elemental Smite",
+        "level": 3,
+        "damage_dice": {
+          "num_dice": 2,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "cold damage",
+        "description": "Coats sword edge with chilling frost."
+      },
+      {
+        "name": "Revivify",
+        "level": 3,
+        "damage_dice": {},
+        "effect": "cleanse",
+        "description": "Saves a recently dead party ally."
+      },
+      {
+        "name": "Aura of Life",
+        "level": 4,
+        "damage_dice": {},
+        "effect": "buff",
+        "description": "Radiant shield protects team from dark rot."
+      },
+      {
+        "name": "Staggering Smite",
+        "level": 4,
+        "damage_dice": {
+          "num_dice": 4,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "psychic damage",
+        "description": "Sword hits mind lines directly causing stupor."
+      },
+      {
+        "name": "Death Ward Faith",
+        "level": 4,
+        "damage_dice": {},
+        "effect": "buff",
+        "description": "Angels prevent health dropping to zero."
+      },
+      {
+        "name": "Destructive Wave",
+        "level": 5,
+        "damage_dice": {
+          "num_dice": 6,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "thunder damage",
+        "dc": {
+          "dc_type": "str",
+          "dc_success": "half"
+        },
+        "description": "Stomps floor creating grand sonic shocks."
+      },
+      {
+        "name": "Banishing Smite",
+        "level": 5,
+        "damage_dice": {
+          "num_dice": 5,
+          "roll_dice": 10,
+          "bonus": 0
+        },
+        "effect": "force damage",
+        "description": "Crits so hard it sends target into empty zones."
+      },
+      {
+        "name": "Holy Cure Wounds",
+        "level": 5,
+        "damage_dice": {
+          "num_dice": 5,
+          "roll_dice": 8,
+          "bonus": 5
+        },
+        "effect": "heal",
+        "description": "Major paladin health restore."
+      },
+      {
+        "name": "Holy Cleave",
+        "level": 6,
+        "damage_dice": {
+          "num_dice": 5,
+          "roll_dice": 10,
+          "bonus": 5
+        },
+        "effect": "radiant damage",
+        "description": "Wide sword swing purges low demons."
+      },
+      {
+        "name": "Aura of Devotion",
+        "level": 6,
+        "damage_dice": {},
+        "effect": "cleanse",
+        "description": "Breaks sleep and mind-charms nearby."
+      },
+      {
+        "name": "Chilling Smite",
+        "level": 6,
+        "damage_dice": {
+          "num_dice": 4,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "cold damage",
+        "description": "Freezes target joints with an attack."
+      },
+      {
+        "name": "Shield of Valor",
+        "level": 7,
+        "damage_dice": {},
+        "effect": "shield",
+        "description": "Grand light aura scales user armor stats."
+      },
+      {
+        "name": "Radiant Weapon",
+        "level": 7,
+        "damage_dice": {
+          "num_dice": 4,
+          "roll_dice": 6,
+          "bonus": 4
+        },
+        "effect": "radiant damage",
+        "description": "Sword burns ongoing bright energy loops."
+      },
+      {
+        "name": "Acidic Vow",
+        "level": 7,
+        "damage_dice": {
+          "num_dice": 4,
+          "roll_dice": 6,
+          "bonus": 0
+        },
+        "effect": "acid damage",
+        "description": "Corrosive layer coats weapon edge."
+      },
+      {
+        "name": "Cleansing Touch",
+        "level": 8,
+        "damage_dice": {},
+        "effect": "cleanse",
+        "description": "Dissolves active detrimental states."
+      },
+      {
+        "name": "Holy Bastion",
+        "level": 8,
+        "damage_dice": {},
+        "effect": "shield",
+        "description": "Creates safe zone tiles for teammates."
+      },
+      {
+        "name": "Necrotic Smite",
+        "level": 8,
+        "damage_dice": {
+          "num_dice": 6,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "necrotic damage",
+        "description": "Vengeful dark smite rots enemy shields."
+      },
+      {
+        "name": "Righteous Verdict",
+        "level": 9,
+        "damage_dice": {
+          "num_dice": 10,
+          "roll_dice": 10,
+          "bonus": 10
+        },
+        "effect": "radiant damage",
+        "description": "Holy pillar crashes executing sentence."
+      },
+      {
+        "name": "Aura of Supremacy",
+        "level": 9,
+        "damage_dice": {},
+        "effect": "buff",
+        "description": "Buffs party flat output multipliers."
+      },
+      {
+        "name": "Sonic Smite",
+        "level": 9,
+        "damage_dice": {
+          "num_dice": 8,
+          "roll_dice": 8,
+          "bonus": 0
+        },
+        "effect": "thunder damage",
+        "description": "Impact produces an ear-splitting thunder blast."
+      },
+      {
+        "name": "Holy Crusade",
+        "level": 10,
+        "damage_dice": {
+          "num_dice": 15,
+          "roll_dice": 12,
+          "bonus": 20
+        },
+        "effect": "radiant damage",
+        "description": "Empowers user weapon output to limits."
+      },
+      {
+        "name": "Martyr's Shield",
+        "level": 10,
+        "damage_dice": {},
+        "effect": "shield",
+        "description": "Absorbs 100% damage meant for teammates."
+      },
+      {
+        "name": "Divine Cataclysm Smite",
+        "level": 10,
+        "damage_dice": {
+          "num_dice": 12,
+          "roll_dice": 10,
+          "bonus": 30
+        },
+        "effect": "force damage",
+        "description": "Ultimate physical swing shatters tectonic plates."
+      }
+    ]
+  }
+]

@@ -1,0 +1,804 @@
+[
+  {
+    "name": "Goblin",
+    "hit_dice": {"num_dice": 1, "roll_dice": 6, "bonus": 0},
+    "ac": 12,
+    "damage_dice": {"num_dice": 1, "roll_dice": 4, "bonus": 0},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": [],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Kobold",
+    "hit_dice": {"num_dice": 1, "roll_dice": 4, "bonus": 0},
+    "ac": 13,
+    "damage_dice": {"num_dice": 1, "roll_dice": 3, "bonus": 0},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": [],
+    "vulnerabilities": ["cold damage"]
+  },
+  {
+    "name": "Skeleton",
+    "hit_dice": {"num_dice": 1, "roll_dice": 8, "bonus": 0},
+    "ac": 13,
+    "damage_dice": {"num_dice": 1, "roll_dice": 6, "bonus": 0},
+    "spellcasting": false,
+    "resistances": ["necrotic damage"],
+    "immunities": ["poison damage"],
+    "vulnerabilities": ["thunder damage"]
+  },
+  {
+    "name": "Giant Rat",
+    "hit_dice": {"num_dice": 1, "roll_dice": 6, "bonus": 1},
+    "ac": 12,
+    "damage_dice": {"num_dice": 1, "roll_dice": 4, "bonus": 1},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": [],
+    "vulnerabilities": ["fire damage"]
+  },
+  {
+    "name": "Orc",
+    "hit_dice": {"num_dice": 2, "roll_dice": 8, "bonus": 2},
+    "ac": 14,
+    "damage_dice": {"num_dice": 1, "roll_dice": 8, "bonus": 2},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": [],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Zombie",
+    "hit_dice": {"num_dice": 2, "roll_dice": 8, "bonus": 2},
+    "ac": 10,
+    "damage_dice": {"num_dice": 1, "roll_dice": 6, "bonus": 0},
+    "spellcasting": false,
+    "resistances": ["necrotic damage"],
+    "immunities": ["poison damage"],
+    "vulnerabilities": ["radiant damage"]
+  },
+  {
+    "name": "Wizard",
+    "hit_dice": {"num_dice": 2, "roll_dice": 6, "bonus": 2},
+    "ac": 12,
+    "damage_dice": {"num_dice": 1, "roll_dice": 4, "bonus": 0},
+    "spellcasting": true,
+    "resistances": ["force damage"],
+    "immunities": [],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Bandit",
+    "hit_dice": {"num_dice": 2, "roll_dice": 8, "bonus": 0},
+    "ac": 13,
+    "damage_dice": {"num_dice": 1, "roll_dice": 6, "bonus": 1},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": [],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Bugbear",
+    "hit_dice": {"num_dice": 3, "roll_dice": 8, "bonus": 3},
+    "ac": 16,
+    "damage_dice": {"num_dice": 2, "roll_dice": 8, "bonus": 2},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": [],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Dire Wolf",
+    "hit_dice": {"num_dice": 3, "roll_dice": 10, "bonus": 6},
+    "ac": 14,
+    "damage_dice": {"num_dice": 2, "roll_dice": 6, "bonus": 3},
+    "spellcasting": false,
+    "resistances": ["cold damage"],
+    "immunities": [],
+    "vulnerabilities": ["fire damage"]
+  },
+  {
+    "name": "Acolyte",
+    "hit_dice": {"num_dice": 3, "roll_dice": 6, "bonus": 0},
+    "ac": 10,
+    "damage_dice": {"num_dice": 1, "roll_dice": 4, "bonus": 0},
+    "spellcasting": true,
+    "resistances": ["radiant damage"],
+    "immunities": [],
+    "vulnerabilities": ["necrotic damage"]
+  },
+  {
+    "name": "Imp",
+    "hit_dice": {"num_dice": 3, "roll_dice": 4, "bonus": 3},
+    "ac": 13,
+    "damage_dice": {"num_dice": 1, "roll_dice": 4, "bonus": 3},
+    "spellcasting": false,
+    "resistances": ["cold damage"],
+    "immunities": ["fire damage", "poison damage"],
+    "vulnerabilities": ["radiant damage"]
+  },
+  {
+    "name": "Ogre",
+    "hit_dice": {"num_dice": 4, "roll_dice": 10, "bonus": 8},
+    "ac": 15,
+    "damage_dice": {"num_dice": 2, "roll_dice": 8, "bonus": 4},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": [],
+    "vulnerabilities": ["psychic damage"]
+  },
+  {
+    "name": "Gargoyle",
+    "hit_dice": {"num_dice": 4, "roll_dice": 8, "bonus": 4},
+    "ac": 15,
+    "damage_dice": {"num_dice": 1, "roll_dice": 6, "bonus": 2},
+    "spellcasting": false,
+    "resistances": ["fire damage"],
+    "immunities": ["poison damage"],
+    "vulnerabilities": ["thunder damage"]
+  },
+  {
+    "name": "Harpy",
+    "hit_dice": {"num_dice": 4, "roll_dice": 8, "bonus": 4},
+    "ac": 11,
+    "damage_dice": {"num_dice": 2, "roll_dice": 4, "bonus": 1},
+    "spellcasting": false,
+    "resistances": ["thunder damage"],
+    "immunities": [],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Cult Fanatic",
+    "hit_dice": {"num_dice": 4, "roll_dice": 8, "bonus": 4},
+    "ac": 13,
+    "damage_dice": {"num_dice": 1, "roll_dice": 6, "bonus": 2},
+    "spellcasting": true,
+    "resistances": ["necrotic damage"],
+    "immunities": [],
+    "vulnerabilities": ["radiant damage"]
+  },
+  {
+    "name": "Ghoul",
+    "hit_dice": {"num_dice": 5, "roll_dice": 8, "bonus": 0},
+    "ac": 12,
+    "damage_dice": {"num_dice": 2, "roll_dice": 4, "bonus": 2},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": ["poison damage"],
+    "vulnerabilities": ["radiant damage"]
+  },
+  {
+    "name": "Griffon",
+    "hit_dice": {"num_dice": 5, "roll_dice": 10, "bonus": 15},
+    "ac": 12,
+    "damage_dice": {"num_dice": 1, "roll_dice": 8, "bonus": 4},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": [],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Basilisk",
+    "hit_dice": {"num_dice": 5, "roll_dice": 8, "bonus": 10},
+    "ac": 15,
+    "damage_dice": {"num_dice": 2, "roll_dice": 6, "bonus": 3},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": ["poison damage"],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Druid Apprentice",
+    "hit_dice": {"num_dice": 5, "roll_dice": 8, "bonus": 5},
+    "ac": 13,
+    "damage_dice": {"num_dice": 1, "roll_dice": 6, "bonus": 1},
+    "spellcasting": true,
+    "resistances": ["acid damage", "poison damage"],
+    "immunities": [],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Dragon Whelp",
+    "hit_dice": {"num_dice": 6, "roll_dice": 8, "bonus": 10},
+    "ac": 16,
+    "damage_dice": {"num_dice": 3, "roll_dice": 8, "bonus": 3},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": ["fire damage"],
+    "vulnerabilities": ["cold damage"]
+  },
+  {
+    "name": "Manticore",
+    "hit_dice": {"num_dice": 6, "roll_dice": 10, "bonus": 18},
+    "ac": 14,
+    "damage_dice": {"num_dice": 1, "roll_dice": 8, "bonus": 3},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": [],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Minotaur",
+    "hit_dice": {"num_dice": 6, "roll_dice": 10, "bonus": 12},
+    "ac": 14,
+    "damage_dice": {"num_dice": 2, "roll_dice": 12, "bonus": 4},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": [],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Mage",
+    "hit_dice": {"num_dice": 6, "roll_dice": 8, "bonus": 6},
+    "ac": 12,
+    "damage_dice": {"num_dice": 1, "roll_dice": 4, "bonus": 1},
+    "spellcasting": true,
+    "resistances": ["force damage", "psychic damage"],
+    "immunities": [],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Mummy",
+    "hit_dice": {"num_dice": 7, "roll_dice": 8, "bonus": 14},
+    "ac": 11,
+    "damage_dice": {"num_dice": 2, "roll_dice": 6, "bonus": 3},
+    "spellcasting": false,
+    "resistances": ["necrotic damage"],
+    "immunities": ["poison damage"],
+    "vulnerabilities": ["fire damage", "radiant damage"]
+  },
+  {
+    "name": "Wyvern",
+    "hit_dice": {"num_dice": 7, "roll_dice": 10, "bonus": 21},
+    "ac": 13,
+    "damage_dice": {"num_dice": 2, "roll_dice": 6, "bonus": 4},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": ["poison damage"],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Owlbear",
+    "hit_dice": {"num_dice": 7, "roll_dice": 10, "bonus": 21},
+    "ac": 13,
+    "damage_dice": {"num_dice": 1, "roll_dice": 10, "bonus": 5},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": [],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Succubus",
+    "hit_dice": {"num_dice": 7, "roll_dice": 8, "bonus": 7},
+    "ac": 15,
+    "damage_dice": {"num_dice": 1, "roll_dice": 6, "bonus": 3},
+    "spellcasting": true,
+    "resistances": ["cold damage", "fire damage", "lightning damage"],
+    "immunities": ["poison damage"],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Troll",
+    "hit_dice": {"num_dice": 8, "roll_dice": 10, "bonus": 40},
+    "ac": 15,
+    "damage_dice": {"num_dice": 1, "roll_dice": 6, "bonus": 4},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": [],
+    "vulnerabilities": ["fire damage", "acid damage"]
+  },
+  {
+    "name": "Green Hag",
+    "hit_dice": {"num_dice": 8, "roll_dice": 8, "bonus": 16},
+    "ac": 17,
+    "damage_dice": {"num_dice": 2, "roll_dice": 6, "bonus": 4},
+    "spellcasting": true,
+    "resistances": [],
+    "immunities": ["poison damage"],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Cyclops",
+    "hit_dice": {"num_dice": 8, "roll_dice": 12, "bonus": 40},
+    "ac": 14,
+    "damage_dice": {"num_dice": 3, "roll_dice": 10, "bonus": 6},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": [],
+    "vulnerabilities": ["blind"]
+  },
+  {
+    "name": "Werewolf",
+    "hit_dice": {"num_dice": 8, "roll_dice": 8, "bonus": 16},
+    "ac": 12,
+    "damage_dice": {"num_dice": 1, "roll_dice": 8, "bonus": 2},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": [],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Vampire Spawn",
+    "hit_dice": {"num_dice": 9, "roll_dice": 8, "bonus": 27},
+    "ac": 15,
+    "damage_dice": {"num_dice": 1, "roll_dice": 10, "bonus": 3},
+    "spellcasting": false,
+    "resistances": ["necrotic damage"],
+    "immunities": [],
+    "vulnerabilities": ["radiant damage"]
+  },
+
+
+    {
+    "name": "Night Hag",
+    "hit_dice": {"num_dice": 9, "roll_dice": 8, "bonus": 18},
+    "ac": 17,
+    "damage_dice": {"num_dice": 2, "roll_dice": 8, "bonus": 4},
+    "spellcasting": true,
+    "resistances": ["cold damage", "fire damage"],
+    "immunities": ["poison damage"],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Chimera",
+    "hit_dice": {"num_dice": 9, "roll_dice": 10, "bonus": 36},
+    "ac": 14,
+    "damage_dice": {"num_dice": 2, "roll_dice": 6, "bonus": 4},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": ["fire damage"],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Flesh Golem",
+    "hit_dice": {"num_dice": 9, "roll_dice": 8, "bonus": 45},
+    "ac": 9,
+    "damage_dice": {"num_dice": 2, "roll_dice": 8, "bonus": 4},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": ["lightning damage", "poison damage"],
+    "vulnerabilities": ["fire damage"]
+  },
+  {
+    "name": "Hill Giant",
+    "hit_dice": {"num_dice": 10, "roll_dice": 12, "bonus": 40},
+    "ac": 13,
+    "damage_dice": {"num_dice": 3, "roll_dice": 8, "bonus": 5},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": [],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Young White Dragon",
+    "hit_dice": {"num_dice": 10, "roll_dice": 10, "bonus": 40},
+    "ac": 17,
+    "damage_dice": {"num_dice": 2, "roll_dice": 10, "bonus": 4},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": ["cold damage"],
+    "vulnerabilities": ["fire damage"]
+  },
+  {
+    "name": "Mind Flayer",
+    "hit_dice": {"num_dice": 10, "roll_dice": 8, "bonus": 10},
+    "ac": 15,
+    "damage_dice": {"num_dice": 2, "roll_dice": 10, "bonus": 4},
+    "spellcasting": true,
+    "resistances": ["psychic damage"],
+    "immunities": [],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Bone Devil",
+    "hit_dice": {"num_dice": 10, "roll_dice": 10, "bonus": 30},
+    "ac": 19,
+    "damage_dice": {"num_dice": 2, "roll_dice": 8, "bonus": 4},
+    "spellcasting": false,
+    "resistances": ["cold damage"],
+    "immunities": ["fire damage", "poison damage"],
+    "vulnerabilities": ["radiant damage"]
+  },
+  {
+    "name": "Hydra",
+    "hit_dice": {"num_dice": 11, "roll_dice": 12, "bonus": 55},
+    "ac": 15,
+    "damage_dice": {"num_dice": 1, "roll_dice": 10, "bonus": 5},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": [],
+    "vulnerabilities": ["fire damage", "acid damage"]
+  },
+  {
+    "name": "Stone Golem",
+    "hit_dice": {"num_dice": 11, "roll_dice": 10, "bonus": 55},
+    "ac": 17,
+    "damage_dice": {"num_dice": 2, "roll_dice": 10, "bonus": 6},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": ["poison damage", "psychic damage"],
+    "vulnerabilities": ["acid damage"]
+  },
+  {
+    "name": "Young Black Dragon",
+    "hit_dice": {"num_dice": 11, "roll_dice": 10, "bonus": 33},
+    "ac": 18,
+    "damage_dice": {"num_dice": 2, "roll_dice": 6, "bonus": 4},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": ["acid damage"],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Efreeti",
+    "hit_dice": {"num_dice": 11, "roll_dice": 10, "bonus": 44},
+    "ac": 17,
+    "damage_dice": {"num_dice": 2, "roll_dice": 6, "bonus": 6},
+    "spellcasting": true,
+    "resistances": [],
+    "immunities": ["fire damage"],
+    "vulnerabilities": ["cold damage"]
+  },
+  {
+    "name": "Frost Giant",
+    "hit_dice": {"num_dice": 12, "roll_dice": 12, "bonus": 60},
+    "ac": 15,
+    "damage_dice": {"num_dice": 3, "roll_dice": 12, "bonus": 6},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": ["cold damage"],
+    "vulnerabilities": ["fire damage"]
+  },
+  {
+    "name": "Young Blue Dragon",
+    "hit_dice": {"num_dice": 12, "roll_dice": 10, "bonus": 48},
+    "ac": 18,
+    "damage_dice": {"num_dice": 2, "roll_dice": 10, "bonus": 5},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": ["lightning damage"],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Archmage",
+    "hit_dice": {"num_dice": 12, "roll_dice": 8, "bonus": 12},
+    "ac": 12,
+    "damage_dice": {"num_dice": 1, "roll_dice": 4, "bonus": 2},
+    "spellcasting": true,
+    "resistances": ["fire damage", "cold damage", "lightning damage"],
+    "immunities": [],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Beholder",
+    "hit_dice": {"num_dice": 12, "roll_dice": 10, "bonus": 36},
+    "ac": 18,
+    "damage_dice": {"num_dice": 4, "roll_dice": 6, "bonus": 0},
+    "spellcasting": true,
+    "resistances": ["force damage"],
+    "immunities": [],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Fire Giant",
+    "hit_dice": {"num_dice": 13, "roll_dice": 12, "bonus": 78},
+    "ac": 18,
+    "damage_dice": {"num_dice": 4, "roll_dice": 10, "bonus": 7},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": ["fire damage"],
+    "vulnerabilities": ["cold damage"]
+  },
+  {
+    "name": "Young Red Dragon",
+    "hit_dice": {"num_dice": 13, "roll_dice": 10, "bonus": 65},
+    "ac": 18,
+    "damage_dice": {"num_dice": 2, "roll_dice": 10, "bonus": 6},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": ["fire damage"],
+    "vulnerabilities": ["cold damage"]
+  },
+  {
+    "name": "Githyanki Supreme",
+    "hit_dice": {"num_dice": 13, "roll_dice": 8, "bonus": 26},
+    "ac": 18,
+    "damage_dice": {"num_dice": 4, "roll_dice": 6, "bonus": 4},
+    "spellcasting": true,
+    "resistances": ["psychic damage"],
+    "immunities": [],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Nal feshnee Demon",
+    "hit_dice": {"num_dice": 13, "roll_dice": 10, "bonus": 78},
+    "ac": 18,
+    "damage_dice": {"num_dice": 3, "roll_dice": 6, "bonus": 5},
+    "spellcasting": true,
+    "resistances": ["cold damage", "fire damage", "lightning damage"],
+    "immunities": ["poison damage"],
+    "vulnerabilities": ["radiant damage"]
+  },
+  {
+    "name": "Iron Golem",
+    "hit_dice": {"num_dice": 14, "roll_dice": 10, "bonus": 98},
+    "ac": 20,
+    "damage_dice": {"num_dice": 3, "roll_dice": 10, "bonus": 7},
+    "spellcasting": false,
+    "resistances": ["fire damage", "cold damage"],
+    "immunities": ["poison damage", "psychic damage"],
+    "vulnerabilities": ["acid damage"]
+  },
+  {
+    "name": "Adult White Dragon",
+    "hit_dice": {"num_dice": 14, "roll_dice": 12, "bonus": 70},
+    "ac": 18,
+    "damage_dice": {"num_dice": 2, "roll_dice": 10, "bonus": 6},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": ["cold damage"],
+    "vulnerabilities": ["fire damage"]
+  },
+  {
+    "name": "Ice Devil",
+    "hit_dice": {"num_dice": 14, "roll_dice": 10, "bonus": 42},
+    "ac": 18,
+    "damage_dice": {"num_dice": 2, "roll_dice": 6, "bonus": 5},
+    "spellcasting": false,
+    "resistances": ["cold damage"],
+    "immunities": ["fire damage", "poison damage"],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Rakshasa",
+    "hit_dice": {"num_dice": 14, "roll_dice": 8, "bonus": 28},
+    "ac": 16,
+    "damage_dice": {"num_dice": 2, "roll_dice": 6, "bonus": 2},
+    "spellcasting": true,
+    "resistances": [],
+    "immunities": [],
+    "vulnerabilities": ["radiant damage"]
+  },
+  {
+    "name": "Adult Green Dragon",
+    "hit_dice": {"num_dice": 15, "roll_dice": 12, "bonus": 75},
+    "ac": 19,
+    "damage_dice": {"num_dice": 2, "roll_dice": 10, "bonus": 6},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": ["poison damage"],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Purple Worm",
+    "hit_dice": {"num_dice": 15, "roll_dice": 20, "bonus": 90},
+    "ac": 18,
+    "damage_dice": {"num_dice": 4, "roll_dice": 8, "bonus": 9},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": ["poison damage"],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Vampire Lord",
+    "hit_dice": {"num_dice": 15, "roll_dice": 8, "bonus": 30},
+    "ac": 16,
+    "damage_dice": {"num_dice": 1, "roll_dice": 8, "bonus": 4},
+    "spellcasting": true,
+    "resistances": ["necrotic damage"],
+    "immunities": ["poison damage"],
+    "vulnerabilities": ["radiant damage"]
+  },
+  {
+    "name": "Storm Giant",
+    "hit_dice": {"num_dice": 15, "roll_dice": 12, "bonus": 90},
+    "ac": 16,
+    "damage_dice": {"num_dice": 4, "roll_dice": 12, "bonus": 9},
+    "spellcasting": true,
+    "resistances": ["cold damage", "fire damage"],
+    "immunities": ["lightning damage", "thunder damage"],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Adult Blue Dragon",
+    "hit_dice": {"num_dice": 16, "roll_dice": 12, "bonus": 80},
+    "ac": 19,
+    "damage_dice": {"num_dice": 2, "roll_dice": 10, "bonus": 7},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": ["lightning damage"],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Marilith Demon",
+    "hit_dice": {"num_dice": 16, "roll_dice": 10, "bonus": 80},
+    "ac": 18,
+    "damage_dice": {"num_dice": 2, "roll_dice": 8, "bonus": 4},
+    "spellcasting": false,
+    "resistances": ["cold damage", "fire damage", "lightning damage"],
+    "immunities": ["poison damage"],
+    "vulnerabilities": ["radiant damage"]
+  },
+  {
+    "name": "Planetar Angel",
+    "hit_dice": {"num_dice": 16, "roll_dice": 10, "bonus": 80},
+    "ac": 19,
+    "damage_dice": {"num_dice": 4, "roll_dice": 6, "bonus": 7},
+    "spellcasting": true,
+    "resistances": ["radiant damage"],
+    "immunities": [],
+    "vulnerabilities": ["necrotic damage"]
+  },
+  {
+    "name": "Mummy Lord",
+    "hit_dice": {"num_dice": 16, "roll_dice": 8, "bonus": 32},
+    "ac": 17,
+    "damage_dice": {"num_dice": 3, "roll_dice": 6, "bonus": 4},
+    "spellcasting": true,
+    "resistances": ["necrotic damage"],
+    "immunities": ["poison damage"],
+    "vulnerabilities": ["fire damage", "radiant damage"]
+  },
+  {
+    "name": "Adult Red Dragon",
+    "hit_dice": {"num_dice": 17, "roll_dice": 12, "bonus": 102},
+    "ac": 19,
+    "damage_dice": {"num_dice": 2, "roll_dice": 10, "bonus": 8},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": ["fire damage"],
+    "vulnerabilities": ["cold damage"]
+  },
+    {
+    "name": "Goristro Demon",
+    "hit_dice": {"num_dice": 17, "roll_dice": 10, "bonus": 119},
+    "ac": 19,
+    "damage_dice": {"num_dice": 3, "roll_dice": 10, "bonus": 7},
+    "spellcasting": false,
+    "resistances": ["cold damage", "fire damage", "lightning damage"],
+    "immunities": ["poison damage"],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Death Knight",
+    "hit_dice": {"num_dice": 17, "roll_dice": 8, "bonus": 51},
+    "ac": 20,
+    "damage_dice": {"num_dice": 1, "roll_dice": 8, "bonus": 5},
+    "spellcasting": true,
+    "resistances": [],
+    "immunities": ["necrotic damage", "poison damage"],
+    "vulnerabilities": ["radiant damage"]
+  },
+  {
+    "name": "Androsphinx",
+    "hit_dice": {"num_dice": 17, "roll_dice": 10, "bonus": 68},
+    "ac": 17,
+    "damage_dice": {"num_dice": 2, "roll_dice": 10, "bonus": 6},
+    "spellcasting": true,
+    "resistances": ["psychic damage"],
+    "immunities": [],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Lich",
+    "hit_dice": {"num_dice": 18, "roll_dice": 8, "bonus": 54},
+    "ac": 17,
+    "damage_dice": {"num_dice": 1, "roll_dice": 10, "bonus": 3},
+    "spellcasting": true,
+    "resistances": ["cold damage", "lightning damage"],
+    "immunities": ["necrotic damage", "poison damage"],
+    "vulnerabilities": ["radiant damage"]
+  },
+  {
+    "name": "Balor Demon",
+    "hit_dice": {"num_dice": 18, "roll_dice": 10, "bonus": 126},
+    "ac": 19,
+    "damage_dice": {"num_dice": 3, "roll_dice": 8, "bonus": 8},
+    "spellcasting": true,
+    "resistances": ["cold damage", "lightning damage"],
+    "immunities": ["fire damage", "poison damage"],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Ancient White Dragon",
+    "hit_dice": {"num_dice": 18, "roll_dice": 12, "bonus": 108},
+    "ac": 20,
+    "damage_dice": {"num_dice": 2, "roll_dice": 10, "bonus": 7},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": ["cold damage"],
+    "vulnerabilities": ["fire damage"]
+  },
+  {
+    "name": "Pit Fiend Devil",
+    "hit_dice": {"num_dice": 18, "roll_dice": 10, "bonus": 126},
+    "ac": 19,
+    "damage_dice": {"num_dice": 2, "roll_dice": 8, "bonus": 8},
+    "spellcasting": true,
+    "resistances": ["cold damage"],
+    "immunities": ["fire damage", "poison damage"],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Ancient Blue Dragon",
+    "hit_dice": {"num_dice": 19, "roll_dice": 12, "bonus": 133},
+    "ac": 22,
+    "damage_dice": {"num_dice": 2, "roll_dice": 10, "bonus": 8},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": ["lightning damage"],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Ancient Green Dragon",
+    "hit_dice": {"num_dice": 19, "roll_dice": 12, "bonus": 114},
+    "ac": 21,
+    "damage_dice": {"num_dice": 2, "roll_dice": 10, "bonus": 7},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": ["poison damage"],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Kraken",
+    "hit_dice": {"num_dice": 19, "roll_dice": 20, "bonus": 133},
+    "ac": 18,
+    "damage_dice": {"num_dice": 3, "roll_dice": 10, "bonus": 10},
+    "spellcasting": false,
+    "resistances": ["cold damage", "fire damage"],
+    "immunities": ["lightning damage"],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Solar Angel",
+    "hit_dice": {"num_dice": 19, "roll_dice": 10, "bonus": 114},
+    "ac": 21,
+    "damage_dice": {"num_dice": 4, "roll_dice": 6, "bonus": 8},
+    "spellcasting": true,
+    "resistances": ["radiant damage"],
+    "immunities": [],
+    "vulnerabilities": ["necrotic damage"]
+  },
+  {
+    "name": "Ancient Red Dragon",
+    "hit_dice": {"num_dice": 20, "roll_dice": 12, "bonus": 160},
+    "ac": 22,
+    "damage_dice": {"num_dice": 2, "roll_dice": 10, "bonus": 9},
+    "spellcasting": false,
+    "resistances": [],
+    "immunities": ["fire damage"],
+    "vulnerabilities": ["cold damage"]
+  },
+  {
+    "name": "Tarrasque",
+    "hit_dice": {"num_dice": 20, "roll_dice": 20, "bonus": 200},
+    "ac": 25,
+    "damage_dice": {"num_dice": 4, "roll_dice": 12, "bonus": 10},
+    "spellcasting": false,
+    "resistances": ["fire damage", "poison damage"],
+    "immunities": [],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Empyrean",
+    "hit_dice": {"num_dice": 20, "roll_dice": 12, "bonus": 140},
+    "ac": 22,
+    "damage_dice": {"num_dice": 6, "roll_dice": 6, "bonus": 10},
+    "spellcasting": true,
+    "resistances": [],
+    "immunities": ["thunder damage"],
+    "vulnerabilities": []
+  },
+  {
+    "name": "Ancient Gold Dragon",
+    "hit_dice": {"num_dice": 20, "roll_dice": 12, "bonus": 140},
+    "ac": 22,
+    "damage_dice": {"num_dice": 2, "roll_dice": 10, "bonus": 9},
+    "spellcasting": true,
+    "resistances": [],
+    "immunities": ["fire damage", "radiant damage"],
+    "vulnerabilities": []
+  }
+]
