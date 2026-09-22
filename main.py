@@ -37,7 +37,10 @@ class Armor:
 @dataclass
 class Weapon:
 	name: str
-	damage: int
+	damage_dice: DamageDice
+
+	def __repr__(self):
+		return f'{self.name} {self.damage_dice}'
 
 
 @dataclass
@@ -135,7 +138,7 @@ class SpellCaster:
 
 		# Reduce spell slots
 		self.current_spell_slots[spell.level - 1] -= 1
-		spells_cast[spell.name] += 1
+		spells_cast[spell.level - 1][spell.name] += 1
 		BattleSystem.spells_inc()
 
 		# Use BattleSystem to resolve effect (it will apply HP changes) and return its message
@@ -325,8 +328,8 @@ class Hero(SpellCaster, Character):
 
 	def attack(self, target: Character) -> int:
 		"""Perform an attack and return damage dealt"""
-		# Calculate base damage
-		damage = self.weapon.damage
+		# Roll damage
+		damage = self.weapon.damage_dice.roll
 
 		# Add ability modifiers
 		if self.class_type == ClassType.FIGHTER:
@@ -336,14 +339,8 @@ class Hero(SpellCaster, Character):
 		elif self.class_type == ClassType.WIZARD:
 			damage += self.abilities.int_mod
 
-		# Roll damage
-		damage += randint(1, damage)
+		return damage
 
-		# Apply target's armor
-		armor_bonus = target.armor.bonus if hasattr(target, 'armor') else 0
-		damage_dealt = max(1, damage - armor_bonus)
-
-		return damage_dealt
 
 	def take_damage(self, damage: int) -> int:
 		"""Apply damage to character and return actual damage taken"""
@@ -366,12 +363,15 @@ class Hero(SpellCaster, Character):
 class DamageDice:
 	num_dice: int
 	roll_dice: int
-	bonus: int
+	bonus: int = 0
 
 	@property
 	def roll(self):
 		return sum(randint(1, self.roll_dice) for _ in range(self.num_dice)) + self.bonus
 
+	def __repr__(self):
+		bonus = f'+{self.bonus}' if self.bonus else ''
+		return f'{self.num_dice}d{self.roll_dice}{bonus}'
 
 @dataclass
 class MonsterType:
@@ -639,10 +639,7 @@ class BattleSystem:
 	@staticmethod
 	def _roll_damage(attacker: Character, defender: Character, is_critical: bool = False) -> int:
 		"""Méthode interne pour calculer et appliquer les dégâts."""
-		if hasattr(attacker, 'attack') and callable(getattr(attacker, 'attack')):
-			base_damage = attacker.attack(defender)
-		else:
-			base_damage = getattr(attacker, 'damage', 1)
+		base_damage = attacker.attack(defender)
 
 		if attacker.is_blessed:
 			d4 = randint(1, 4)
@@ -793,8 +790,8 @@ def create_sample_party(spells: List[Spell] | None = None, classes: list | None 
 	def pick_weapon(name: str):
 		for w in weapons:
 			if w.get('name', '').lower() == name.lower():
-				return Weapon(name=w['name'], damage=w['damage'])
-		return Weapon(name='Fists', damage=1)
+				return Weapon(name=w['name'], damage_dice=w['damage'])
+		return Weapon(name='Fists', damage_dice=1)
 
 	def pick_armor(name: str):
 		for a in armors:
@@ -821,9 +818,9 @@ def create_sample_party(spells: List[Spell] | None = None, classes: list | None 
 	gandalf_slots = gandalf_class.get('base_spell_slots', 3) if gandalf_class else 3
 
 	return [Hero(id=1, name="Aragorn", level=1, hp=10, max_hp=10, gold=100, xp=0, class_type=ClassType.FIGHTER, race=Race(type=RaceType.HUMAN), armor=aragorn_armor, weapon=aragorn_weapon, shield=aragorn_shield, abilities=Abilities(strength=14, intelligence=10, dexterity=12, wisdom=10, agility=12, constitution=13), spells=[]), Hero(id=2, name="Gandalf", level=1, hp=8, max_hp=8, gold=50, xp=0, class_type=ClassType.WIZARD, race=Race(type=RaceType.HUMAN), armor=gandalf_armor, weapon=gandalf_weapon, shield=gandalf_shield, abilities=Abilities(strength=8, intelligence=16, dexterity=10, wisdom=14, agility=10, constitution=12), spells=spells, max_spell_slots=gandalf_slots, current_spell_slots=gandalf_slots),
-	        Hero(id=3, name="Legolas", level=1, hp=9, max_hp=9, gold=75, xp=0, class_type=ClassType.RANGER, race=Race(type=RaceType.ELF), armor=Armor(name="Leather Armor", bonus=2), weapon=Weapon(name="Bow", damage=6), shield=Shield(name="None", bonus=0), abilities=Abilities(strength=12, intelligence=12, dexterity=16, wisdom=12, agility=14, constitution=12), spells=[]),  # Ranger has no spells
-	        Hero(id=4, name="Frodo", level=1, hp=7, max_hp=7, gold=30, xp=0, class_type=ClassType.ROGUE, race=Race(type=RaceType.HOBBIT), armor=Armor(name="Leather Armor", bonus=2), weapon=Weapon(name="Dagger", damage=4), shield=Shield(name="None", bonus=0), abilities=Abilities(strength=10, intelligence=12, dexterity=14, wisdom=12, agility=14, constitution=10), spells=[]),  # Rogue has no spells
-	        Hero(id=5, name="Boromir", level=1, hp=10, max_hp=10, gold=80, xp=0, class_type=ClassType.FIGHTER, race=Race(type=RaceType.HUMAN), armor=Armor(name="Chainmail", bonus=3), weapon=Weapon(name="Sword", damage=6), shield=Shield(name="Wooden Shield", bonus=1), abilities=Abilities(strength=14, intelligence=10, dexterity=12, wisdom=10, agility=12, constitution=13), spells=[]),  # Fighter has no spells
+	        Hero(id=3, name="Legolas", level=1, hp=9, max_hp=9, gold=75, xp=0, class_type=ClassType.RANGER, race=Race(type=RaceType.ELF), armor=Armor(name="Leather Armor", bonus=2), weapon=Weapon(name="Bow", damage_dice=6), shield=Shield(name="None", bonus=0), abilities=Abilities(strength=12, intelligence=12, dexterity=16, wisdom=12, agility=14, constitution=12), spells=[]),  # Ranger has no spells
+	        Hero(id=4, name="Frodo", level=1, hp=7, max_hp=7, gold=30, xp=0, class_type=ClassType.ROGUE, race=Race(type=RaceType.HOBBIT), armor=Armor(name="Leather Armor", bonus=2), weapon=Weapon(name="Dagger", damage_dice=4), shield=Shield(name="None", bonus=0), abilities=Abilities(strength=10, intelligence=12, dexterity=14, wisdom=12, agility=14, constitution=10), spells=[]),  # Rogue has no spells
+	        Hero(id=5, name="Boromir", level=1, hp=10, max_hp=10, gold=80, xp=0, class_type=ClassType.FIGHTER, race=Race(type=RaceType.HUMAN), armor=Armor(name="Chainmail", bonus=3), weapon=Weapon(name="Sword", damage_dice=6), shield=Shield(name="Wooden Shield", bonus=1), abilities=Abilities(strength=14, intelligence=10, dexterity=12, wisdom=10, agility=12, constitution=13), spells=[]),  # Fighter has no spells
 	        ]
 
 
@@ -852,14 +849,15 @@ def build_party_from_heroes(heroes_data, spells, classes, races, weapons, armors
 		ab = h.get('abilities', {})
 		abilities = Abilities(**{k: ab.get(k, 10) for k in ['strength', 'intelligence', 'dexterity', 'wisdom', 'agility', 'constitution']})
 
-		weapon = Weapon(name=h.get('weapon', 'Fists'), damage=next((w['damage'] for w in weapons if w['name'] == h.get('weapon')), 1))
+		damage = next((w['damage'] for w in weapons if w['name'] == h.get('weapon')), 1)
+		weapon = Weapon(name=h.get('weapon', 'Fists'), damage_dice=DamageDice(1, damage))
 		armor = Armor(name=h.get('armor', 'Cloth'), bonus=next((a['bonus'] for a in armors if a['name'] == h.get('armor')), 0))
 		shield = Shield(name=h.get('shield', 'None'), bonus=next((s['bonus'] for s in shields if s['name'] == h.get('shield')), 0))
 
 		# determine spell slots
 		spellcasting_ability = [c.get('spellcasting_ability', '') for c in classes if c.get('name').lower() == class_str.lower()][0]
 		hero = Hero(id=h.get('id', 0), name=h.get('name', 'Hero'), level=h.get('level', 1), hp=h.get('hp', 10), max_hp=h.get('max_hp', 10), gold=h.get('gold', 0), xp=h.get('xp', 0), class_type=cls or ClassType.FIGHTER, race=race, armor=armor, weapon=weapon, shield=shield, abilities=abilities, spellcasting_ability=spellcasting_ability)
-		allowed_spells = hero.allowed_spells(spell_categories, spells)
+		allowed_spells = [s for s in hero.allowed_spells(spell_categories, spells) if s.level == 1]
 		# print(h.get('name'), class_str, allowed_spells)
 		hero.spells = sample(allowed_spells, min(randint(1, 2), len(allowed_spells)))
 		# print(h.get('name'), class_str, hero.spells)
@@ -903,16 +901,16 @@ def calculate_initiative(party, monsters):
 	return combatants
 
 
-def end_combat_msg(party, monsters, num_combats, killed_monsters):
+def party_stats_msg(party, num_combats, killed_monsters):
 	# Display final stats
-	print("=" * 50)
-	print(f"FINAL STATS : {num_combats} victoires et {killed_monsters} monstres tués! {BattleSystem.spells_count} sorts lancés!")
-	print("=" * 50)
+	print("=" * 100)
+	print(f"STATS (Retour auberge tous les {BACK_TO_TOWN_FREQ} combats): {num_combats} victoires et {killed_monsters} monstres tués! {BattleSystem.spells_count} sorts lancés!")
+	print("=" * 100)
 
 	alive_chars = [c for c in party if c.hp > 0]
 	print(f"Party Status: {len(alive_chars)}/{len(party)} ")
-	if alive_chars:
-		for hero in alive_chars:
+	if True or alive_chars:
+		for hero in party:
 			cls = getattr(hero, 'class_type', None)
 			race = getattr(hero, 'race', None)
 			cls_name = cls.value if isinstance(cls, Enum) else (cls if cls is not None else 'Unknown')
@@ -924,14 +922,25 @@ def end_combat_msg(party, monsters, num_combats, killed_monsters):
 					race_name = str(race.type)
 			elif isinstance(getattr(hero, 'race', None), Enum):
 				race_name = hero.race.value
-			spell_slots = f', Spells slots: {hero.current_spell_slots}/{hero.max_spell_slots}' if hero.spells else ''
+			# spell_slots = f', Spells slots: {hero.current_spell_slots}/{hero.max_spell_slots}' if hero.spells else ''
+			spell_slots = ''
 			spells = '|'.join([f'{s.level}:{s.name}' for s in hero.spells])
-			print(f"  {hero.name}: Lvl {hero.level} {cls_name} {race_name} (AC {hero.armor_class} - THACO: {hero.thac0}) "
-			      f"- STR: {hero.str} INT: {hero.int} DEX: {hero.dex} CON: {hero.con} WIS: {hero.wis} "
-			      f"- HP {hero.hp}/{hero.max_hp} - {hero.condition.value.upper()}, XP {hero.xp}, Gold {hero.gold}{spell_slots} - {spells}")
+			print(f"  {hero.name}: Lvl {hero.level} {cls_name} {race_name} (AC {hero.armor_class} - THACO {hero.thac0} - {hero.weapon}) "
+			      f"- STR {hero.str} INT {hero.int} DEX {hero.dex} CON {hero.con} WIS {hero.wis} "
+			      f"- HP {hero.hp}/{hero.max_hp} - {hero.condition.value.upper()}, XP {hero.xp}, {hero.gold} gp{spell_slots} - {spells}")
 	else:
 		print(f"All {len(party)} characters in party has died!")
 
+def print_stats(killed_by_level, spells_cast):
+	print("\nMonsters kill stats")
+	for i, monsters in enumerate(killed_by_level):
+		print(f'Lvl {i+1}: {monsters}')
+	print("\nSpells cast stats")
+	for i, spells in enumerate(spells_cast):
+		if spells:
+			print(f'Lvl {i+1}: {spells}')
+
+def monster_stats_msg(monsters):
 	print("\nMonster Status:")
 	for monster in monsters:
 		# print(f"  {monster.name}: HP {monster.hp}/{monster.max_hp}")
@@ -947,21 +956,21 @@ def start_combat(party: List[Hero], monsters: List[Monster]):
 	uprint("COMBAT BEGINS!")
 	uprint("=" * 60)
 
-	# Display initial status
-	uprint("\nParty Status:")
-	for hero in party:
-		cls = getattr(hero, 'class_type', None)
-		race = getattr(hero, 'race', None)
-		cls_name = cls.value if isinstance(cls, Enum) else (cls if cls is not None else 'Unknown')
-		race_name = 'Unknown'
-		if isinstance(race, Race):
-			if isinstance(race.type, Enum):
-				race_name = race.type.value
-			else:
-				race_name = str(race.type)
-		elif isinstance(getattr(hero, 'race', None), Enum):
-			race_name = hero.race.value
-		uprint(f"  {hero.name}: {cls_name} {race_name} - HP {hero.hp}/{hero.max_hp}, XP {hero.xp}, Gold {hero.gold}")
+	# # Display initial status
+	# uprint("\nParty Status:")
+	# for hero in party:
+	# 	cls = getattr(hero, 'class_type', None)
+	# 	race = getattr(hero, 'race', None)
+	# 	cls_name = cls.value if isinstance(cls, Enum) else (cls if cls is not None else 'Unknown')
+	# 	race_name = 'Unknown'
+	# 	if isinstance(race, Race):
+	# 		if isinstance(race.type, Enum):
+	# 			race_name = race.type.value
+	# 		else:
+	# 			race_name = str(race.type)
+	# 	elif isinstance(getattr(hero, 'race', None), Enum):
+	# 		race_name = hero.race.value
+	# 	uprint(f"  {hero.name}: {cls_name} {race_name} - HP {hero.hp}/{hero.max_hp}, XP {hero.xp}, Gold {hero.gold}")
 
 	uprint("\nMonster Status:")
 	for monster in monsters:
@@ -1000,7 +1009,7 @@ def start_combat(party: List[Hero], monsters: List[Monster]):
 					combatant.character.gold += target.gold
 					uprint(f"{target.name} is defeated!")
 					alive_monsters.remove(target)
-					killed_by_level[target.name] += 1
+					killed_by_level[target.level - 1][target.name] += 1
 					uprint(f"{combatant.character.name} gained {target.xp} XP and earned {target.gold} gp!")
 			else:
 				# Monster acts (spell or attack)
@@ -1067,21 +1076,25 @@ if __name__ == '__main__':
 	else:
 		party = create_sample_party(spells, classes, races, weapons, armors, shields)
 
+
 	BATCH_MODE = True
 	end_game = False
 	max_combats = 1000
 	num_combats = 0
 	max_monsters = 2
 	killed_monsters = 0
-	killed_by_level = {m.name: 0 for m in monster_types}
-	spells_cast = {s.name: 0 for s in spells}
+	killed_by_level = [{m.name: 0 for m in monster_types if m.level == i} for i in range(1, 4)]
+	spells_cast =  [{s.name: 0 for s in spells if s.level == i} for i in range(1, 10)]
+	BACK_TO_TOWN_FREQ = 10
+	# party_stats_msg(party, num_combats, killed_monsters)
 	while not end_game and num_combats < max_combats:
 		for char in party:
 			if char.xp // 500 >= char.level:
 				allowed_spells = char.allowed_spells(spell_categories, spells)
 				level_up(char, allowed_spells)
 		num_combats += 1
-		if num_combats % 50 == 0:
+		# Reposer et soigner le groupe (tous les 10 combats)
+		if num_combats % BACK_TO_TOWN_FREQ == 0:
 			for char in party:
 				char.hp = char.max_hp
 				for i in range(10):
@@ -1100,6 +1113,6 @@ if __name__ == '__main__':
 		# 		end_game = True
 		killed_monsters += len(monsters)
 
-	end_combat_msg(party, monsters, num_combats, killed_monsters)
-	print("killed: ", killed_by_level)
-	print("spells: ", spells_cast)
+	party_stats_msg(party, num_combats, killed_monsters)
+	monster_stats_msg(monsters)
+	print_stats(killed_by_level, spells_cast)
