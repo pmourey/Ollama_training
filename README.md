@@ -1,34 +1,77 @@
+🎮 Résumé du Projet : Jeu de Combat Automatisé (RPG en mode batch)
 
+Ce projet est un jeu de rôle (RPG) textuel automatisé, simulant des combats entre un groupe de héros (party) et des monstres. Le jeu est conçu pour fonctionner en mode batch, c’est-à-dire sans interface graphique, et peut être exécuté depuis la ligne de commande.
+
+🔧 Fonctionnalités principales :
+1. Génération de Party
+Un groupe de héros est créé aléatoirement à partir de données stockées dans des fichiers JSON (heroes.json, classes.json, races.json, etc.).
+Chaque héros possède :
+- Classe (Fighter, Wizard, etc.)
+- Race (Humain, Elfe, Nain, etc.)
+- Attributs (Force, Dextérité, Intelligence, etc.)
+- Arme, Armure, Bouclier
+- Sorts (si applicable)
+- Points de vie, XP, Or
+
+2. Génération de Monstres
+Des monstres sont générés aléatoirement à partir de types définis dans monsters.json.
+Le niveau des monstres est adapté au niveau moyen du groupe de héros.
+Chaque monstre a :
+- Un type (nom, niveau)
+- Des statistiques (PV, CA, dégâts, XP, or)
+
+3. Combat Automatisé
+Les combats se déroulent en tour par tour, avec un ordre d'initiative basé sur les caractéristiques des personnages.
+Les héros et monstres s’affrontent tour à tour :
+- Attaques normales (avec arme)
+- Sorts (si le personnage est un lanceur de sorts)
+Les combats se terminent quand :
+- Tous les héros sont morts → Défaite
+- Tous les monstres sont morts → Victoire
+
+4. Système de Niveau et d'Évolution
+Les héros montent en niveau à mesure qu’ils gagnent de l’XP.
+À chaque montée de niveau :
+- Ils gagnent des PV
+- Ils obtiennent de nouveaux sorts (selon leur classe)
+- Ils reçoivent plus de fentes de sorts (spell slots)
+
+5. Système de Sauvegarde et de Stats
+À chaque 10 combats, le groupe se repose et se soigne (recharge des sorts, restauration des PV).
+Des statistiques sont collectées :
+- Nombre de monstres tués par niveau
+- Sorts lancés
+- XP et or gagnés
+
+6. Mode Batch
+Le jeu est conçu pour tourner en mode batch (sans interaction utilisateur pendant les combats).
+Un seul input() est utilisé à la fin de chaque round, si BATCH_MODE = False.
+
+📁 Fichiers de données utilisés :
+- monsters.json : Définitions des types de monstres
+- spells.json : Sorts disponibles
+- classes.json : Classes et règles de sorts
+- races.json : Types de races
+- weapons.json, armors.json, shields.json : Équipements
+- heroes.json : Héros de départ
+
+🧠 Objectif du Jeu :
+
+Simuler un cycle de combats entre un groupe de héros et des monstres.
+Observer l’évolution du groupe au fil des combats.
+Collecter des statistiques de jeu pour analyser les performances et les tendances (ex : sorts utilisés, monstres tués par niveau, etc.)
+
+🧪 Exemple de sortie :
+
+```COMBAT BEGINS!
+------------------------------------------------------------
+ROUND 1 ------------------
+  Hero1: Lvl 3 Fighter Human - HP 20/20, XP 150, Gold 25
+  Monster1: HP 12/12
+VICTORY! Each member gained 30 XP and earned 15 gp
 ```
-====================================================================================================
-DEBUG: 2024-06-17 19:30:00
-====================================================================================================
-Party Status: 6/6 
-  Faramir: Lvl 1 Ranger Human (AC 14 - THACO 19 - Bow 1d5) - STR 13 INT 12 WIS 12 DEX 14 CON 12 CHA 12 - HP 10/10 - OK, XP 0, 50 gp - 
-  Aragorn: Lvl 1 Fighter Human (AC 14 - THACO 18 - Sword 1d6) - STR 14 INT 10 WIS 10 DEX 12 CON 13 CHA 14 - HP 10/10 - OK, XP 0, 100 gp - 
-  Thorin: Lvl 1 Fighter Dwarf (AC 14 - THACO 16 - Axe 1d7) - STR 14 INT 10 WIS 10 DEX 12 CON 14 CHA 11 - HP 11/11 - OK, XP 0, 55 gp - 
-  Elrond: Lvl 1 Cleric Elf (AC 14 - THACO 19 - Mace 1d5) - STR 12 INT 12 WIS 15 DEX 10 CON 12 CHA 14 - HP 9/9 - OK, XP 0, 60 gp, Spells slots: [3, 0, 0, 0, 0, 0, 0, 0, 0, 0]/[3, 0, 0, 0, 0, 0, 0, 0, 0, 0] - 1:Healing Word
-  Lyra: Lvl 1 Bard Human (AC 12 - THACO 20 - Dagger 1d3) - STR 10 INT 12 WIS 12 DEX 14 CON 10 CHA 16 - HP 8/8 - OK, XP 0, 40 gp, Spells slots: [1, 0, 0, 0, 0, 0, 0, 0, 0, 0]/[1, 0, 0, 0, 0, 0, 0, 0, 0, 0] - 1:Cure Wounds
-  Gandalf: Lvl 1 Wizard Human (AC 11 - THACO 21 - Staff 1d4) - STR 8 INT 16 WIS 14 DEX 10 CON 12 CHA 15 - HP 8/8 - OK, XP 0, 50 gp, Spells slots: [3, 0, 0, 0, 0, 0, 0, 0, 0, 0]/[3, 0, 0, 0, 0, 0, 0, 0, 0, 0] - 1:Fire Bolt
-====================================================================================================
-STATS (Retour auberge tous les 10 combats): 10000 victoires et 14930 monstres tués! 11067 sorts lancés!
-====================================================================================================
-Party Status: 6/6 
-  Faramir: Lvl 20 Ranger Human (AC 14 - THACO 0 - Bow 1d5) - STR 13 INT 12 WIS 12 DEX 14 CON 12 CHA 12 - HP 89/89 - OK, XP 77366, 9496 gp - 
-  Aragorn: Lvl 20 Fighter Human (AC 14 - THACO -1 - Sword 1d6) - STR 14 INT 10 WIS 10 DEX 12 CON 13 CHA 14 - HP 117/117 - OK, XP 77366, 9546 gp - 
-  Thorin: Lvl 20 Fighter Dwarf (AC 14 - THACO -3 - Axe 1d7) - STR 14 INT 10 WIS 10 DEX 12 CON 14 CHA 11 - HP 127/127 - OK, XP 77366, 9501 gp - 
-  Elrond: Lvl 20 Cleric Elf (AC 14 - THACO 7 - Mace 1d5) - STR 12 INT 12 WIS 15 DEX 10 CON 12 CHA 14 - HP 117/117 - OK, XP 77366, 9506 gp, Spells slots: [9, 9, 9, 9, 9, 9, 9, 9, 8, 2]/[9, 9, 9, 9, 9, 9, 9, 9, 8, 2] - 1:Healing Word|1:Bless|1:Cure Wounds|3:Greater Heal
-  Lyra: Lvl 20 Bard Human (AC 12 - THACO 11 - Dagger 1d3) - STR 10 INT 12 WIS 12 DEX 14 CON 10 CHA 16 - HP 94/94 - OK, XP 77366, 9486 gp, Spells slots: [9, 9, 9, 9, 9, 9, 9, 9, 8, 3]/[9, 9, 9, 9, 9, 9, 9, 9, 8, 3] - 1:Cure Wounds|1:Bless|1:Healing Word|3:Greater Heal
-  Gandalf: Lvl 20 Wizard Human (AC 11 - THACO 15 - Staff 1d4) - STR 8 INT 16 WIS 14 DEX 10 CON 12 CHA 15 - HP 96/96 - OK, XP 77366, 9496 gp, Spells slots: [9, 9, 8, 9, 9, 9, 9, 9, 8, 3]/[9, 9, 9, 9, 9, 9, 9, 9, 8, 3] - 1:Fire Bolt|1:Magic Missile|1:Sleep|2:Scorching Ray|1:Ice Lance|3:Fireball|3:Lightning Bolt
 
-Monsters kill stats
-Lvl 1: {'Goblin': 1787, 'Kobold': 1546, 'Skeleton': 1714}
-Lvl 2: {'Orc': 1628, 'Zombie': 1631, 'Wizard': 1682, 'Bandit': 1690}
-Lvl 4: {'Ogre': 1593}
-Lvl 6: {'Dragon Whelp': 1524}
+📌 Conclusion :
+C’est un simulateur de combat RPG en mode batch, parfait pour les tests automatisés, l’analyse statistique de gameplay ou l’expérimentation de mécaniques de jeu (classes, sorts, niveaux, etc.). Il est entièrement paramétrable via des fichiers JSON et peut être étendu facilement.
 
-Spells cast stats
-Lvl 1: {'Fire Bolt': 35, 'Magic Missile': 132, 'Healing Word': 89, 'Bless': 0, 'Sleep': 0, 'Cure Wounds': 70, 'Ice Lance': 0}
-Lvl 2: {'Heal': 0, 'Scorching Ray': 941}
-Lvl 3: {'Lightning Bolt': 0, 'Fireball': 7416, 'Greater Heal': 2384}
-```
+Souhaitez-vous que je vous aide à ajouter des fonctionnalités, améliorer les performances, ou générer des rapports de statistiques ? SURTOUT PAS :-D
