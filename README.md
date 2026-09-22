@@ -1,4 +1,6 @@
 
+### Ce projet m'a été prescrit par mon médecin pour ma cure de désintoxication à l'usage excessif des LLM pour revenir à une activité normale de codeur  lambda :-D
+
 ```====================================================================================================
 STATS (Retour auberge tous les 10 combats): 1000 victoires et 1500 monstres tués! 784 sorts lancés!
 ====================================================================================================
