@@ -1,7 +1,7 @@
 {
-  "Wizard": ["Ice Lance", "Fireball", "Fire Bolt", "Magic Missile", "Scorching Ray", "Sleep"],
-  "Cleric": ["Cure Wounds", "Bless", "Healing Word"],
-  "Druid": ["Cure Wounds", "Bless", "Healing Word"],
-  "Sorcerer": ["Ice Lance", "Fireball", "Fire Bolt", "Magic Missile", "Scorching Ray", "Sleep"],
-  "Bard": ["Cure Wounds", "Bless", "Healing Word"]
+  "Wizard": ["Ice Lance", "Fireball", "Fire Bolt", "Magic Missile", "Scorching Ray", "Sleep", "Lightning Bolt"],
+  "Cleric": ["Cure Wounds", "Bless", "Healing Word", "Greater Heal"],
+  "Druid": ["Cure Wounds", "Bless", "Healing Word", "Greater Heal"],
+  "Sorcerer": ["Ice Lance", "Fireball", "Fire Bolt", "Magic Missile", "Scorching Ray", "Sleep", "Lightning Bolt"],
+  "Bard": ["Cure Wounds", "Bless", "Healing Word", "Greater Heal"]
 }

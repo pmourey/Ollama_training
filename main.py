@@ -3,10 +3,11 @@ from __future__ import annotations
 
 import json
 import os
+from copy import copy
 from dataclasses import dataclass, field
 from enum import Enum
 from random import randint, choice, sample
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 
 class ClassType(Enum):
@@ -65,7 +66,7 @@ class Abilities:
 	intelligence: int = 10
 	dexterity: int = 10
 	wisdom: int = 10
-	agility: int = 10
+	charisma: int = 10
 	constitution: int = 10
 
 	def __post_init__(self):
@@ -74,7 +75,7 @@ class Abilities:
 		self.intelligence = max(3, min(20, self.intelligence))
 		self.dexterity = max(3, min(20, self.dexterity))
 		self.wisdom = max(3, min(20, self.wisdom))
-		self.agility = max(3, min(20, self.agility))
+		self.charisma = max(3, min(20, self.charisma))
 		self.constitution = max(3, min(20, self.constitution))
 
 	@property
@@ -102,13 +103,17 @@ class Abilities:
 		"""Constitution modifier for hit points and saving throws"""
 		return (self.constitution - 10) // 2
 
+	@property
+	def cha_mod(self) -> int:
+		"""Constitution modifier for hit points and saving throws"""
+		return (self.charisma - 10) // 2
 
 @dataclass
 class Spell:
 	"""A spell that can be cast by spellcasters"""
 	name: str
 	level: int
-	damage_dice: Dict[str, int]  # e.g., {"num_dice": 1, "roll_dice": 6}
+	damage_dice: Optional[DamageDice]
 	effect: str  # e.g., "fire damage", "heal"
 	dc_type: str
 	dc_success: bool
@@ -117,32 +122,14 @@ class Spell:
 	def __eq__(self, other):
 		return self.name == other.name
 
+	@property
+	def value(self):
+		dice = self.damage_dice
+		# Calcule la valeur moyenne d'un dé (ex: pour un d6, (1 + 6) / 2 = 3.5)
+		average_roll = (1 + dice.roll_dice) / 2
 
-class SpellCaster:
-	"""Mixin class for characters that can cast spells"""
+		return (dice.num_dice * average_roll) + dice.bonus
 
-	def __init__(self, spells=None, max_spell_slots=None, current_spell_slots=None):
-		self.spells: List[Spell] = spells or []
-		self.max_spell_slots: list[int] = max_spell_slots or [0] * 10
-		self.current_spell_slots: list[int] = current_spell_slots or [0] * 10
-
-	def can_cast_spell(self, spell: Spell) -> bool:
-		"""Check if the spellcaster can cast a spell of given level"""
-		return self.current_spell_slots[spell.level - 1] > 0
-
-	def cast_spell(self, spell: Spell, target: Character) -> str:
-		"""Cast a spell, reduce slots, and return the BattleSystem message.
-		Delegates effect resolution to BattleSystem.resolve_spell_effect which also updates target HP."""
-		if self.current_spell_slots[spell.level - 1] == 0:
-			return f"[Spell] {self.name} cannot cast {spell.name} (insufficient slots)!"
-
-		# Reduce spell slots
-		self.current_spell_slots[spell.level - 1] -= 1
-		spells_cast[spell.level - 1][spell.name] += 1
-		BattleSystem.spells_inc()
-
-		# Use BattleSystem to resolve effect (it will apply HP changes) and return its message
-		return BattleSystem.resolve_spell_effect(self, target, spell)
 
 
 @dataclass
@@ -221,6 +208,10 @@ class Character:
 		return self.abilities.wisdom
 
 	@property
+	def cha(self):
+		return self.abilities.charisma
+
+	@property
 	def armor_class(self) -> int:
 		"""Classe d'armure par défaut (sans armure)"""
 		return 10 + self.abilities.dex_mod
@@ -239,16 +230,14 @@ class Character:
 		return roll + modifiers[dc_type] >= dc
 
 
-class Hero(SpellCaster, Character):
+class Hero(Character):
 	"""Hero character combining Character dataclass with SpellCaster mixin"""
 
-	def __init__(self, id: int, name: str, level: int, hp: int, max_hp: int, gold: int, xp: int, *, class_type: ClassType, race: Race, armor: Armor, weapon: Weapon, shield: Shield, inventory: List[Equipment] | None = None, abilities: Abilities | None = None, spells: List[Spell] | None = None, spellcasting_ability='', max_spell_slots: int = 0, current_spell_slots: int = 0):
+	def __init__(self, id: int, name: str, level: int, hp: int, max_hp: int, gold: int, xp: int, *, class_type: ClassType, race: Race, armor: Armor, weapon: Weapon, shield: Shield, inventory: List[Equipment] | None = None, abilities: Abilities | None = None, spellcasting_ability='', spells = None, max_spell_slots = None, current_spell_slots = None):
 		# Initialize dataclass part
 		if abilities is None:
 			abilities = Abilities()
 		Character.__init__(self, id=id, name=name, level=level, hp=hp, max_hp=max_hp, gold=gold, xp=xp, condition=Condition.OK, abilities=abilities)
-		# Initialize spellcaster mixin
-		SpellCaster.__init__(self, spells=spells, max_spell_slots=max_spell_slots, current_spell_slots=current_spell_slots)
 
 		# Hero-specific attributes
 		self.class_type: ClassType = class_type
@@ -258,6 +247,28 @@ class Hero(SpellCaster, Character):
 		self.weapon: Weapon = weapon
 		self.shield: Shield = shield
 		self.inventory: List[Equipment] = inventory or []
+		self.spells: List[Spell] = spells or []
+		self.max_spell_slots: list[int] = max_spell_slots or [0] * 10
+		self.current_spell_slots: list[int] = current_spell_slots or [0] * 10
+
+	def can_cast_spell(self, spell: Spell) -> bool:
+		"""Check if the spellcaster can cast a spell of given level"""
+		return self.current_spell_slots[spell.level - 1] > 0
+
+	def cast_spell(self, spell: Spell, targets: list[Character]):
+		"""Cast a spell, reduce slots, and return the BattleSystem message.
+		Delegates effect resolution to BattleSystem.resolve_spell_effect which also updates target HP."""
+		if self.current_spell_slots[spell.level - 1] == 0:
+			print(f"[Spell] {self.name} cannot cast {spell.name} (insufficient slots)!")
+
+		# Reduce spell slots
+		self.current_spell_slots[spell.level - 1] -= 1
+		spells_cast[spell.level - 1][spell.name] += 1
+		BattleSystem.spells_inc()
+
+		# Use BattleSystem to resolve effect (it will apply HP changes) and return its message
+		BattleSystem.resolve_spell_effect(self, targets, spell)
+
 
 	def allowed_spells(self, spell_categories: dict, spells: list[Spell]) -> list[Spell]:
 		# spells: if explicit list provided use it; otherwise infer by class categories
@@ -384,7 +395,7 @@ class MonsterType:
 
 	@property
 	def level(self):
-		return self.damage_dice.num_dice
+		return self.hit_dice.num_dice
 
 	@property
 	def damage(self):
@@ -458,7 +469,9 @@ class SpellLoader:
 				if dc:
 					dc_type = dc.get('dc_type')
 					dc_success = dc.get('dc_success')
-				spell = Spell(name=spell_dict['name'], level=spell_dict['level'], damage_dice=spell_dict.get('damage_dice', {}), effect=spell_dict['effect'], dc_type=dc_type, dc_success=dc_success, description=spell_dict.get('description', ''))
+				dd = spell_dict.get('damage_dice', {})
+				damage_dice = DamageDice(num_dice=dd['num_dice'], roll_dice=dd['roll_dice'], bonus=dd['bonus']) if dd else None
+				spell = Spell(name=spell_dict['name'], level=spell_dict['level'], damage_dice=damage_dice, effect=spell_dict['effect'], dc_type=dc_type, dc_success=dc_success, description=spell_dict.get('description', ''))
 				spells.append(spell)
 
 			return spells
@@ -533,92 +546,99 @@ class BattleSystem:
 		return faces_that_hit / 20.0
 
 	@staticmethod
-	def resolve_spell_effect(caster: Hero, target: Character, spell: Spell) -> str:
-		"""Resolve the effect of a spell on the target"""
-		if spell.effect == "heal":
-			# Healing spell
-			heal_amount = sum(randint(1, spell.damage_dice["roll_dice"]) for _ in range(spell.damage_dice["num_dice"]))
-			heal_amount += spell.damage_dice.get("bonus", 0)
-			target.hp = min(target.max_hp, target.hp + heal_amount)
-			return f"[Spell] {caster.name} heals {target.name} for {heal_amount} HP!"
+	def resolve_spell_effect(caster: Hero, targets: list[Character], spell: Spell):
+		"""Resolve the effect of a spell on the targets"""
+		for target in targets:
+			if spell.effect == "heal":
+				# Healing spell
+				for target in targets:
+					heal_amount = spell.damage_dice.roll
+					target.hp = min(target.max_hp, target.hp + heal_amount)
+					msg = f"[Spell] {caster.name} heals {target.name} for {heal_amount} HP!"
 
-		elif spell.effect == "buff":
-			# Logique du sort Bless
-			for t in party:
-				t.is_blessed = True
-			return f"[Spell] {caster.name} bless all party members!"
+			elif spell.effect == "buff":
+				# Logique du sort Bless
+				target.is_blessed = True
+				msg =  f"[Spell] {caster.name} bless {target.name}!"
 
-		elif spell.effect in ["fire damage", "lightning damage", "force damage", "cold damage"]:
-			# Damage spell
-			damage = sum(randint(1, spell.damage_dice["roll_dice"]) for _ in range(spell.damage_dice["num_dice"]))
-			damage += spell.damage_dice.get("bonus", 0)
+			elif spell.effect in ["fire damage", "lightning damage", "force damage", "cold damage"]:
+				# Damage spell
+				damage = spell.damage_dice.roll
 
-			# Check if target makes saving throw (any character with saving_throw)
-			if spell.dc_type and target.saving_throw(spell.dc_type, caster.dc_value):
-				hp_loss = max(1, damage // 2) if spell.dc_success == 'half' else 0
-				if hp_loss:
-					target.hp -= hp_loss
-					return f"[Spell] {target.name} saves against {spell.name} and takes half damage ({hp_loss} HP)!"
+				# Check if target makes saving throw (any character with saving_throw)
+				if spell.dc_type and target.saving_throw(spell.dc_type, caster.dc_value):
+					hp_loss = max(1, damage // 2) if spell.dc_success == 'half' else 0
+					if hp_loss:
+						target.hp -= hp_loss
+						return f"[Spell] {target.name} saves against {spell.name} and takes half damage ({hp_loss} HP)!"
+					else:
+						return f"[Spell] {target.name} saves against {spell.name} and takes no damage!"
+
 				else:
-					return f"[Spell] {target.name} saves against {spell.name} and takes no damage!"
+					target.hp -= damage
+					msg =  f"[Spell] {caster.name} casts {spell.name} and deals {damage} damage to {target.name}!"
+
+			elif spell.effect == "sleep":
+				# Sleep spell - requires saving throw
+				# if hasattr(target, 'saving_throw') and target.saving_throw(spell.dc_type, caster.dc_value):
+				# 	return f"[Spell] {target.name} saves against {spell.name} and remains awake!"
+				# else:
+				target.condition = Condition.UNCONSCIOUS
+				msg =  f"[Spell] {target.name} falls asleep due to {spell.name}!"
 
 			else:
-				target.hp -= damage
-				return f"[Spell] {caster.name} casts {spell.name} and deals {damage} damage to {target.name}!"
+				msg = f"[Spell] {caster.name} casts {spell.name} on {target.name}!"
 
-		elif spell.effect == "sleep":
-			# Sleep spell - requires saving throw
-			# if hasattr(target, 'saving_throw') and target.saving_throw(spell.dc_type, caster.dc_value):
-			# 	return f"[Spell] {target.name} saves against {spell.name} and remains awake!"
-			# else:
-			target.condition = Condition.UNCONSCIOUS
-			return f"[Spell] {target.name} falls asleep due to {spell.name}!"
-
-		return f"[Spell] {caster.name} casts {spell.name} on {target.name}!"
+			uprint(msg)
 
 	@staticmethod
-	def resolve_attack(attacker: Character, defender: Character) -> str:
+	def melee_attack(attacker: Character, defenders: list[Character]):
 		"""Résout une attaque en utilisant un jet de 1d20 et gère les échecs critiques."""
-		# 1. Gestion des cibles sans défense
-		if hasattr(defender, 'condition') and defender.condition in [Condition.UNCONSCIOUS, Condition.PARALYZED]:
-			damage = BattleSystem._roll_damage(attacker, defender, is_critical=True)
-			defender.hp -= damage
-			return f"[Weapon] {attacker.name} touche AUTOMATIQUEMENT {defender.name} (sans défense) pour un COUP CRITIQUE de {damage} dégâts !"
+		for defender in defenders:
+			# 1. Gestion des cibles sans défense
+			if hasattr(defender, 'condition') and defender.condition in [Condition.UNCONSCIOUS, Condition.PARALYZED]:
+				damage = BattleSystem._roll_damage(attacker, defender, is_critical=True)
+				defender.hp -= damage
+				msg = f"[Weapon] {attacker.name} touche AUTOMATIQUEMENT {defender.name} (sans défense) pour un COUP CRITIQUE de {damage} dégâts !"
 
-		# 2. Lancer du d20
-		d20_roll = randint(1, 20)
-		attack_bonus = attacker.attack_bonus
-		total_attack = d20_roll + attack_bonus
-		ac = defender.armor_class
+			else:
+				# 2. Lancer du d20
+				d20_roll = randint(1, 20)
+				attack_bonus = attacker.attack_bonus
+				total_attack = d20_roll + attack_bonus
+				ac = defender.armor_class
 
-		# --- GESTION DU 1 NATUREL (ÉCHEC CRITIQUE) ---
-		if d20_roll == 1:
-			# Calcul des dégâts de maladresse subis par l'attaquant (ex: 1d4 + son propre modificateur de Force/Dex)
-			fumble_damage = randint(1, 4)
-			attacker.hp -= fumble_damage
+				# --- GESTION DU 1 NATUREL (ÉCHEC CRITIQUE) ---
+				if d20_roll == 1:
+					# Calcul des dégâts de maladresse subis par l'attaquant (ex: 1d4 + son propre modificateur de Force/Dex)
+					fumble_damage = randint(1, 4)
+					attacker.hp -= fumble_damage
 
-			# Liste d'actions spéciales de maladresse pour l'immersion
-			fumble_actions = [f"glisse lamentablement en attaquant et s'entaille la jambe", f"frappe un mur de pierre par maladresse, faisant vibrer son arme douloureusement", f"perd l'équilibre sous l'élan de son coup et se cogne la tête"]
-			chosen_action = choice(fumble_actions)
+					# Liste d'actions spéciales de maladresse pour l'immersion
+					fumble_actions = [f"glisse lamentablement en attaquant et s'entaille la jambe", f"frappe un mur de pierre par maladresse, faisant vibrer son arme douloureusement", f"perd l'équilibre sous l'élan de son coup et se cogne la tête"]
+					chosen_action = choice(fumble_actions)
 
-			status_msg = f"[Weapon] ❌ ÉCHEC CRITIQUE ! {attacker.name} fait un 1 naturel... Il {chosen_action} ! Il subit {fumble_damage} dégâts."
-			if attacker.is_dead:
-				status_msg += f" {attacker.name} s'est tué !"
-			return status_msg
+					status_msg = f"[Weapon] ❌ ÉCHEC CRITIQUE ! {attacker.name} fait un 1 naturel... Il {chosen_action} ! Il subit {fumble_damage} dégâts."
+					if attacker.is_dead:
+						status_msg += f" {attacker.name} s'est tué !"
+					msg = status_msg
 
-		# 3. Réussite Critique (20 naturel)
-		if d20_roll == 20:
-			damage = BattleSystem._roll_damage(attacker, defender, is_critical=True)
-			defender.hp -= damage
-			return f"[Weapon] 🎯 COUP CRITIQUE ! {attacker.name} fait un 20 naturel et inflige {damage} dégâts à {defender.name} !"
+				# 3. Réussite Critique (20 naturel)
+				elif d20_roll == 20:
+					damage = BattleSystem._roll_damage(attacker, defender, is_critical=True)
+					defender.hp -= damage
+					msg = f"[Weapon] 🎯 COUP CRITIQUE ! {attacker.name} fait un 20 naturel et inflige {damage} dégâts à {defender.name} !"
 
-		# 4. Jet normal contre Classe d'Armure (CA)
-		if total_attack >= ac:
-			damage = BattleSystem._roll_damage(attacker, defender, is_critical=False)
-			defender.hp -= damage
-			return f"[Weapon] {attacker.name} (jet: {d20_roll} + {attack_bonus} = {total_attack}) TOUCHE {defender.name} (CA: {ac}) pour {damage} dégâts !"
-		else:
-			return f"[Weapon] {attacker.name} (jet: {d20_roll} + {attack_bonus} = {total_attack}) RATE {defender.name} (CA: {ac}) !"
+				# 4. Jet normal contre Classe d'Armure (CA)
+				else:
+					if total_attack >= ac:
+						damage = BattleSystem._roll_damage(attacker, defender, is_critical=False)
+						defender.hp -= damage
+						msg = f"{attacker.name} (jet: {d20_roll} + {attack_bonus} = {total_attack}) TOUCHE {defender.name} (CA: {ac}) pour {damage} dégâts !"
+					else:
+						msg = f"{attacker.name} (jet: {d20_roll} + {attack_bonus} = {total_attack}) RATE {defender.name} (CA: {ac}) !"
+
+			uprint(msg)
 
 	@staticmethod
 	def perform_attack(attacker: Character, defender: Character) -> tuple[bool, int]:
@@ -652,43 +672,41 @@ class BattleSystem:
 		return max(1, base_damage)
 
 	@staticmethod
-	def combat(attacker: Character, defender: Character, party: List[Hero]) -> str:
+	def combat(attacker: Character, defender: Character, party: List[Hero]):
 		"""Execute a single combat round"""
-		# Determine if attacker is a spellcaster
-		if isinstance(attacker, SpellCaster) and attacker.spells:
+		# Determine if attacker is a spellcaster et un personnage (Note: monstres ne lancent pas encore de sorts)
+		if isinstance(attacker, Hero) and attacker.spells:
 			# Filter spells to only those allowed for the class and affordable by slots
 			usable_spells = [s for s in attacker.spells if attacker.can_cast_spell(s)]
 
 			# Smart selection: prefer healing when any ally is below 40% HP and spell heals; else prefer highest-level damaging spell
 			if usable_spells:
-				if not all(t.is_blessed for t in party):
-					buffs = [s for s in usable_spells if s.effect == 'buff']
-					if buffs:
-						attacker.cast_spell = buffs[0]
 				# If attacker is allied party member, attempt to heal allies
 				healing_spells = [s for s in usable_spells if s.effect == 'heal']
-				if attacker in party and healing_spells:
-					# cast heal on the low ally if found
-					allies = [a for a in party if 0 < a.hp < a.max_hp and a is not attacker]
-					allies_to_heal = [a for a in allies if a.hp / a.max_hp <= 0.4]
-					if allies_to_heal:
-						spell = max(healing_spells, key=lambda x: x.level)
-						low_ally = min(allies_to_heal, key=lambda a: a.hp)
-						# print(low_ally, spell)
-						try:
-							return attacker.cast_spell(spell, low_ally)
-						except TypeError:
-							pass
-
-				# otherwise pick highest-level damaging spell and best target
-				damage_spells = [s for s in usable_spells if s.effect not in ('heal', 'buff')]
-				if damage_spells:
-					spell = max(damage_spells, key=lambda x: x.level)
-					# prefer target with highest hp among defenders (to finish big ones)
-					return attacker.cast_spell(spell, defender)
-
-		# Regular attack
-		return BattleSystem.resolve_attack(attacker, defender)
+				allies_to_heal = [a for a in party if a.hp / a.max_hp <= 0.9]
+				if healing_spells and allies_to_heal:
+					spell = max(healing_spells, key=lambda x: x.level * x.value)
+					low_ally = min(allies_to_heal, key=lambda a: a.hp)
+					attacker.cast_spell(spell, [low_ally])
+				else:
+					buff_spells = [s for s in usable_spells if s.effect == 'buf']
+					sleep_spells = [s for s in usable_spells if s.effect == 'sleep']
+					damage_spells = [s for s in usable_spells if s.effect not in ('heal', 'buff', 'sleep')]
+					if buff_spells and not all(c.is_blessed for c in party):
+						attacker.cast_spell(buff_spells[0], party)
+					elif sleep_spells and not defender.condition.UNCONSCIOUS:
+						attacker.cast_spell(sleep_spells[0], [defender])
+					elif damage_spells:
+						# otherwise pick highest-level damaging spell and best target
+						spell = max(damage_spells, key=lambda x: x.level * x.value)
+						# prefer target with highest hp among defenders (to finish big ones)
+						attacker.cast_spell(spell, [defender])
+					else:
+						# Regular attack
+						BattleSystem.melee_attack(attacker, [defender])
+		else:
+			# Regular attack
+			BattleSystem.melee_attack(attacker, [defender])
 
 
 def load_game_data():
@@ -847,7 +865,7 @@ def build_party_from_heroes(heroes_data, spells, classes, races, weapons, armors
 
 		# abilities
 		ab = h.get('abilities', {})
-		abilities = Abilities(**{k: ab.get(k, 10) for k in ['strength', 'intelligence', 'dexterity', 'wisdom', 'agility', 'constitution']})
+		abilities = Abilities(**{k: ab.get(k, 10) for k in ['strength', 'intelligence', 'dexterity', 'wisdom', 'charisma', 'constitution']})
 
 		damage = next((w['damage'] for w in weapons if w['name'] == h.get('weapon')), 1)
 		weapon = Weapon(name=h.get('weapon', 'Fists'), damage_dice=DamageDice(1, damage))
@@ -856,13 +874,19 @@ def build_party_from_heroes(heroes_data, spells, classes, races, weapons, armors
 
 		# determine spell slots
 		spellcasting_ability = [c.get('spellcasting_ability', '') for c in classes if c.get('name').lower() == class_str.lower()][0]
-		hero = Hero(id=h.get('id', 0), name=h.get('name', 'Hero'), level=h.get('level', 1), hp=h.get('hp', 10), max_hp=h.get('max_hp', 10), gold=h.get('gold', 0), xp=h.get('xp', 0), class_type=cls or ClassType.FIGHTER, race=race, armor=armor, weapon=weapon, shield=shield, abilities=abilities, spellcasting_ability=spellcasting_ability)
-		allowed_spells = [s for s in hero.allowed_spells(spell_categories, spells) if s.level == 1]
+		hero = Hero(id=h.get('id', 0), name=h.get('name', 'Hero'), level=h.get('level', 1), hp=h.get('hp', 10), max_hp=h.get('max_hp', 10),
+					gold=h.get('gold', 0), xp=h.get('xp', 0), class_type=cls or ClassType.FIGHTER, race=race, armor=armor, weapon=weapon, shield=shield,
+					abilities=abilities, spellcasting_ability=spellcasting_ability)
+		if spellcasting_ability:
+			hero.current_spell_slots = [0] * 10
+			hero.max_spell_slots = [0] * 10
+			allowed_spells = [s for s in hero.allowed_spells(spell_categories, spells) if s.level == 1]
+			hero.spells = sample(allowed_spells, min(randint(1, 2), len(allowed_spells)))
+			base_slots = [c.get('base_spell_slots', 0) for c in classes if c.get('name').lower() == class_str.lower()]
+			hero.current_spell_slots[0] = copy(base_slots[0])
+			hero.max_spell_slots[0] = copy(base_slots[0])
+
 		# print(h.get('name'), class_str, allowed_spells)
-		hero.spells = sample(allowed_spells, min(randint(1, 2), len(allowed_spells)))
-		# print(h.get('name'), class_str, hero.spells)
-		base_slots = [c.get('base_spell_slots', 0) for c in classes if c.get('name').lower() == class_str.lower()]
-		hero.current_spell_slots[0] = hero.max_spell_slots[0] = base_slots[0]
 		party.append(hero)
 	return party
 
@@ -876,7 +900,7 @@ def create_sample_monsters(monster_types: List[MonsterType], count: int = 3):
 
 		# Create monster with appropriate stats
 		hp = monster_type.hit_dice.roll
-		monster = Monster(id=i + 1, name=f"{monster_type.name}", level=monster_type.level, hp=hp, max_hp=hp, gold=randint(1, 10), xp=randint(5, 15) * (monster_type.level + 1), abilities=Abilities(strength=8 + monster_type.level, intelligence=8, dexterity=10 + monster_type.level, wisdom=10, agility=10 + monster_type.level, constitution=10 + monster_type.level), type=monster_type, ac=monster_type.ac, damage=monster_type.damage)
+		monster = Monster(id=i + 1, name=f"{monster_type.name}", level=monster_type.level, hp=hp, max_hp=hp, gold=randint(1, 10), xp=randint(5, 15) * (monster_type.level + 1), abilities=Abilities(strength=8 + monster_type.level, intelligence=8, dexterity=10 + monster_type.level, wisdom=10, charisma=10 + monster_type.level, constitution=10 + monster_type.level), type=monster_type, ac=monster_type.ac, damage=monster_type.damage)
 		monsters.append(monster)
 
 	return monsters
@@ -922,11 +946,11 @@ def party_stats_msg(party, num_combats, killed_monsters):
 					race_name = str(race.type)
 			elif isinstance(getattr(hero, 'race', None), Enum):
 				race_name = hero.race.value
-			# spell_slots = f', Spells slots: {hero.current_spell_slots}/{hero.max_spell_slots}' if hero.spells else ''
-			spell_slots = ''
+			spell_slots = f', Spells slots: {hero.current_spell_slots}/{hero.max_spell_slots}' if hero.spells else ''
+			# spell_slots = ''
 			spells = '|'.join([f'{s.level}:{s.name}' for s in hero.spells])
 			print(f"  {hero.name}: Lvl {hero.level} {cls_name} {race_name} (AC {hero.armor_class} - THACO {hero.thac0} - {hero.weapon}) "
-			      f"- STR {hero.str} INT {hero.int} DEX {hero.dex} CON {hero.con} WIS {hero.wis} "
+			      f"- STR {hero.str} INT {hero.int} WIS {hero.wis} DEX {hero.dex} CON {hero.con} CHA {hero.cha} "
 			      f"- HP {hero.hp}/{hero.max_hp} - {hero.condition.value.upper()}, XP {hero.xp}, {hero.gold} gp{spell_slots} - {spells}")
 	else:
 		print(f"All {len(party)} characters in party has died!")
@@ -934,7 +958,8 @@ def party_stats_msg(party, num_combats, killed_monsters):
 def print_stats(killed_by_level, spells_cast):
 	print("\nMonsters kill stats")
 	for i, monsters in enumerate(killed_by_level):
-		print(f'Lvl {i+1}: {monsters}')
+		if monsters:
+			print(f'Lvl {i+1}: {monsters}')
 	print("\nSpells cast stats")
 	for i, spells in enumerate(spells_cast):
 		if spells:
@@ -950,7 +975,7 @@ def monster_stats_msg(monsters):
 			print(f"  {monster.name}: HP {monster.hp}/{monster.max_hp}")
 
 
-def start_combat(party: List[Hero], monsters: List[Monster]):
+def start_combat(party: List[Hero], monsters: List[Monster]) -> tuple[int, int]:
 	"""Start a combat encounter using BattleSystem.combat_round for each action."""
 	uprint("=" * 60)
 	uprint("COMBAT BEGINS!")
@@ -978,6 +1003,7 @@ def start_combat(party: List[Hero], monsters: List[Monster]):
 
 	# Combat loop
 	round_num = 0
+	total_xp = total_gp = 0
 	while any(hero.hp > 0 for hero in party) and any(monster.hp > 0 for monster in monsters):
 		round_num += 1
 		for c in party:
@@ -999,40 +1025,37 @@ def start_combat(party: List[Hero], monsters: List[Monster]):
 				if not alive_monsters:
 					break
 				target = max(monsters, key=lambda m: m.hp)
-				uprint(f"{current_char.name} acts against {target.name}!")
+				# uprint(f"{current_char.name} acts against {target.name}!")
 
 				# Use combat_round to handle spellcasting or normal attacks
-				result = BattleSystem.combat(current_char, target, party)
-				uprint(result)
+				BattleSystem.combat(current_char, target, party)
 				if target.is_dead:
-					combatant.character.xp += target.xp
-					combatant.character.gold += target.gold
+					total_xp += target.xp
+					total_gp += target.gold
 					uprint(f"{target.name} is defeated!")
 					alive_monsters.remove(target)
+					# print(killed_by_level)
 					killed_by_level[target.level - 1][target.name] += 1
 					uprint(f"{combatant.character.name} gained {target.xp} XP and earned {target.gold} gp!")
 			else:
 				# Monster acts (spell or attack)
 				if not alive_chars:
 					break
-				target = max(party, key=lambda m: m.hp)
-				uprint(f"{current_char.name} acts against {target.name}!")
+				target = max(alive_chars, key=lambda m: m.hp)
+				# uprint(f"{current_char.name} acts against {target.name}!")
 
-				result = BattleSystem.combat(current_char, target, party)
-				uprint(result)
+				BattleSystem.combat(current_char, target, party)
 				if target.is_dead:
 					uprint(f"{target.name} is defeated!")
 					alive_chars.remove(target)
 
-			uprint()
-
 			# Check if battle should end
 			if not any(hero.hp > 0 for hero in party):
 				uprint("All heroes have been defeated!")
-				break
+				return 0, 0
 			if not any(monster.hp > 0 for monster in monsters):
-				uprint("All monsters have been defeated!")
-				break
+				uprint(f"*** VICTORY! *** Each member gained {total_xp} XP and earned {total_gp} gp")
+				return total_xp, total_gp
 		if not BATCH_MODE:
 			input(f"End of round {round_num}. Press Enter to continue...")
 
@@ -1042,7 +1065,8 @@ def level_up(char, spells):
 	hp_gained = randint(1, 10)
 	char.max_hp += hp_gained
 	char.hp += hp_gained
-	max_spell_level = max(1, (char.level + 1) // 2)
+	max_spell_level = max(1, (min(20, char.level + 1) // 2))
+	# print(max_spell_level)
 	for i in range(max_spell_level):
 		char.max_spell_slots[i] = min(char.max_spell_slots[i] + randint(1, 3), 9)
 		char.current_spell_slots[i] = char.max_spell_slots[i]
@@ -1079,19 +1103,20 @@ if __name__ == '__main__':
 
 	BATCH_MODE = True
 	end_game = False
-	max_combats = 1000
+	max_combats = 10000
 	num_combats = 0
 	max_monsters = 2
 	killed_monsters = 0
-	killed_by_level = [{m.name: 0 for m in monster_types if m.level == i} for i in range(1, 4)]
+	killed_by_level = [{m.name: 0 for m in monster_types if m.level == i + 1} for i in range(20)]
 	spells_cast =  [{s.name: 0 for s in spells if s.level == i} for i in range(1, 10)]
-	BACK_TO_TOWN_FREQ = 10
-	# party_stats_msg(party, num_combats, killed_monsters)
+	BACK_TO_TOWN_FREQ = 30
+	party_stats_msg(party, num_combats, killed_monsters)
 	while not end_game and num_combats < max_combats:
 		for char in party:
 			if char.xp // 500 >= char.level:
 				allowed_spells = char.allowed_spells(spell_categories, spells)
-				level_up(char, allowed_spells)
+				if char.level < 20:
+					level_up(char, allowed_spells)
 		num_combats += 1
 		# Reposer et soigner le groupe (tous les 10 combats)
 		if num_combats % BACK_TO_TOWN_FREQ == 0:
@@ -1102,7 +1127,12 @@ if __name__ == '__main__':
 		party_level = sum([c.level for c in party]) / len(party)
 		monster_types_selection = [m for m in monster_types if m.level <= party_level]
 		monsters = create_sample_monsters(monster_types_selection, randint(1, max_monsters))
-		start_combat(party, monsters)
+		total_xp, total_gp = start_combat(party, monsters)
+		# Répartition des XP et Gold du combat sur personnages vivants
+		alive_chars = [c for c in party if not c.is_dead]
+		for char in alive_chars:
+			char.xp += total_xp // len(alive_chars)
+			char.gold += total_gp // len(alive_chars)
 		# end_combat_msg(party, monsters)
 
 		if all(c.is_dead for c in party):
