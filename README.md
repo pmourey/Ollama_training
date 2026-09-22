@@ -1,6 +1,4 @@
 
-### Ce projet m'a été prescrit par mon médecin pour ma cure de désintoxication à l'usage excessif des LLM pour revenir à une activité normale de codeur  lambda :-D
-
 ```
 ====================================================================================================
 DEBUG: 2024-06-17 19:30:00
