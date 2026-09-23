@@ -6,7 +6,7 @@ Ce projet est un jeu de rôle (RPG) textuel automatisé, simulant des combats en
 
 ### 1. Génération de Party
 
-Un groupe de héros est créé aléatoirement à partir de données stockées dans des fichiers JSON (`heroes.json`, `classes.json`, `races.json`, etc.).
+Un groupe de héros est créé aléatoirement à partir de données stockées dans des fichiers JSON (`data/heroes.json`, `data/classes.json`, `data/races.json`, etc.).
 Chaque héros possède :
 - Classe (Fighter, Wizard, etc.)
 - Race (Humain, Elfe, Nain, etc.)
@@ -17,7 +17,7 @@ Chaque héros possède :
 
 ### 2. Génération de Monstres
 
-Des monstres sont générés aléatoirement à partir de types définis dans `monsters.json`. 
+Des monstres sont générés aléatoirement à partir de types définis dans `data/monsters.json`. 
 Le niveau des monstres est adapté au niveau moyen du groupe de héros.
 
 Chaque monstre a :
@@ -55,12 +55,12 @@ Des statistiques sont collectées :
 Le jeu est conçu pour tourner en mode batch (sans interaction utilisateur pendant les combats). Un seul `input()` est utilisé à la fin de chaque round, si `BATCH_MODE = False`.
 
 ## 📁 Fichiers de données utilisés :
-- `monsters.json` : Définitions des types de monstres
-- `spells.json` : Sorts disponibles
-- `classes.json` : Classes et règles de sorts
-- `races.json` : Types de races
-- `weapons.json`, `armors.json`, `shields.json` : Équipements
-- `heroes.json` : Héros de départ
+- `data/monsters.json` : Définitions des types de monstres
+- `data/spells.json` : Sorts disponibles
+- `data/classes.json` : Classes et règles de sorts
+- `data/races.json` : Types de races
+- `data/weapons.json`, `data/armors.json`, `data/shields.json` : Équipements
+- `data/heroes.json` : Héros de départ
 
 ## 🧠 Objectif du Jeu :
 
