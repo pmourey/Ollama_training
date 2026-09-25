@@ -35,12 +35,12 @@ class Monster(Character):
 
 	@property
 	def armor_class(self) -> int:
-		return self.ac
+		return self.ac + self.ac_modifiers()
 
 	@property
 	def attack_bonus(self) -> int:
 		proficiency_bonus = 2 + ((self.level - 1) // 4)
-		return self.abilities.str_mod + proficiency_bonus
+		return self.abilities.str_mod + proficiency_bonus + self.attack_modifier()
 
 	def attack(self, target: Character) -> int:
 		"""Jet de dégâts (la CA gère le toucher)."""

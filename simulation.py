@@ -7,7 +7,7 @@ from typing import List
 
 import game_state
 from combat.battle import BattleSystem
-from combat.encounter import start_combat
+from combat.encounter import start_combat, monster_stats_msg
 from loaders.game_data import load_game_data
 from models.abilities import Abilities
 from models.character import Hero
@@ -177,9 +177,7 @@ def party_stats_msg(party: List[Hero], num_combats: int, killed_monsters: int) -
 			race_name = race.type.value
 		else:
 			race_name = 'Unknown'
-		spell_slots = (
-			f', Spells slots: {hero.current_spell_slots}/{hero.max_spell_slots}' if hero.spells else ''
-		)
+		spell_slots = (f', Spells slots: {hero.current_spell_slots}/{hero.max_spell_slots}' if hero.spells else '')
 		spells = '|'.join(f'{s.level}:{s.name}' for s in hero.spells)
 		print(
 			f'  {hero.name}: Lvl {hero.level} {cls_name} {race_name} '
@@ -205,40 +203,21 @@ def print_stats(killed_by_level, spells_cast) -> None:
 			print(f'Lvl {i + 1}: {nonzero}')
 
 
-def monster_stats_msg(monsters: List[Monster]) -> None:
-	print('\nMonster Status:')
-	for monster in monsters:
-		print(
-			f'  {monster.name} (Lvl {monster.level} - AC {monster.armor_class}): '
-			f'HP {monster.hp}/{monster.max_hp}'
-		)
-
-
 def run(max_combats: int = 10000, party_size: int = 6, max_monsters: int = 2) -> None:
 	"""Boucle principale de simulation batch."""
-	monster_types, spells, classes, races, weapons, armors, shields, heroes_data, spell_categories = (
-		load_game_data()
-	)
-	party = build_party_from_heroes(
-		heroes_data, spells, classes, races, weapons, armors, shields, spell_categories, party_size
-	)
+	monster_types, spells, classes, races, weapons, armors, shields, heroes_data, spell_categories = (load_game_data())
+	party = build_party_from_heroes(heroes_data, spells, classes, races, weapons, armors, shields, spell_categories, party_size)
 	if not party:
-		raise RuntimeError(
-			'Party vide : vérifie que data/heroes.json (et classes/armes/etc.) se chargent correctement.'
-		)
+		raise RuntimeError('Party vide : vérifie que data/heroes.json (et classes/armes/etc.) se chargent correctement.')
 
 	game_state.BATCH_MODE = True
-	game_state.BACK_TO_TOWN_FREQ = 10
+	game_state.BACK_TO_TOWN_FREQ = 30
 	# mutate lists in place so combat/encounter keeps the same references
 	game_state.killed_by_level.clear()
-	game_state.killed_by_level.extend(
-		[{m.name: 0 for m in monster_types if m.level == i + 1} for i in range(20)]
-	)
+	game_state.killed_by_level.extend([{m.name: 0 for m in monster_types if m.level == i + 1} for i in range(20)])
 	max_spell_level = max((s.level for s in spells), default=9)
 	game_state.spells_cast.clear()
-	game_state.spells_cast.extend(
-		[{s.name: 0 for s in spells if s.level == i} for i in range(1, max_spell_level + 1)]
-	)
+	game_state.spells_cast.extend([{s.name: 0 for s in spells if s.level == i} for i in range(1, max_spell_level + 1)])
 	BattleSystem.spells_count = 0
 
 	end_game = False

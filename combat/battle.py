@@ -61,7 +61,8 @@ class BattleSystem:
 					)
 			elif spell.effect == 'sleep':
 				target.condition = Condition.UNCONSCIOUS
-				msg = f'[Spell] {target.name} falls asleep due to {spell.name}!'
+				msg = f'[Spell] {caster.name} casts {spell.name} on {target.name}!'
+				msg += f'\n[Spell] {target.name} falls asleep due to {spell.name}!'
 			else:
 				msg = f'[Spell] {caster.name} casts {spell.name} on {target.name}!'
 			uprint(msg)
@@ -73,7 +74,7 @@ class BattleSystem:
 				damage = BattleSystem._roll_damage(attacker, defender, is_critical=True)
 				defender.hp -= damage
 				msg = (
-					f'[Weapon] {attacker.name} touche AUTOMATIQUEMENT {defender.name} '
+					f'{attacker.name} touche AUTOMATIQUEMENT {defender.name} '
 					f'(sans défense) pour un COUP CRITIQUE de {damage} dégâts !'
 				)
 			else:
@@ -91,7 +92,7 @@ class BattleSystem:
 						'perd l\'équilibre et se cogne la tête',
 					])
 					msg = (
-						f'[Weapon] ❌ ÉCHEC CRITIQUE ! {attacker.name} fait un 1 naturel... '
+						f'❌ ÉCHEC CRITIQUE ! {attacker.name} fait un 1 naturel... '
 						f'Il {action} ! Il subit {fumble_damage} dégâts.'
 					)
 					if attacker.is_dead:
@@ -100,7 +101,7 @@ class BattleSystem:
 					damage = BattleSystem._roll_damage(attacker, defender, is_critical=True)
 					defender.hp -= damage
 					msg = (
-						f'[Weapon] 🎯 COUP CRITIQUE ! {attacker.name} fait un 20 naturel '
+						f'🎯 COUP CRITIQUE ! {attacker.name} fait un 20 naturel '
 						f'et inflige {damage} dégâts à {defender.name} !'
 					)
 				elif total_attack >= ac:
