@@ -159,7 +159,7 @@ def level_up(char: Hero, spells: List[Spell]) -> None:
 	char.spells = (char.spells or []) + new_spells
 
 
-def party_stats_msg(party: List[Hero], num_combats: int, killed_monsters: int) -> None:
+def party_stats_msg(party: List[Hero], num_combats: int, killed_monsters: int, monsters=None) -> None:
 	print('=' * 100)
 	print(
 		f'STATS (Retour auberge tous les {game_state.BACK_TO_TOWN_FREQ} combats): '
@@ -188,6 +188,12 @@ def party_stats_msg(party: List[Hero], num_combats: int, killed_monsters: int) -
 			f'XP {hero.xp}, {hero.gold} gp{spell_slots} - {spells}'
 		)
 
+	if monsters:
+		print("\nMonsters:")
+		for monster in monsters:
+			print(f'  {monster.name} (Lvl {monster.level} - AC {monster.armor_class}): '
+				f'HP {monster.hp}/{monster.max_hp}')
+
 
 def print_stats(killed_by_level, spells_cast) -> None:
 	print('\nMonsters kill stats')
@@ -203,15 +209,15 @@ def print_stats(killed_by_level, spells_cast) -> None:
 			print(f'Lvl {i + 1}: {nonzero}')
 
 
-def run(max_combats: int = 10000, party_size: int = 6, max_monsters: int = 2) -> None:
+def run(max_combats: int = 10000, party_size: int = 6, max_monsters: int = 2, batch_mode: bool = True, rest_freq: int = 30) -> None:
 	"""Boucle principale de simulation batch."""
 	monster_types, spells, classes, races, weapons, armors, shields, heroes_data, spell_categories = (load_game_data())
 	party = build_party_from_heroes(heroes_data, spells, classes, races, weapons, armors, shields, spell_categories, party_size)
 	if not party:
 		raise RuntimeError('Party vide : vérifie que data/heroes.json (et classes/armes/etc.) se chargent correctement.')
 
-	game_state.BATCH_MODE = True
-	game_state.BACK_TO_TOWN_FREQ = 30
+	game_state.BATCH_MODE = batch_mode
+	game_state.BACK_TO_TOWN_FREQ = rest_freq
 	# mutate lists in place so combat/encounter keeps the same references
 	game_state.killed_by_level.clear()
 	game_state.killed_by_level.extend([{m.name: 0 for m in monster_types if m.level == i + 1} for i in range(20)])
@@ -256,7 +262,8 @@ def run(max_combats: int = 10000, party_size: int = 6, max_monsters: int = 2) ->
 			end_game = True
 		killed_monsters += len(monsters)
 
-	party_stats_msg(party, num_combats, killed_monsters)
-	if monsters:
-		monster_stats_msg(monsters)
+	for monster in monsters:
+		print(f'  {monster.name}: HP {monster.hp}/{monster.max_hp}')
+
+	party_stats_msg(party, num_combats, killed_monsters, monsters)
 	print_stats(game_state.killed_by_level, game_state.spells_cast)

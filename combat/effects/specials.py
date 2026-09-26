@@ -14,6 +14,7 @@ from models.status import ActiveEffect
 
 class ShieldSpellHandler(ShieldHandler):
 	"""Shield / Shield Wild : +5 CA, un round, comme le sort de bouclier arcanique."""
+	#ai_priority = 5
 
 	def apply(self, ctx: CastContext, target: Character) -> str:
 		target.add_effect(ActiveEffect(

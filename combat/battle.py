@@ -33,38 +33,24 @@ class BattleSystem:
 
 	@staticmethod
 	def resolve_spell_effect(caster: Hero, targets: list[Character], spell: Spell) -> None:
+		"""Delegate spell effect resolution to combat.effects registry handlers.
+
+		Builds a CastContext and calls the resolved handler.apply for each target.
+		This centralizes special-case handling implemented in combat/effects/*.
+		"""
+		from combat.effects.base import CastContext
+		from combat.effects import registry
+		from game_state import uprint
+
+		ctx = CastContext(caster=caster, spell=spell)
+		handler = registry.resolve(spell)
 		for target in targets:
-			if spell.effect == 'heal':
-				heal_amount = spell.damage_dice.roll if spell.damage_dice else 0
-				target.hp = min(target.max_hp, target.hp + heal_amount)
-				msg = f'[Spell] {caster.name} heals {target.name} for {heal_amount} HP!'
-			elif spell.effect == 'buff':
-				target.is_blessed = True
-				msg = f'[Spell] {caster.name} bless {target.name}!'
-			elif 'damage' in spell.effect:
-				damage = spell.damage_dice.roll if spell.damage_dice else 0
-				if spell.dc_type and target.saving_throw(spell.dc_type, caster.dc_value):
-					if spell.dc_success == 'half':
-						hp_loss = max(1, damage // 2)
-						target.hp -= hp_loss
-						msg = (
-							f'[Spell] {target.name} saves against {spell.name} '
-							f'and takes half damage ({hp_loss} HP)!'
-						)
-					else:
-						msg = f'[Spell] {target.name} saves against {spell.name} and takes no damage!'
-				else:
-					target.hp -= damage
-					msg = (
-						f'[Spell] {caster.name} casts {spell.name} '
-						f'and deals {damage} damage to {target.name}!'
-					)
-			elif spell.effect == 'sleep':
-				target.condition = Condition.UNCONSCIOUS
-				msg = f'[Spell] {caster.name} casts {spell.name} on {target.name}!'
-				msg += f'\n[Spell] {target.name} falls asleep due to {spell.name}!'
-			else:
-				msg = f'[Spell] {caster.name} casts {spell.name} on {target.name}!'
+			# handler may perform saves, damage, add ActiveEffect, etc.
+			try:
+					msg = handler.apply(ctx, target)
+			except Exception:
+					# Fallback to a generic message if a handler fails unexpectedly
+					msg = f'[Spell] {caster.name} casts {spell.name} on {target.name}!'
 			uprint(msg)
 
 	@staticmethod
@@ -144,29 +130,81 @@ class BattleSystem:
 
 	@staticmethod
 	def combat(attacker: Character, defender: Character, party: List[Hero]) -> None:
+		"""Decide between casting a spell or making a weapon attack.
+
+		Strategy uses effect handler metadata (ai_role, ai_status, ai_priority) to
+		rank and select spells. Handlers are resolved via registry.resolve(spell).
+
+		Algorithm (high level):
+		- collect usable spells and resolve their handlers
+		- sort spells by handler.ai_priority (lower first)
+		- consider each spell in order and test applicability based on ai_role:
+		  - heal: if any ally below threshold
+		  - buff: if not all allies have ai_status
+		  - control: if target lacks ai_status
+		  - smite: always applicable (adds effect to target)
+		  - damage: fallback when other roles not applicable
+		- if no spell chosen, perform melee attack
+		"""
+		from combat.effects import registry
+
+		# Only spellcasters (Hero) consider spells
 		if isinstance(attacker, Hero) and attacker.spells:
 			usable = [s for s in attacker.spells if attacker.can_cast_spell(s)]
 			if usable:
-				heals = [s for s in usable if s.effect == 'heal']
-				allies = [a for a in party if a.hp / a.max_hp <= 0.9]
-				if heals and allies:
-					spell = max(heals, key=lambda x: x.level * x.value)
-					attacker.cast_spell(spell, [min(allies, key=lambda a: a.hp)])
-					return
+				# pair spells with their handlers
+				pairs = [(s, registry.resolve(s)) for s in usable]
+				# sort by priority
+				pairs.sort(key=lambda sv: getattr(sv[1], 'ai_priority', 50))
 
-				buffs = [s for s in usable if s.effect == 'buff']
-				sleeps = [s for s in usable if s.effect == 'sleep']
-				damages = [s for s in usable if 'damage' in s.effect]
+				# utility predicates
+				allies = [a for a in party if a.hp > 0]
+				heal_threshold = 0.9
 
-				if buffs and not all(c.is_blessed for c in party):
-					attacker.cast_spell(buffs[0], party)
-					return
-				if sleeps and defender.condition != Condition.UNCONSCIOUS:
-					attacker.cast_spell(sleeps[0], [defender])
-					return
-				if damages:
-					spell = max(damages, key=lambda x: x.level * x.value)
-					attacker.cast_spell(spell, [defender])
-					return
+				for spell, handler in pairs:
+					role = getattr(handler, 'ai_role', 'other')
+					status = getattr(handler, 'ai_status', '')
+					# Heal if an ally is below threshold
+					if role == 'heal':
+						vulnerable = [a for a in allies if a.hp / a.max_hp <= heal_threshold]
+						if vulnerable:
+							target = min(vulnerable, key=lambda a: a.hp)
+							attacker.cast_spell(spell, [target])
+							return
+					# Buff if not everyone has the status
+					if role == 'buff':
+						if not all(getattr(a, 'is_blessed', False) for a in allies):
+							attacker.cast_spell(spell, allies)
+							return
+					# Control (condition) if defender lacks status.
+					# If the handler role indicates a control/debuff, target the defender;
+					# otherwise (buffs like shield) apply to allies who lack the status.
+					if role == 'control' or status:
+						if status:
+							if role == 'control':
+								if not defender.has_effect(status):
+									attacker.cast_spell(spell, [defender])
+									return
+							else:
+								# treat as a positive status (buff/shield) and apply to allies missing it
+								targets_missing = [a for a in allies if not a.has_effect(status)]
+								if targets_missing:
+									attacker.cast_spell(spell, targets_missing)
+									return
+						# fall through if nothing applicable
+					# Smite is applied to target (adds effect for next hit)
+					if role == 'smite':
+						attacker.cast_spell(spell, [defender])
+						return
+					# Damage fallback
+					if role == 'damage' or 'damage' in spell.effect:
+						attacker.cast_spell(spell, [defender])
+						return
+					# Shield
+					if role == 'shield':
+						target = min(party, key=lambda c: c.hp / c.armor_class)
+						attacker.cast_spell(spell, [target])
+						return
 
+		# No spell chosen or cannot cast: melee attack
 		BattleSystem.melee_attack(attacker, [defender])
