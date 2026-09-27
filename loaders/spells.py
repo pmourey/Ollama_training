@@ -43,6 +43,8 @@ class SpellLoader:
 							dc_type=dc_type,
 							dc_success=dc_success,
 							description=spell_dict.get('description', ''),
+							# JSON field multi_target: optional boolean indicating AOE
+							multi_target=spell_dict.get('multi_target', False),
 						)
 					)
 			return spells

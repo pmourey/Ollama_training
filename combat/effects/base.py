@@ -43,3 +43,12 @@ class EffectHandler:
 		if ctx.spell.dc_type and target.saving_throw(ctx.spell.dc_type, ctx.caster.dc_value):
 			return f'[Spell] {target.name} saves against {ctx.spell.name}!'
 		return None
+
+	def applicable(self, ctx: CastContext, allies: list[Character], enemies: list[Character]) -> list[Character]:
+		"""Return the list of valid targets for this spell in the current situation.
+
+		Default behaviour: single-target spell that targets the first enemy provided.
+		Handlers should override this to encapsulate applicability logic (heal, buff, area, etc.).
+		"""
+		# default: target first enemy if any
+		return [enemies[0]] if enemies else []

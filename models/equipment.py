@@ -10,7 +10,6 @@ class Armor:
 	name: str
 	bonus: int
 
-
 @dataclass
 class Weapon:
 	name: str

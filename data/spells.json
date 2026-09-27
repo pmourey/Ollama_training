@@ -11,7 +11,8 @@
           "bonus": 0
         },
         "effect": "fire damage",
-        "description": "A fiery bolt strikes the target."
+        "description": "A fiery bolt strikes the target.",
+        "multi_target": false
       },
       {
         "name": "Magic Missile",
@@ -22,14 +23,16 @@
           "bonus": 0
         },
         "effect": "force damage",
-        "description": "Three unmissable force darts."
+        "description": "Three unmissable force darts.",
+        "multi_target": false
       },
       {
         "name": "Shield",
         "level": 1,
         "damage_dice": {},
         "effect": "shield",
-        "description": "An invisible barrier that increases AC temporarily."
+        "description": "An invisible barrier that increases AC temporarily.",
+        "multi_target": false
       },
       {
         "name": "Scorching Ray",
@@ -40,7 +43,8 @@
           "bonus": 0
         },
         "effect": "fire damage",
-        "description": "Multiple fire rays shoot at targets."
+        "description": "Multiple fire rays shoot at targets.",
+        "multi_target": false
       },
       {
         "name": "Acid Arrow",
@@ -51,7 +55,8 @@
           "bonus": 0
         },
         "effect": "acid damage",
-        "description": "A magical arrow that corrodes on impact."
+        "description": "A magical arrow that corrodes on impact.",
+        "multi_target": false
       },
       {
         "name": "Blindness",
@@ -62,7 +67,8 @@
           "dc_type": "con",
           "dc_success": "none"
         },
-        "description": "Blinds a creature mentally."
+        "description": "Blinds a creature mentally.",
+        "multi_target": false
       },
       {
         "name": "Fireball",
@@ -77,7 +83,8 @@
           "dc_type": "dex",
           "dc_success": "half"
         },
-        "description": "A massive fiery explosion."
+        "description": "A massive fiery explosion.",
+        "multi_target": true
       },
       {
         "name": "Lightning Bolt",
@@ -92,7 +99,8 @@
           "dc_type": "dex",
           "dc_success": "half"
         },
-        "description": "A stroke of lightning forming a line."
+        "description": "A stroke of lightning forming a line.",
+        "multi_target": false
       },
       {
         "name": "Slow",
@@ -103,7 +111,8 @@
           "dc_type": "wis",
           "dc_success": "none"
         },
-        "description": "Alters time to slow down and weaken enemies."
+        "description": "Alters time to slow down and weaken enemies.",
+        "multi_target": false
       },
       {
         "name": "Ice Storm",
@@ -118,7 +127,8 @@
           "dc_type": "dex",
           "dc_success": "half"
         },
-        "description": "Hail stones smash from the sky."
+        "description": "Hail stones smash from the sky.",
+        "multi_target": true
       },
       {
         "name": "Blight",
@@ -133,7 +143,8 @@
           "dc_type": "con",
           "dc_success": "half"
         },
-        "description": "Necrotic energy withers a creature."
+        "description": "Necrotic energy withers a creature.",
+        "multi_target": false
       },
       {
         "name": "Phantasmal Killer",
@@ -148,7 +159,8 @@
           "dc_type": "wis",
           "dc_success": "none"
         },
-        "description": "Illusion evoking a target's deepest fears."
+        "description": "Illusion evoking a target's deepest fears.",
+        "multi_target": false
       },
       {
         "name": "Cone of Cold",
@@ -163,7 +175,8 @@
           "dc_type": "con",
           "dc_success": "half"
         },
-        "description": "A blast of cold air erupts from your hands."
+        "description": "A blast of cold air erupts from your hands.",
+        "multi_target": true
       },
       {
         "name": "Cloudkill",
@@ -178,7 +191,8 @@
           "dc_type": "con",
           "dc_success": "half"
         },
-        "description": "A poisonous fog that moves away from you."
+        "description": "A poisonous fog that moves away from you.",
+        "multi_target": true
       },
       {
         "name": "Hold Monster",
@@ -189,7 +203,8 @@
           "dc_type": "wis",
           "dc_success": "none"
         },
-        "description": "Paralyzes a creature in place."
+        "description": "Paralyzes a creature in place.",
+        "multi_target": false
       },
       {
         "name": "Disintegrate",
@@ -204,7 +219,8 @@
           "dc_type": "dex",
           "dc_success": "none"
         },
-        "description": "A green ray that turns matter to dust."
+        "description": "A green ray that turns matter to dust.",
+        "multi_target": false
       },
       {
         "name": "Chain Lightning",
@@ -219,7 +235,8 @@
           "dc_type": "dex",
           "dc_success": "half"
         },
-        "description": "Lightning strikes a target and leaps to others."
+        "description": "Lightning strikes a target and leaps to others.",
+        "multi_target": false
       },
       {
         "name": "Sunbeam",
@@ -234,7 +251,8 @@
           "dc_type": "con",
           "dc_success": "half"
         },
-        "description": "A flash of radiant light blinds and burns."
+        "description": "A flash of radiant light blinds and burns.",
+        "multi_target": false
       },
       {
         "name": "Delayed Blast Fireball",
@@ -249,7 +267,8 @@
           "dc_type": "dex",
           "dc_success": "half"
         },
-        "description": "A fireball that builds power over time."
+        "description": "A fireball that builds power over time.",
+        "multi_target": true
       },
       {
         "name": "Finger of Death",
@@ -264,7 +283,8 @@
           "dc_type": "con",
           "dc_success": "half"
         },
-        "description": "Sends negative energy to snap life force."
+        "description": "Sends negative energy to snap life force.",
+        "multi_target": false
       },
       {
         "name": "Prismatic Spray",
@@ -279,7 +299,8 @@
           "dc_type": "dex",
           "dc_success": "half"
         },
-        "description": "Eight multicolored rays flash outwards."
+        "description": "Eight multicolored rays flash outwards.",
+        "multi_target": false
       },
       {
         "name": "Sunburst",
@@ -294,7 +315,8 @@
           "dc_type": "con",
           "dc_success": "half"
         },
-        "description": "Brilliant flashing light burns and blinds area."
+        "description": "Brilliant flashing light burns and blinds area.",
+        "multi_target": true
       },
       {
         "name": "Incendiary Cloud",
@@ -309,14 +331,16 @@
           "dc_type": "dex",
           "dc_success": "half"
         },
-        "description": "A swirling cloud of white-hot embers."
+        "description": "A swirling cloud of white-hot embers.",
+        "multi_target": true
       },
       {
         "name": "Mind Blank",
         "level": 8,
         "damage_dice": {},
         "effect": "buff",
-        "description": "Protects a mind from all mental alteration."
+        "description": "Protects a mind from all mental alteration.",
+        "multi_target": false
       },
       {
         "name": "Meteor Swarm",
@@ -331,14 +355,16 @@
           "dc_type": "dex",
           "dc_success": "half"
         },
-        "description": "Blazing meteors plummet to earth."
+        "description": "Blazing meteors plummet to earth.",
+        "multi_target": false
       },
       {
         "name": "Time Stop",
         "level": 9,
         "damage_dice": {},
         "effect": "buff",
-        "description": "You stop time for brief turns."
+        "description": "You stop time for brief turns.",
+        "multi_target": false
       },
       {
         "name": "Power Word Kill",
@@ -349,7 +375,8 @@
           "bonus": 50
         },
         "effect": "force damage",
-        "description": "A word that kills a low HP entity instantly."
+        "description": "A word that kills a low HP entity instantly.",
+        "multi_target": false
       },
       {
         "name": "Arcane Cataclysm",
@@ -364,7 +391,8 @@
           "dc_type": "int",
           "dc_success": "none"
         },
-        "description": "Unleashes cosmic magic that tears reality apart."
+        "description": "Unleashes cosmic magic that tears reality apart.",
+        "multi_target": false
       },
       {
         "name": "Absolute Zero",
@@ -379,14 +407,16 @@
           "dc_type": "con",
           "dc_success": "half"
         },
-        "description": "Freezes all kinetic motion instantly."
+        "description": "Freezes all kinetic motion instantly.",
+        "multi_target": false
       },
       {
         "name": "Wish Spell",
         "level": 10,
         "damage_dice": {},
         "effect": "cleanse",
-        "description": "Rewrites the laws of combat completely."
+        "description": "Rewrites the laws of combat completely.",
+        "multi_target": false
       }
     ]
   },
@@ -402,7 +432,8 @@
           "bonus": 4
         },
         "effect": "heal",
-        "description": "Quick ranged burst heal."
+        "description": "Quick ranged burst heal.",
+        "multi_target": false
       },
       {
         "name": "Cure Wounds",
@@ -413,7 +444,8 @@
           "bonus": 4
         },
         "effect": "heal",
-        "description": "Touch heal."
+        "description": "Touch heal.",
+        "multi_target": false
       },
       {
         "name": "Guiding Bolt",
@@ -424,7 +456,8 @@
           "bonus": 0
         },
         "effect": "radiant damage",
-        "description": "Flash of light that opens target up."
+        "description": "Flash of light that opens target up.",
+        "multi_target": false
       },
       {
         "name": "Heal",
@@ -435,7 +468,8 @@
           "bonus": 4
         },
         "effect": "heal",
-        "description": "Moderate divine mending."
+        "description": "Moderate divine mending.",
+        "multi_target": false
       },
       {
         "name": "Spiritual Weapon",
@@ -446,14 +480,16 @@
           "bonus": 3
         },
         "effect": "force damage",
-        "description": "Summons a floating spectral weapon."
+        "description": "Summons a floating spectral weapon.",
+        "multi_target": false
       },
       {
         "name": "Lesser Restoration",
         "level": 2,
         "damage_dice": {},
         "effect": "cleanse",
-        "description": "Cleanses a condition or debuff."
+        "description": "Cleanses a condition or debuff.",
+        "multi_target": false
       },
       {
         "name": "Greater Heal",
@@ -464,7 +500,8 @@
           "bonus": 4
         },
         "effect": "heal",
-        "description": "Powerful light-infused healing."
+        "description": "Powerful light-infused healing.",
+        "multi_target": false
       },
       {
         "name": "Spirit Guardians",
@@ -479,7 +516,8 @@
           "dc_type": "wis",
           "dc_success": "half"
         },
-        "description": "Angels swirl around protecting the area."
+        "description": "Angels swirl around protecting the area.",
+        "multi_target": false
       },
       {
         "name": "Bestow Curse",
@@ -490,7 +528,8 @@
           "dc_type": "wis",
           "dc_success": "none"
         },
-        "description": "Afflicts a creature with a dark hex."
+        "description": "Afflicts a creature with a dark hex.",
+        "multi_target": false
       },
       {
         "name": "Sacred Radiance",
@@ -506,14 +545,16 @@
           "roll_dice": 0,
           "bonus": 0
         },
-        "description": "Divine light purges corruption."
+        "description": "Divine light purges corruption.",
+        "multi_target": false
       },
       {
         "name": "Death Ward",
         "level": 4,
         "damage_dice": {},
         "effect": "buff",
-        "description": "Ward protecting against fatal damage once."
+        "description": "Ward protecting against fatal damage once.",
+        "multi_target": false
       },
       {
         "name": "Guardian of Faith",
@@ -524,7 +565,8 @@
           "bonus": 0
         },
         "effect": "radiant damage",
-        "description": "A spectral sentinel strikes invaders."
+        "description": "A spectral sentinel strikes invaders.",
+        "multi_target": false
       },
       {
         "name": "Mass Cure Wounds",
@@ -535,7 +577,8 @@
           "bonus": 5
         },
         "effect": "heal",
-        "description": "Healing wave over all allies."
+        "description": "Healing wave over all allies.",
+        "multi_target": true
       },
       {
         "name": "Flame Strike",
@@ -550,7 +593,8 @@
           "dc_type": "dex",
           "dc_success": "half"
         },
-        "description": "Vertical column of fire roars down."
+        "description": "Vertical column of fire roars down.",
+        "multi_target": false
       },
       {
         "name": "Insect Plague",
@@ -565,7 +609,8 @@
           "dc_type": "con",
           "dc_success": "half"
         },
-        "description": "Swarm of biting locusts hits the zone."
+        "description": "Swarm of biting locusts hits the zone.",
+        "multi_target": false
       },
       {
         "name": "Harm",
@@ -580,7 +625,8 @@
           "dc_type": "con",
           "dc_success": "half"
         },
-        "description": "Devastating disease inflicts dark wounds."
+        "description": "Devastating disease inflicts dark wounds.",
+        "multi_target": false
       },
       {
         "name": "Heal Divine",
@@ -591,7 +637,8 @@
           "bonus": 20
         },
         "effect": "heal",
-        "description": "Massive top tier flat health injection."
+        "description": "Massive top tier flat health injection.",
+        "multi_target": false
       },
       {
         "name": "Blade Barrier",
@@ -606,7 +653,8 @@
           "dc_type": "dex",
           "dc_success": "half"
         },
-        "description": "Wall of spinning, razor-sharp blades."
+        "description": "Wall of spinning, razor-sharp blades.",
+        "multi_target": false
       },
       {
         "name": "Divine Word",
@@ -621,14 +669,16 @@
           "dc_type": "cha",
           "dc_success": "none"
         },
-        "description": "Utterance of power that crushes infidels."
+        "description": "Utterance of power that crushes infidels.",
+        "multi_target": false
       },
       {
         "name": "Resurrection",
         "level": 7,
         "damage_dice": {},
         "effect": "cleanse",
-        "description": "Brings back a dead target to life."
+        "description": "Brings back a dead target to life.",
+        "multi_target": false
       },
       {
         "name": "Fire of Judgment",
@@ -639,14 +689,16 @@
           "bonus": 10
         },
         "effect": "fire damage",
-        "description": "Purging fire that filters out holy entities."
+        "description": "Purging fire that filters out holy entities.",
+        "multi_target": false
       },
       {
         "name": "Holy Aura",
         "level": 8,
         "damage_dice": {},
         "effect": "shield",
-        "description": "Divine protection blocks evil attacks."
+        "description": "Divine protection blocks evil attacks.",
+        "multi_target": false
       },
       {
         "name": "Earthquake",
@@ -661,7 +713,8 @@
           "dc_type": "dex",
           "dc_success": "half"
         },
-        "description": "Tremors tear down obstacles."
+        "description": "Tremors tear down obstacles.",
+        "multi_target": false
       },
       {
         "name": "Unholy Blight",
@@ -672,7 +725,8 @@
           "bonus": 8
         },
         "effect": "necrotic damage",
-        "description": "Corrupts the battlefield ground."
+        "description": "Corrupts the battlefield ground.",
+        "multi_target": false
       },
       {
         "name": "Mass Heal",
@@ -683,14 +737,16 @@
           "bonus": 50
         },
         "effect": "heal",
-        "description": "Flood of light fully restores party health."
+        "description": "Flood of light fully restores party health.",
+        "multi_target": true
       },
       {
         "name": "Gate",
         "level": 9,
         "damage_dice": {},
         "effect": "buff",
-        "description": "Opens a dimensional rift to request aid."
+        "description": "Opens a dimensional rift to request aid.",
+        "multi_target": false
       },
       {
         "name": "Storm of Judgment",
@@ -701,7 +757,8 @@
           "bonus": 0
         },
         "effect": "radiant damage",
-        "description": "Meteorite-like light shower falls down."
+        "description": "Meteorite-like light shower falls down.",
+        "multi_target": true
       },
       {
         "name": "Avatar of the Deities",
@@ -712,14 +769,16 @@
           "bonus": 20
         },
         "effect": "radiant damage",
-        "description": "Direct divine manifestation smites all foes."
+        "description": "Direct divine manifestation smites all foes.",
+        "multi_target": false
       },
       {
         "name": "Absolute Salvation",
         "level": 10,
         "damage_dice": {},
         "effect": "cleanse",
-        "description": "Immunity to all debuffs and 100% group heal."
+        "description": "Immunity to all debuffs and 100% group heal.",
+        "multi_target": false
       },
       {
         "name": "Eldritch Purge",
@@ -730,7 +789,8 @@
           "bonus": 30
         },
         "effect": "necrotic damage",
-        "description": "Sacrifices light to unleash terrible cosmic dark energy."
+        "description": "Sacrifices light to unleash terrible cosmic dark energy.",
+        "multi_target": false
       }
     ]
   },
@@ -742,7 +802,8 @@
         "level": 1,
         "damage_dice": {},
         "effect": "sleep",
-        "description": "Puts targets into temporary magical slumber."
+        "description": "Puts targets into temporary magical slumber.",
+        "multi_target": false
       },
       {
         "name": "Dissonant Whispers",
@@ -757,7 +818,8 @@
           "dc_type": "wis",
           "dc_success": "half"
         },
-        "description": "Whispers that induce heavy mental pain."
+        "description": "Whispers that induce heavy mental pain.",
+        "multi_target": false
       },
       {
         "name": "Healing Word",
@@ -768,7 +830,8 @@
           "bonus": 2
         },
         "effect": "heal",
-        "description": "A witty song that acts as a fast heal."
+        "description": "A witty song that acts as a fast heal.",
+        "multi_target": false
       },
       {
         "name": "Vicious Mockery",
@@ -783,7 +846,8 @@
           "dc_type": "wis",
           "dc_success": "none"
         },
-        "description": "Insults so heavy they cause actual damage."
+        "description": "Insults so heavy they cause actual damage.",
+        "multi_target": false
       },
       {
         "name": "Shatter",
@@ -798,14 +862,16 @@
           "dc_type": "con",
           "dc_success": "half"
         },
-        "description": "Sonic boom that shatters armor and focus."
+        "description": "Sonic boom that shatters armor and focus.",
+        "multi_target": false
       },
       {
         "name": "Calm Emotions",
         "level": 2,
         "damage_dice": {},
         "effect": "cleanse",
-        "description": "Suppresses mental control effects."
+        "description": "Suppresses mental control effects.",
+        "multi_target": false
       },
       {
         "name": "Hypnotic Pattern",
@@ -816,7 +882,8 @@
           "dc_type": "wis",
           "dc_success": "none"
         },
-        "description": "Twisting pattern of colors incapacitates targets."
+        "description": "Twisting pattern of colors incapacitates targets.",
+        "multi_target": false
       },
       {
         "name": "Fear",
@@ -827,7 +894,8 @@
           "dc_type": "wis",
           "dc_success": "none"
         },
-        "description": "Projects nightmarish phantoms."
+        "description": "Projects nightmarish phantoms.",
+        "multi_target": false
       },
       {
         "name": "Stinking Cloud",
@@ -838,7 +906,8 @@
           "dc_type": "con",
           "dc_success": "none"
         },
-        "description": "Disgusting gas blinds and chokes targets."
+        "description": "Disgusting gas blinds and chokes targets.",
+        "multi_target": true
       },
       {
         "name": "Compulsive Dance",
@@ -849,7 +918,8 @@
           "dc_type": "wis",
           "dc_success": "none"
         },
-        "description": "Forces targets to skip loops dance style."
+        "description": "Forces targets to skip loops dance style.",
+        "multi_target": false
       },
       {
         "name": "Confusion",
@@ -860,7 +930,8 @@
           "dc_type": "wis",
           "dc_success": "none"
         },
-        "description": "Scrambles minds making actions erratic."
+        "description": "Scrambles minds making actions erratic.",
+        "multi_target": false
       },
       {
         "name": "Shout of Discord",
@@ -871,7 +942,8 @@
           "bonus": 0
         },
         "effect": "thunder damage",
-        "description": "Disruptive shriek harms balance."
+        "description": "Disruptive shriek harms balance.",
+        "multi_target": false
       },
       {
         "name": "Synaptic Static",
@@ -886,7 +958,8 @@
           "dc_type": "int",
           "dc_success": "half"
         },
-        "description": "A psychic explosion that scrambled analytical thoughts."
+        "description": "A psychic explosion that scrambled analytical thoughts.",
+        "multi_target": false
       },
       {
         "name": "Hold Monster",
@@ -897,7 +970,8 @@
           "dc_type": "wis",
           "dc_success": "none"
         },
-        "description": "Captivates an enemy keeping it frozen."
+        "description": "Captivates an enemy keeping it frozen.",
+        "multi_target": false
       },
       {
         "name": "Mass Cure Wounds",
@@ -908,7 +982,8 @@
           "bonus": 3
         },
         "effect": "heal",
-        "description": "Enchanting melody mends all friendly players."
+        "description": "Enchanting melody mends all friendly players.",
+        "multi_target": true
       },
       {
         "name": "Shout of Triumph",
@@ -923,7 +998,8 @@
           "dc_type": "con",
           "dc_success": "half"
         },
-        "description": "Booming blast pushes targets back and breaks walls."
+        "description": "Booming blast pushes targets back and breaks walls.",
+        "multi_target": false
       },
       {
         "name": "Eyebite",
@@ -934,14 +1010,16 @@
           "dc_type": "wis",
           "dc_success": "none"
         },
-        "description": "Your eyes terrify or put targets to sleep."
+        "description": "Your eyes terrify or put targets to sleep.",
+        "multi_target": false
       },
       {
         "name": "Otto's Irresistible Dance",
         "level": 6,
         "damage_dice": {},
         "effect": "paralyze",
-        "description": "Inescapable dance locks any entity."
+        "description": "Inescapable dance locks any entity.",
+        "multi_target": false
       },
       {
         "name": "Power Word: Pain",
@@ -952,14 +1030,16 @@
           "bonus": 10
         },
         "effect": "psychic damage",
-        "description": "Spoken word induces devastating pain waves."
+        "description": "Spoken word induces devastating pain waves.",
+        "multi_target": false
       },
       {
         "name": "Ethereal Melody",
         "level": 7,
         "damage_dice": {},
         "effect": "shield",
-        "description": "Sings an ethereal rhythm shifting party into safety."
+        "description": "Sings an ethereal rhythm shifting party into safety.",
+        "multi_target": false
       },
       {
         "name": "Regenerate",
@@ -970,7 +1050,8 @@
           "bonus": 15
         },
         "effect": "heal",
-        "description": "Slow, powerful ongoing health regeneration."
+        "description": "Slow, powerful ongoing health regeneration.",
+        "multi_target": false
       },
       {
         "name": "Feeblemind",
@@ -985,21 +1066,24 @@
           "dc_type": "int",
           "dc_success": "none"
         },
-        "description": "Shatters intelligence leaving target incompetent."
+        "description": "Shatters intelligence leaving target incompetent.",
+        "multi_target": false
       },
       {
         "name": "Power Word: Stun",
         "level": 8,
         "damage_dice": {},
         "effect": "paralyze",
-        "description": "Stuns target immediately if low health."
+        "description": "Stuns target immediately if low health.",
+        "multi_target": false
       },
       {
         "name": "Mind Blank",
         "level": 8,
         "damage_dice": {},
         "effect": "buff",
-        "description": "Full immunities to thought manipulation."
+        "description": "Full immunities to thought manipulation.",
+        "multi_target": false
       },
       {
         "name": "Psychic Scream",
@@ -1014,14 +1098,16 @@
           "dc_type": "int",
           "dc_success": "half"
         },
-        "description": "Explodes enemy heads mentally."
+        "description": "Explodes enemy heads mentally.",
+        "multi_target": false
       },
       {
         "name": "Foresight",
         "level": 9,
         "damage_dice": {},
         "effect": "buff",
-        "description": "Gives flawless prescience combat advantage."
+        "description": "Gives flawless prescience combat advantage.",
+        "multi_target": false
       },
       {
         "name": "Power Word Kill",
@@ -1032,7 +1118,8 @@
           "bonus": 50
         },
         "effect": "force damage",
-        "description": "Final musical rest that shuts down life."
+        "description": "Final musical rest that shuts down life.",
+        "multi_target": false
       },
       {
         "name": "Grand Finale",
@@ -1043,7 +1130,8 @@
           "bonus": 10
         },
         "effect": "thunder damage",
-        "description": "Symphony so high it collapses internal bodies."
+        "description": "Symphony so high it collapses internal bodies.",
+        "multi_target": false
       },
       {
         "name": " Cacophony of Pandemonium",
@@ -1054,14 +1142,16 @@
           "bonus": 20
         },
         "effect": "psychic damage",
-        "description": "Unleashes madness onto the field."
+        "description": "Unleashes madness onto the field.",
+        "multi_target": false
       },
       {
         "name": "Requiem of Eternity",
         "level": 10,
         "damage_dice": {},
         "effect": "paralyze",
-        "description": "Ultimate song freezes the entire enemy team indefinitely."
+        "description": "Ultimate song freezes the entire enemy team indefinitely.",
+        "multi_target": false
       }
     ]
   },
@@ -1077,7 +1167,8 @@
           "bonus": 0
         },
         "effect": "cold damage",
-        "description": "Piercing elemental icicle throw."
+        "description": "Piercing elemental icicle throw.",
+        "multi_target": false
       },
       {
         "name": "Entangle",
@@ -1088,7 +1179,8 @@
           "dc_type": "str",
           "dc_success": "none"
         },
-        "description": "Vines grab target ankles."
+        "description": "Vines grab target ankles.",
+        "multi_target": false
       },
       {
         "name": "Cure Wounds",
@@ -1099,7 +1191,8 @@
           "bonus": 2
         },
         "effect": "heal",
-        "description": "Nature touch healing."
+        "description": "Nature touch healing.",
+        "multi_target": false
       },
       {
         "name": "Flame Blade",
@@ -1110,7 +1203,8 @@
           "bonus": 0
         },
         "effect": "fire damage",
-        "description": "Summons a fiery beam sword."
+        "description": "Summons a fiery beam sword.",
+        "multi_target": false
       },
       {
         "name": "Moonbeam",
@@ -1125,7 +1219,8 @@
           "dc_type": "con",
           "dc_success": "half"
         },
-        "description": "Silver light shines burning monsters."
+        "description": "Silver light shines burning monsters.",
+        "multi_target": false
       },
       {
         "name": "Healing Spirit",
@@ -1136,7 +1231,8 @@
           "bonus": 2
         },
         "effect": "heal",
-        "description": "Nature spirit heals zone walkers."
+        "description": "Nature spirit heals zone walkers.",
+        "multi_target": false
       },
       {
         "name": "Call Lightning",
@@ -1151,7 +1247,8 @@
           "dc_type": "dex",
           "dc_success": "half"
         },
-        "description": "Storm strikes specific enemies."
+        "description": "Storm strikes specific enemies.",
+        "multi_target": false
       },
       {
         "name": "Erupting Earth",
@@ -1166,14 +1263,16 @@
           "dc_type": "dex",
           "dc_success": "half"
         },
-        "description": "Rocks explode outward."
+        "description": "Rocks explode outward.",
+        "multi_target": false
       },
       {
         "name": "Dispel Magic",
         "level": 3,
         "damage_dice": {},
         "effect": "cleanse",
-        "description": "Dissolves active magical effects."
+        "description": "Dissolves active magical effects.",
+        "multi_target": false
       },
       {
         "name": "Ice Storm",
@@ -1184,7 +1283,8 @@
           "bonus": 0
         },
         "effect": "cold damage",
-        "description": "Freezing slush drops down."
+        "description": "Freezing slush drops down.",
+        "multi_target": true
       },
       {
         "name": "Blight",
@@ -1195,14 +1295,16 @@
           "bonus": 0
         },
         "effect": "necrotic damage",
-        "description": "Drains the inner moisture of entities."
+        "description": "Drains the inner moisture of entities.",
+        "multi_target": false
       },
       {
         "name": "Grasping Vine",
         "level": 4,
         "damage_dice": {},
         "effect": "paralyze",
-        "description": "Giant tentacle root ties target up."
+        "description": "Giant tentacle root ties target up.",
+        "multi_target": false
       },
       {
         "name": "Insect Plague",
@@ -1213,7 +1315,8 @@
           "bonus": 0
         },
         "effect": "poison damage",
-        "description": "Locust clouds eat flesh and poison health."
+        "description": "Locust clouds eat flesh and poison health.",
+        "multi_target": false
       },
       {
         "name": "Wrath of Nature",
@@ -1224,14 +1327,16 @@
           "bonus": 0
         },
         "effect": "thunder damage",
-        "description": "Trees and rocks slap enemies."
+        "description": "Trees and rocks slap enemies.",
+        "multi_target": false
       },
       {
         "name": "Antilife Shell",
         "level": 5,
         "damage_dice": {},
         "effect": "shield",
-        "description": "Barrier prevents living monsters from coming close."
+        "description": "Barrier prevents living monsters from coming close.",
+        "multi_target": false
       },
       {
         "name": "Sunbeam",
@@ -1242,7 +1347,8 @@
           "bonus": 0
         },
         "effect": "radiant damage",
-        "description": "Blinds and disintegrates with pure sun."
+        "description": "Blinds and disintegrates with pure sun.",
+        "multi_target": false
       },
       {
         "name": "Wall of Thorns",
@@ -1253,7 +1359,8 @@
           "bonus": 0
         },
         "effect": "acid damage",
-        "description": "Sharp roots secrete acid burns."
+        "description": "Sharp roots secrete acid burns.",
+        "multi_target": false
       },
       {
         "name": "Heal Nature",
@@ -1264,7 +1371,8 @@
           "bonus": 0
         },
         "effect": "heal",
-        "description": "Earth core energy patches vital points."
+        "description": "Earth core energy patches vital points.",
+        "multi_target": false
       },
       {
         "name": "Fire Storm",
@@ -1275,14 +1383,16 @@
           "bonus": 0
         },
         "effect": "fire damage",
-        "description": "Flames cover widespread encounter tiles."
+        "description": "Flames cover widespread encounter tiles.",
+        "multi_target": true
       },
       {
         "name": "Reverse Gravity",
         "level": 7,
         "damage_dice": {},
         "effect": "disadvantage",
-        "description": "Flips physics to disorient enemies."
+        "description": "Flips physics to disorient enemies.",
+        "multi_target": false
       },
       {
         "name": "Whirlwind",
@@ -1293,7 +1403,8 @@
           "bonus": 0
         },
         "effect": "thunder damage",
-        "description": "Tornado catches and smashes bodies."
+        "description": "Tornado catches and smashes bodies.",
+        "multi_target": false
       },
       {
         "name": "Earthquake",
@@ -1304,7 +1415,8 @@
           "bonus": 0
         },
         "effect": "thunder damage",
-        "description": "Ground shakes collapsing armor structures."
+        "description": "Ground shakes collapsing armor structures.",
+        "multi_target": false
       },
       {
         "name": "Sunburst",
@@ -1315,14 +1427,16 @@
           "bonus": 0
         },
         "effect": "radiant damage",
-        "description": "Sun explosion purges darkness."
+        "description": "Sun explosion purges darkness.",
+        "multi_target": true
       },
       {
         "name": "Animal Shapes",
         "level": 8,
         "damage_dice": {},
         "effect": "buff",
-        "description": "Transforms party into mighty mythical beasts."
+        "description": "Transforms party into mighty mythical beasts.",
+        "multi_target": false
       },
       {
         "name": "Storm of Vengeance",
@@ -1333,21 +1447,24 @@
           "bonus": 12
         },
         "effect": "lightning damage",
-        "description": "Acid rain mixed with lightning storm."
+        "description": "Acid rain mixed with lightning storm.",
+        "multi_target": true
       },
       {
         "name": "Shapechange",
         "level": 9,
         "damage_dice": {},
         "effect": "buff",
-        "description": "Player gains a massive boss statblock form."
+        "description": "Player gains a massive boss statblock form.",
+        "multi_target": false
       },
       {
         "name": "Foresight Nature",
         "level": 9,
         "damage_dice": {},
         "effect": "shield",
-        "description": "Winds tell you where danger comes from."
+        "description": "Winds tell you where danger comes from.",
+        "multi_target": false
       },
       {
         "name": "Nature's Judgment",
@@ -1358,7 +1475,8 @@
           "bonus": 0
         },
         "effect": "acid damage",
-        "description": "Volcanic moss completely dissolves target."
+        "description": "Volcanic moss completely dissolves target.",
+        "multi_target": false
       },
       {
         "name": "Primal Cataclysm",
@@ -1369,14 +1487,16 @@
           "bonus": 0
         },
         "effect": "thunder damage",
-        "description": "Continental plate shift breaks bones."
+        "description": "Continental plate shift breaks bones.",
+        "multi_target": false
       },
       {
         "name": "Gaia's Blessing",
         "level": 10,
         "damage_dice": {},
         "effect": "cleanse",
-        "description": "The earth cures all ailments completely."
+        "description": "The earth cures all ailments completely.",
+        "multi_target": false
       }
     ]
   },
@@ -1392,7 +1512,8 @@
           "bonus": 0
         },
         "effect": "force damage",
-        "description": "Homing sparks of pure energy."
+        "description": "Homing sparks of pure energy.",
+        "multi_target": false
       },
       {
         "name": "Burning Hands",
@@ -1407,14 +1528,16 @@
           "dc_type": "dex",
           "dc_success": "half"
         },
-        "description": "Cone of wild raw flames."
+        "description": "Cone of wild raw flames.",
+        "multi_target": false
       },
       {
         "name": "Shield Wild",
         "level": 1,
         "damage_dice": {},
         "effect": "shield",
-        "description": "Flashes barrier protection."
+        "description": "Flashes barrier protection.",
+        "multi_target": false
       },
       {
         "name": "Shatter",
@@ -1425,7 +1548,8 @@
           "bonus": 0
         },
         "effect": "thunder damage",
-        "description": "Loud ringing explosion breaks items."
+        "description": "Loud ringing explosion breaks items.",
+        "multi_target": false
       },
       {
         "name": "Scorching Ray",
@@ -1436,7 +1560,8 @@
           "bonus": 0
         },
         "effect": "fire damage",
-        "description": "Multiple fiery bolts fly out."
+        "description": "Multiple fiery bolts fly out.",
+        "multi_target": false
       },
       {
         "name": "Melf's Minute Meteors",
@@ -1447,7 +1572,8 @@
           "bonus": 0
         },
         "effect": "fire damage",
-        "description": "Tiny floating magma bits attack."
+        "description": "Tiny floating magma bits attack.",
+        "multi_target": false
       },
       {
         "name": "Lightning Bolt",
@@ -1458,7 +1584,8 @@
           "bonus": 0
         },
         "effect": "lightning damage",
-        "description": "Fires a sharp line of electricity."
+        "description": "Fires a sharp line of electricity.",
+        "multi_target": false
       },
       {
         "name": "Fireball Wild",
@@ -1469,14 +1596,16 @@
           "bonus": 0
         },
         "effect": "fire damage",
-        "description": "Arcane massive explosion boom."
+        "description": "Arcane massive explosion boom.",
+        "multi_target": true
       },
       {
         "name": "Haste",
         "level": 3,
         "damage_dice": {},
         "effect": "buff",
-        "description": "Gives double actions and extra turn speed."
+        "description": "Gives double actions and extra turn speed.",
+        "multi_target": false
       },
       {
         "name": "Vitriolic Sphere",
@@ -1487,7 +1616,8 @@
           "bonus": 0
         },
         "effect": "acid damage",
-        "description": "Corrosive plasma splash ball."
+        "description": "Corrosive plasma splash ball.",
+        "multi_target": false
       },
       {
         "name": "Ice Storm Sorcery",
@@ -1498,7 +1628,8 @@
           "bonus": 0
         },
         "effect": "cold damage",
-        "description": "Freezing hail blasts down."
+        "description": "Freezing hail blasts down.",
+        "multi_target": true
       },
       {
         "name": "Blight Force",
@@ -1509,7 +1640,8 @@
           "bonus": 0
         },
         "effect": "necrotic damage",
-        "description": "Raw unholy cells rot away blood."
+        "description": "Raw unholy cells rot away blood.",
+        "multi_target": false
       },
       {
         "name": "Immolation",
@@ -1520,7 +1652,8 @@
           "bonus": 0
         },
         "effect": "fire damage",
-        "description": "Ignites internal soul burning inside out."
+        "description": "Ignites internal soul burning inside out.",
+        "multi_target": false
       },
       {
         "name": "Cone of Cold Sorcery",
@@ -1531,14 +1664,16 @@
           "bonus": 0
         },
         "effect": "cold damage",
-        "description": "Frosty heavy ice mist flow."
+        "description": "Frosty heavy ice mist flow.",
+        "multi_target": true
       },
       {
         "name": "Hold Monster Wild",
         "level": 5,
         "damage_dice": {},
         "effect": "paralyze",
-        "description": "Raw charisma forces entity down."
+        "description": "Raw charisma forces entity down.",
+        "multi_target": false
       },
       {
         "name": "Chain Lightning Sorcery",
@@ -1549,7 +1684,8 @@
           "bonus": 0
         },
         "effect": "lightning damage",
-        "description": "Electricity chains across all close mobs."
+        "description": "Electricity chains across all close mobs.",
+        "multi_target": false
       },
       {
         "name": "Disintegrate Wild",
@@ -1560,7 +1696,8 @@
           "bonus": 40
         },
         "effect": "force damage",
-        "description": "Melts bones with chaotic space power."
+        "description": "Melts bones with chaotic space power.",
+        "multi_target": false
       },
       {
         "name": "Sunbeam Wild",
@@ -1571,7 +1708,8 @@
           "bonus": 0
         },
         "effect": "radiant damage",
-        "description": "Focuses cosmic starlight burn."
+        "description": "Focuses cosmic starlight burn.",
+        "multi_target": false
       },
       {
         "name": "Prismatic Spray Sorcery",
@@ -1582,7 +1720,8 @@
           "bonus": 0
         },
         "effect": "radiant damage",
-        "description": "Chaotic spectrum beam blasts everything."
+        "description": "Chaotic spectrum beam blasts everything.",
+        "multi_target": false
       },
       {
         "name": "Delayed Fireball",
@@ -1593,7 +1732,8 @@
           "bonus": 0
         },
         "effect": "fire damage",
-        "description": "Magma orbs sit ready to pop."
+        "description": "Magma orbs sit ready to pop.",
+        "multi_target": true
       },
       {
         "name": "Finger of Ruin",
@@ -1604,7 +1744,8 @@
           "bonus": 30
         },
         "effect": "necrotic damage",
-        "description": "Death touch kills raw code elements."
+        "description": "Death touch kills raw code elements.",
+        "multi_target": false
       },
       {
         "name": "Incendiary Cloud Sorcery",
@@ -1615,7 +1756,8 @@
           "bonus": 0
         },
         "effect": "fire damage",
-        "description": "Blazing fog smoke fills maps."
+        "description": "Blazing fog smoke fills maps.",
+        "multi_target": true
       },
       {
         "name": "Sunburst Wild",
@@ -1626,14 +1768,16 @@
           "bonus": 0
         },
         "effect": "radiant damage",
-        "description": "Supernova burst cooks targets."
+        "description": "Supernova burst cooks targets.",
+        "multi_target": true
       },
       {
         "name": "Power Word Stun Sorcery",
         "level": 8,
         "damage_dice": {},
         "effect": "paralyze",
-        "description": "Chaotic yell shocks mind processes."
+        "description": "Chaotic yell shocks mind processes.",
+        "multi_target": false
       },
       {
         "name": "Meteor Swarm Sorcery",
@@ -1644,14 +1788,16 @@
           "bonus": 0
         },
         "effect": "fire damage",
-        "description": "Calls planetary crust parts down."
+        "description": "Calls planetary crust parts down.",
+        "multi_target": false
       },
       {
         "name": "Wish Wild",
         "level": 9,
         "damage_dice": {},
         "effect": "buff",
-        "description": "Garners any buff slot instant execution."
+        "description": "Garners any buff slot instant execution.",
+        "multi_target": false
       },
       {
         "name": "Power Word Kill Sorcery",
@@ -1662,7 +1808,8 @@
           "bonus": 50
         },
         "effect": "force damage",
-        "description": "A snap that cancels life lines."
+        "description": "A snap that cancels life lines.",
+        "multi_target": false
       },
       {
         "name": "Chaos Overload",
@@ -1673,7 +1820,8 @@
           "bonus": 10
         },
         "effect": "force damage",
-        "description": "Converts pure raw magic fonts directly to extreme damage."
+        "description": "Converts pure raw magic fonts directly to extreme damage.",
+        "multi_target": false
       },
       {
         "name": "Annihilation Ray",
@@ -1684,7 +1832,8 @@
           "bonus": 0
         },
         "effect": "necrotic damage",
-        "description": "Dark cosmic rays dissolve cells."
+        "description": "Dark cosmic rays dissolve cells.",
+        "multi_target": false
       },
       {
         "name": "Elemental Singularity",
@@ -1695,7 +1844,8 @@
           "bonus": 0
         },
         "effect": "acid damage",
-        "description": "Black hole made of toxic materials draws targets."
+        "description": "Black hole made of toxic materials draws targets.",
+        "multi_target": false
       }
     ]
   },
@@ -1707,7 +1857,8 @@
         "level": 1,
         "damage_dice": {},
         "effect": "buff",
-        "description": "Holy prayers grant team bonus dice."
+        "description": "Holy prayers grant team bonus dice.",
+        "multi_target": false
       },
       {
         "name": "Cure Wounds Light",
@@ -1718,7 +1869,8 @@
           "bonus": 2
         },
         "effect": "heal",
-        "description": "Minor lay on hands heal."
+        "description": "Minor lay on hands heal.",
+        "multi_target": false
       },
       {
         "name": "Searing Smite",
@@ -1729,7 +1881,8 @@
           "bonus": 0
         },
         "effect": "fire damage",
-        "description": "Sets active weapon ablaze."
+        "description": "Sets active weapon ablaze.",
+        "multi_target": false
       },
       {
         "name": "Divine Smite",
@@ -1740,7 +1893,8 @@
           "bonus": 0
         },
         "effect": "radiant damage",
-        "description": "Infuses blade with raw holy fire."
+        "description": "Infuses blade with raw holy fire.",
+        "multi_target": false
       },
       {
         "name": "Thunderous Smite",
@@ -1751,14 +1905,16 @@
           "bonus": 0
         },
         "effect": "thunder damage",
-        "description": "Attack rings with loud force knocking back."
+        "description": "Attack rings with loud force knocking back.",
+        "multi_target": false
       },
       {
         "name": "Shield of Faith",
         "level": 2,
         "damage_dice": {},
         "effect": "shield",
-        "description": "Gains massive faith protection to AC."
+        "description": "Gains massive faith protection to AC.",
+        "multi_target": false
       },
       {
         "name": "Blinding Smite",
@@ -1773,7 +1929,8 @@
           "dc_type": "con",
           "dc_success": "none"
         },
-        "description": "Flashes blade out to blind target eyes."
+        "description": "Flashes blade out to blind target eyes.",
+        "multi_target": false
       },
       {
         "name": "Elemental Smite",
@@ -1784,21 +1941,24 @@
           "bonus": 0
         },
         "effect": "cold damage",
-        "description": "Coats sword edge with chilling frost."
+        "description": "Coats sword edge with chilling frost.",
+        "multi_target": false
       },
       {
         "name": "Revivify",
         "level": 3,
         "damage_dice": {},
         "effect": "cleanse",
-        "description": "Saves a recently dead party ally."
+        "description": "Saves a recently dead party ally.",
+        "multi_target": false
       },
       {
         "name": "Aura of Life",
         "level": 4,
         "damage_dice": {},
         "effect": "buff",
-        "description": "Radiant shield protects team from dark rot."
+        "description": "Radiant shield protects team from dark rot.",
+        "multi_target": false
       },
       {
         "name": "Staggering Smite",
@@ -1809,14 +1969,16 @@
           "bonus": 0
         },
         "effect": "psychic damage",
-        "description": "Sword hits mind lines directly causing stupor."
+        "description": "Sword hits mind lines directly causing stupor.",
+        "multi_target": false
       },
       {
         "name": "Death Ward Faith",
         "level": 4,
         "damage_dice": {},
         "effect": "buff",
-        "description": "Angels prevent health dropping to zero."
+        "description": "Angels prevent health dropping to zero.",
+        "multi_target": false
       },
       {
         "name": "Destructive Wave",
@@ -1831,7 +1993,8 @@
           "dc_type": "str",
           "dc_success": "half"
         },
-        "description": "Stomps floor creating grand sonic shocks."
+        "description": "Stomps floor creating grand sonic shocks.",
+        "multi_target": false
       },
       {
         "name": "Banishing Smite",
@@ -1842,7 +2005,8 @@
           "bonus": 0
         },
         "effect": "force damage",
-        "description": "Crits so hard it sends target into empty zones."
+        "description": "Crits so hard it sends target into empty zones.",
+        "multi_target": false
       },
       {
         "name": "Holy Cure Wounds",
@@ -1853,7 +2017,8 @@
           "bonus": 5
         },
         "effect": "heal",
-        "description": "Major paladin health restore."
+        "description": "Major paladin health restore.",
+        "multi_target": false
       },
       {
         "name": "Holy Cleave",
@@ -1864,14 +2029,16 @@
           "bonus": 5
         },
         "effect": "radiant damage",
-        "description": "Wide sword swing purges low demons."
+        "description": "Wide sword swing purges low demons.",
+        "multi_target": false
       },
       {
         "name": "Aura of Devotion",
         "level": 6,
         "damage_dice": {},
         "effect": "cleanse",
-        "description": "Breaks sleep and mind-charms nearby."
+        "description": "Breaks sleep and mind-charms nearby.",
+        "multi_target": false
       },
       {
         "name": "Chilling Smite",
@@ -1882,14 +2049,16 @@
           "bonus": 0
         },
         "effect": "cold damage",
-        "description": "Freezes target joints with an attack."
+        "description": "Freezes target joints with an attack.",
+        "multi_target": false
       },
       {
         "name": "Shield of Valor",
         "level": 7,
         "damage_dice": {},
         "effect": "shield",
-        "description": "Grand light aura scales user armor stats."
+        "description": "Grand light aura scales user armor stats.",
+        "multi_target": false
       },
       {
         "name": "Radiant Weapon",
@@ -1900,7 +2069,8 @@
           "bonus": 4
         },
         "effect": "radiant damage",
-        "description": "Sword burns ongoing bright energy loops."
+        "description": "Sword burns ongoing bright energy loops.",
+        "multi_target": false
       },
       {
         "name": "Acidic Vow",
@@ -1911,21 +2081,24 @@
           "bonus": 0
         },
         "effect": "acid damage",
-        "description": "Corrosive layer coats weapon edge."
+        "description": "Corrosive layer coats weapon edge.",
+        "multi_target": false
       },
       {
         "name": "Cleansing Touch",
         "level": 8,
         "damage_dice": {},
         "effect": "cleanse",
-        "description": "Dissolves active detrimental states."
+        "description": "Dissolves active detrimental states.",
+        "multi_target": false
       },
       {
         "name": "Holy Bastion",
         "level": 8,
         "damage_dice": {},
         "effect": "shield",
-        "description": "Creates safe zone tiles for teammates."
+        "description": "Creates safe zone tiles for teammates.",
+        "multi_target": false
       },
       {
         "name": "Necrotic Smite",
@@ -1936,7 +2109,8 @@
           "bonus": 0
         },
         "effect": "necrotic damage",
-        "description": "Vengeful dark smite rots enemy shields."
+        "description": "Vengeful dark smite rots enemy shields.",
+        "multi_target": false
       },
       {
         "name": "Righteous Verdict",
@@ -1947,14 +2121,16 @@
           "bonus": 10
         },
         "effect": "radiant damage",
-        "description": "Holy pillar crashes executing sentence."
+        "description": "Holy pillar crashes executing sentence.",
+        "multi_target": false
       },
       {
         "name": "Aura of Supremacy",
         "level": 9,
         "damage_dice": {},
         "effect": "buff",
-        "description": "Buffs party flat output multipliers."
+        "description": "Buffs party flat output multipliers.",
+        "multi_target": false
       },
       {
         "name": "Sonic Smite",
@@ -1965,7 +2141,8 @@
           "bonus": 0
         },
         "effect": "thunder damage",
-        "description": "Impact produces an ear-splitting thunder blast."
+        "description": "Impact produces an ear-splitting thunder blast.",
+        "multi_target": false
       },
       {
         "name": "Holy Crusade",
@@ -1976,14 +2153,16 @@
           "bonus": 20
         },
         "effect": "radiant damage",
-        "description": "Empowers user weapon output to limits."
+        "description": "Empowers user weapon output to limits.",
+        "multi_target": false
       },
       {
         "name": "Martyr's Shield",
         "level": 10,
         "damage_dice": {},
         "effect": "shield",
-        "description": "Absorbs 100% damage meant for teammates."
+        "description": "Absorbs 100% damage meant for teammates.",
+        "multi_target": false
       },
       {
         "name": "Divine Cataclysm Smite",
@@ -1994,7 +2173,8 @@
           "bonus": 30
         },
         "effect": "force damage",
-        "description": "Ultimate physical swing shatters tectonic plates."
+        "description": "Ultimate physical swing shatters tectonic plates.",
+        "multi_target": false
       }
     ]
   }

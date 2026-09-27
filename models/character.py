@@ -232,6 +232,11 @@ class Hero(Character):
 	max_spell_slots: list[int] = field(default_factory=lambda: [0] * 10)
 	current_spell_slots: list[int] = field(default_factory=lambda: [0] * 10)
 
+	# New attributes: class hit die, multi-attack count and battlefield position
+	hit_dice: int = 8
+	multi_attack: int = 1
+	position: str = 'front'
+
 	def can_cast_spell(self, spell: Spell) -> bool:
 		return self.current_spell_slots[spell.level - 1] > 0
 

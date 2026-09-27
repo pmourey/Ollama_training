@@ -30,7 +30,7 @@ def _load_json(filename: str, default: Any) -> Any:
 
 
 def load_game_data():
-	"""Load monster types, spells, classes, races, and equipment from data/*.json."""
+	"""Load monster types, spells, classes, races, equipment and magic items from data/*.json."""
 	monster_types = MonsterTypeLoader.load_monster_types_from_file(str(_data_path('monsters.json')))
 	spells = SpellLoader.load_spells_from_file(str(_data_path('spells.json')))
 	classes = _load_json('classes.json', [])
@@ -40,4 +40,6 @@ def load_game_data():
 	shields = _load_json('shields.json', [])
 	heroes_data = _load_json('heroes.json', [])
 	spell_categories = _load_json('spell_categories.json', {})
-	return monster_types, spells, classes, races, weapons, armors, shields, heroes_data, spell_categories
+	magic_items = _load_json('magic_items.json', [])
+	magic_config = _load_json('magic_config.json', {"rarity_chances": {"Legendary": 0.005, "Very rare": 0.01, "Rare": 0.03, "Uncommon": 0.08, "Common": 0.15}, "per_level_scale": 0.02})
+	return monster_types, spells, classes, races, weapons, armors, shields, heroes_data, spell_categories, magic_items, magic_config

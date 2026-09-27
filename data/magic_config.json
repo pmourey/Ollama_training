@@ -1,0 +1,10 @@
+{
+  "rarity_chances": {
+    "Legendary": 0.002,
+    "Very rare": 0.01,
+    "Rare": 0.04,
+    "Uncommon": 0.1,
+    "Common": 0.2
+  },
+  "per_level_scale": 0.03
+}

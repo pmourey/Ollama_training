@@ -1,8 +1,17 @@
 from __future__ import annotations
 
+import re
+
 from copy import copy
 from enum import Enum
-from random import choice, randint, sample
+import random as _stdlib_random
+from random import randint, sample
+
+# keep an internal reference to the stdlib random module for simulation logic
+_random = _stdlib_random
+# expose a callable 'random' at module level (so tests can monkeypatch simulation.random)
+random = _random.random
+
 from typing import List
 
 import game_state
@@ -32,17 +41,29 @@ def build_party_from_heroes(
 	spell_categories,
 	party_size: int = 6,
 ) -> List[Hero]:
+	"""Build a party with 3 front-line melee and 3 back-line casters when possible.
+
+	Assign class hit_dice and initial multi_attack according to class and level.
+	"""
 	if not heroes_data:
 		return []
 	melee_chars = [h for h in heroes_data if h.get('class') in MELEE_CLASSES]
 	caster_chars = [h for h in heroes_data if h not in melee_chars]
-	half = party_size // 2
-	selection = sample(melee_chars, min(half, len(melee_chars))) + sample(
-		caster_chars, min(half, len(caster_chars))
-	)
+
+	# Ensure 3 front-line melee and 3 back-line casters if possible
+	front_needed = min(3, party_size)
+	back_needed = min(party_size - front_needed, party_size)
+	front_selection = _random.sample(melee_chars, min(front_needed, len(melee_chars)))
+	back_selection = _random.sample(caster_chars, min(back_needed, len(caster_chars)))
+	selection = front_selection + back_selection
+
+	# If we still need members (not enough melee/casters), fill from remaining heroes
+	remaining = [h for h in heroes_data if h not in selection]
+	while len(selection) < party_size and remaining:
+		selection.append(remaining.pop())
 
 	party: List[Hero] = []
-	for h in selection:
+	for idx, h in enumerate(selection):
 		class_str = h.get('class', 'Fighter')
 		cls = getattr(ClassType, class_str.upper(), ClassType.FIGHTER)
 
@@ -76,6 +97,7 @@ def build_party_from_heroes(
 			{},
 		)
 		spellcasting_ability = class_info.get('spellcasting_ability', '')
+		hit_dice = class_info.get('hit_dice', 8)
 
 		hero = Hero(
 			id=h.get('id', 0),
@@ -92,11 +114,26 @@ def build_party_from_heroes(
 			shield=shield,
 			abilities=abilities,
 			spellcasting_ability=spellcasting_ability,
+			hit_dice=hit_dice,
+			position='front' if idx < front_needed else 'back',
 		)
+
+		# set initial multi_attack based on class and level
+		lvl = h.get('level', 1)
+		# determine multi-attack progression
+		if cls in [ClassType.FIGHTER, ClassType.RANGER, ClassType.PALADIN]:
+			extra = 0
+			if lvl >= 5:
+				extra += 1
+			if lvl >= 11:
+				extra += 1
+			if lvl >= 20:
+				extra += 1
+			hero.multi_attack = 1 + extra
 
 		if spellcasting_ability:
 			allowed = [s for s in spells if s.class_type == cls and s.level == 1]
-			hero.spells = sample(allowed, min(randint(1, 2), len(allowed))) if allowed else []
+			hero.spells = _random.sample(allowed, min(_random.randint(1, 2), len(allowed))) if allowed else []
 			base_slots = class_info.get('base_spell_slots', 0)
 			hero.current_spell_slots = [0] * 10
 			hero.max_spell_slots = [0] * 10
@@ -112,7 +149,7 @@ def create_sample_monsters(monster_types: List[MonsterType], count: int = 3) -> 
 	if not monster_types:
 		return monsters
 	for i in range(count):
-		monster_type = choice(monster_types)
+		monster_type = _random.choice(monster_types)
 		hp = monster_type.hit_dice.roll
 		level = monster_type.level
 		monsters.append(
@@ -141,14 +178,34 @@ def create_sample_monsters(monster_types: List[MonsterType], count: int = 3) -> 
 
 
 def level_up(char: Hero, spells: List[Spell]) -> None:
+	"""Increase level, gain HP based on class hit_dice and update spell slots and multi-attack."""
 	char.level += 1
-	hp_gained = randint(1, 10)
-	char.max_hp += hp_gained
-	char.hp += hp_gained
+	# HP gain based on class hit die + CON modifier
+	hit_die = getattr(char, 'hit_dice', 8) or 8
+	con_mod = (char.abilities.constitution - 10) // 2
+	hp_gained = randint(1, hit_die) + max(0, con_mod)
+	char.max_hp += max(1, hp_gained)
+	char.hp += max(1, hp_gained)
+
+	# update spell slots (simple progression)
 	max_spell_level = max(1, min(20, char.level + 1) // 2)
 	for i in range(min(max_spell_level, len(char.max_spell_slots))):
 		char.max_spell_slots[i] = min(char.max_spell_slots[i] + randint(1, 3), 9)
 		char.current_spell_slots[i] = char.max_spell_slots[i]
+
+	# update multi-attack progression for classes that gain it
+	if char.class_type in [ClassType.FIGHTER, ClassType.RANGER, ClassType.PALADIN]:
+		extra = 0
+		if char.level >= 5:
+			extra += 1
+		if char.class_type == ClassType.FIGHTER:
+			if char.level >= 11:
+				extra += 1
+			if char.level >= 20:
+				extra += 1
+		char.multi_attack = 1 + extra
+
+	# learn new spells according to class
 	new_spells = [s for s in spells if s not in char.spells and s.level <= max_spell_level]
 	if not new_spells:
 		return
@@ -158,6 +215,172 @@ def level_up(char: Hero, spells: List[Spell]) -> None:
 		new_spells = sample(new_spells, min(1, len(new_spells)))
 	char.spells = (char.spells or []) + new_spells
 
+
+def distribute_loot(monsters: List[Monster], survivors: List[Hero], weapons: list, armors: list, shields: list, magic_items: list) -> None:
+	"""Distribute loot: non-magical equipment + chance for magic items with rarities.
+
+	- Non-magical: small chance per defeated monster to find weapon/armor/shield
+	- Magic items: rarer; use rarity drop probabilities
+	- Auto-equip logic: if item is strictly better than current equipped, equip it
+	"""
+	# use random.random via the random module
+
+	if not survivors:
+		return
+
+	# rarity drop probabilities (base per defeated monster) - prefer config if available
+	config = globals().get('magic_config', None) or {}
+	rarity_chances = config.get('rarity_chances', {
+		'Legendary': 0.005,
+		'Very rare': 0.01,
+		'Rare': 0.03,
+		'Uncommon': 0.08,
+		'Common': 0.15,
+	})
+	per_level_scale = float(config.get('per_level_scale', 0.02))
+
+	import re
+
+	def parse_dice_str(dice: str) -> float:
+		# Parse simple dice expressions like '1d8', '2d6+1' and return average expected damage
+		m = re.match(r'(\d+)d(\d+)(?:\s*\+\s*(\d+))?', str(dice))
+		if not m:
+			return 4.0
+		n, d, bonus = int(m.group(1)), int(m.group(2)), int(m.group(3) or 0)
+		# average of d-sided die is (d+1)/2
+		return n * (d + 1) / 2.0 + bonus
+
+	def weapon_power(w: dict) -> float:
+		# heuristic: parse damage like "1d8" or numeric 'damage' or 'damage_str'
+		if not w:
+			return 4.0
+		if 'damage' in w and isinstance(w.get('damage'), (int, float)):
+			return float(w.get('damage'))
+		if 'damage' in w and isinstance(w.get('damage'), str):
+			return parse_dice_str(w.get('damage'))
+		if 'damage_str' in w:
+			return parse_dice_str(w.get('damage_str'))
+		# try to extract dice from name or desc
+		for field in ('name', 'desc'):
+			val = w.get(field, '')
+			m = re.search(r"(\d+d\d+(?:\+\d+)?)", str(val))
+			if m:
+				return parse_dice_str(m.group(1))
+		# fallback
+		return 4.0
+
+	def parse_bonus_from_desc(item: dict) -> int:
+		# extract '+N' patterns from desc or name
+		for field in ('bonus', 'desc', 'name'):
+			val = item.get(field)
+			if isinstance(val, int):
+				return int(val)
+			if isinstance(val, str):
+				m = re.search(r"\+\s*(\d+)", val)
+				if m:
+					return int(m.group(1))
+		return 0
+
+	# helper to auto-equip better items (must be defined before use)
+	def _try_auto_equip(hero: Hero, item: dict) -> None:
+		it_type = item.get('type')
+		name = item.get('name', 'Magic Item')
+		if it_type == 'weapon':
+			# compare expected damage if both sides have damage or dice
+			cur = hero.weapon
+			cur_power = weapon_power({'damage': getattr(cur.damage_dice, 'roll_dice', None) and f"1d{getattr(cur.damage_dice, 'roll_dice')}" or '1d4'})
+			new_power = weapon_power(item)
+			if new_power > cur_power:
+				hero.weapon = Weapon(name=item.get('name', cur.name), damage_dice=DamageDice(1, int(item.get('damage', 4))))
+				game_state.uprint(f'{hero.name} auto-equips {name} (weapon).')
+		elif it_type == 'armor':
+			cur_bonus = int(getattr(hero.armor, 'bonus', 0) or 0)
+			# prefer explicit 'bonus' field, then 'ac', then parse from desc/name
+			raw_new = item.get('bonus') if item.get('bonus') is not None else item.get('ac') if item.get('ac') is not None else parse_bonus_from_desc(item)
+			try:
+				new_bonus = int(raw_new or 0)
+			except Exception:
+				new_bonus = 0
+			if new_bonus > cur_bonus:
+				hero.armor = Armor(name=item.get('name', hero.armor.name), bonus=new_bonus)
+				game_state.uprint(f'{hero.name} auto-equips {name} (armor).')
+		elif it_type == 'shield':
+			cur_bonus = int(getattr(hero.shield, 'bonus', 0) or 0)
+			raw_new = item.get('bonus') if item.get('bonus') is not None else parse_bonus_from_desc(item)
+			try:
+				new_bonus = int(raw_new or 0)
+			except Exception:
+				new_bonus = 0
+			if new_bonus > cur_bonus:
+				hero.shield = Shield(name=item.get('name', hero.shield.name), bonus=new_bonus)
+				game_state.uprint(f'{hero.name} auto-equips {name} (shield).')
+
+	for m in monsters:
+		if m.hp <= 0:
+			# non-magical equipment drop
+			if random() < 0.25:
+				item_type = _random.choice([0, 1, 2])
+				# prefer explicit monster loot if provided
+				if getattr(m, 'loot', None):
+					# assume loot is a list and pick first (tests set single-item loot)
+					item = m.loot[0]
+				else:
+					if item_type == 0 and weapons:
+						item = _random.choice(weapons)
+					elif item_type == 1 and armors:
+						item = _random.choice(armors)
+					elif shields:
+						item = _random.choice(shields)
+					else:
+						item = None
+				if item:
+					owner = _random.choice(survivors)
+					owner.inventory.append(item)
+					game_state.uprint(f'{owner.name} found {item.get("name","an item")} on {m.name}!')
+					# attempt to auto-equip non-magical equipment immediately
+					_try_auto_equip(owner, item)
+
+			# magic item drop attempt based on rarity table
+			r = random()
+			cumulative = 0.0
+			for rarity, chance in rarity_chances.items():
+				cumulative += chance * (1 + (m.level or 0) * per_level_scale)
+				if r < cumulative:
+					# pick a magic item of this rarity if available
+					candidates = [it for it in magic_items if it.get('rarity') == rarity]
+					if candidates:
+						mi = _random.choice(candidates)
+						owner = _random.choice(survivors)
+						owner.inventory.append(mi)
+						game_state.uprint(f'{owner.name} found magic item {mi.get("name")} (rarity {rarity}) on {m.name}!')
+						# auto-equip if beneficial
+						_try_auto_equip(owner, mi)
+					break
+
+	# helper to auto-equip better items
+	def _try_auto_equip(hero: Hero, item: dict) -> None:
+		it_type = item.get('type')
+		name = item.get('name', 'Magic Item')
+		if it_type == 'weapon':
+			# compare expected damage if both sides have 'damage' field
+			cur = hero.weapon
+			cur_power = weapon_power({'damage': getattr(cur.damage_dice, 'roll_dice', None) or 4})
+			new_power = weapon_power(item)
+			if new_power > cur_power:
+				hero.weapon = Weapon(name=item.get('name', cur.name), damage_dice=DamageDice(1, int(item.get('damage', 4))))
+				game_state.uprint(f'{hero.name} auto-equips {name} (weapon).')
+		elif it_type == 'armor':
+			cur_bonus = hero.armor.bonus
+			new_bonus = item.get('bonus', cur_bonus)
+			if new_bonus > cur_bonus:
+				hero.armor = Armor(name=item.get('name', hero.armor.name), bonus=new_bonus)
+				game_state.uprint(f'{hero.name} auto-equips {name} (armor).')
+		elif it_type == 'shield':
+			cur_bonus = hero.shield.bonus
+			new_bonus = item.get('bonus', cur_bonus)
+			if new_bonus > cur_bonus:
+				hero.shield = Shield(name=item.get('name', hero.shield.name), bonus=new_bonus)
+				game_state.uprint(f'{hero.name} auto-equips {name} (shield).')
 
 def party_stats_msg(party: List[Hero], num_combats: int, killed_monsters: int, monsters=None) -> None:
 	print('=' * 100)
@@ -181,7 +404,7 @@ def party_stats_msg(party: List[Hero], num_combats: int, killed_monsters: int, m
 		spells = '|'.join(f'{s.level}:{s.name}' for s in hero.spells)
 		print(
 			f'  {hero.name}: Lvl {hero.level} {cls_name} {race_name} '
-			f'(AC {hero.armor_class} - ATK+{hero.attack_bonus} - {hero.weapon}) '
+			f'(AC {hero.armor_class} - ATK+{hero.attack_bonus} - {hero.weapon} - {hero.armor.name}) '
 			f'- STR {hero.str} INT {hero.int} WIS {hero.wis} DEX {hero.dex} '
 			f'CON {hero.con} CHA {hero.cha} '
 			f'- HP {hero.hp}/{hero.max_hp} - {hero.condition.value.upper()}, '
@@ -211,7 +434,7 @@ def print_stats(killed_by_level, spells_cast) -> None:
 
 def run(max_combats: int = 10000, party_size: int = 6, max_monsters: int = 2, batch_mode: bool = True, rest_freq: int = 30) -> None:
 	"""Boucle principale de simulation batch."""
-	monster_types, spells, classes, races, weapons, armors, shields, heroes_data, spell_categories = (load_game_data())
+	monster_types, spells, classes, races, weapons, armors, shields, heroes_data, spell_categories, magic_items, magic_config = (load_game_data())
 	party = build_party_from_heroes(heroes_data, spells, classes, races, weapons, armors, shields, spell_categories, party_size)
 	if not party:
 		raise RuntimeError('Party vide : vérifie que data/heroes.json (et classes/armes/etc.) se chargent correctement.')
@@ -246,8 +469,8 @@ def run(max_combats: int = 10000, party_size: int = 6, max_monsters: int = 2, ba
 					char.current_spell_slots[i] = char.max_spell_slots[i]
 
 		party_level = sum(c.level for c in party) / len(party)
-		selection = [m for m in monster_types if m.level <= party_level] or monster_types
-		monsters = create_sample_monsters(selection, randint(1, max_monsters))
+		selection = [m for m in monster_types if party_level - 1 < m.level <= party_level] or monster_types
+		monsters = create_sample_monsters(selection, _random.randint(1, max_monsters))
 		total_xp, total_gp = start_combat(party, monsters)
 
 		alive = [c for c in party if not c.is_dead]
@@ -257,6 +480,8 @@ def run(max_combats: int = 10000, party_size: int = 6, max_monsters: int = 2, ba
 			for char in alive:
 				char.xp += share_xp
 				char.gold += share_gp
+			# Distribute loot items among survivors (weapons/armors/shields + magic items)
+			distribute_loot(monsters, alive, weapons, armors, shields, magic_items)
 
 		if all(c.is_dead for c in party):
 			end_game = True

@@ -1,0 +1,8 @@
+[
+  {"name": "Potion of Healing", "type": "potion", "rarity": "Common", "desc": "Heals 2d4+2 HP"},
+  {"name": "Ring of Protection", "type": "ring", "rarity": "Rare", "bonus": 1, "desc": "+1 to AC and saving throws"},
+  {"name": "+1 Longsword", "type": "weapon", "rarity": "Uncommon", "damage": 8, "desc": "+1 weapon (treated as 1d8)"},
+  {"name": "Armor of Resistance", "type": "armor", "rarity": "Very rare", "bonus": 1, "desc": "Grants resistance to a damage type"},
+  {"name": "Shield of Faith", "type": "shield", "rarity": "Uncommon", "bonus": 1, "desc": "+1 shield"},
+  {"name": "Staff of Power", "type": "staff", "rarity": "Legendary", "desc": "Powerful magical staff"}
+]

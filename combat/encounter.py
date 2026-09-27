@@ -73,7 +73,10 @@ def start_combat(party: List[Hero], monsters: List[Monster]) -> tuple[int, int]:
 			else:
 				if not alive_chars:
 					break
-				target = max(alive_chars, key=lambda m: m.hp)
+				# Prefer front-line heroes for monster attacks
+				front_targets = [c for c in alive_chars if getattr(c, 'position', 'front') == 'front']
+				target_pool = front_targets or alive_chars
+				target = max(target_pool, key=lambda m: m.hp)
 				BattleSystem.combat(current_char, target, party)
 				if target.is_dead:
 					game_state.uprint(f'{target.name} is defeated!')

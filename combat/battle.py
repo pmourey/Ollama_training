@@ -162,49 +162,28 @@ class BattleSystem:
 				heal_threshold = 0.9
 
 				for spell, handler in pairs:
-					role = getattr(handler, 'ai_role', 'other')
-					status = getattr(handler, 'ai_status', '')
-					# Heal if an ally is below threshold
-					if role == 'heal':
-						vulnerable = [a for a in allies if a.hp / a.max_hp <= heal_threshold]
-						if vulnerable:
-							target = min(vulnerable, key=lambda a: a.hp)
-							attacker.cast_spell(spell, [target])
-							return
-					# Buff if not everyone has the status
-					if role == 'buff':
-						if not all(getattr(a, 'is_blessed', False) for a in allies):
-							attacker.cast_spell(spell, allies)
-							return
-					# Control (condition) if defender lacks status.
-					# If the handler role indicates a control/debuff, target the defender;
-					# otherwise (buffs like shield) apply to allies who lack the status.
-					if role == 'control' or status:
-						if status:
-							if role == 'control':
-								if not defender.has_effect(status):
-									attacker.cast_spell(spell, [defender])
-									return
-							else:
-								# treat as a positive status (buff/shield) and apply to allies missing it
-								targets_missing = [a for a in allies if not a.has_effect(status)]
-								if targets_missing:
-									attacker.cast_spell(spell, targets_missing)
-									return
-						# fall through if nothing applicable
-					# Smite is applied to target (adds effect for next hit)
-					if role == 'smite':
-						attacker.cast_spell(spell, [defender])
-						return
-					# Damage fallback
-					if role == 'damage' or 'damage' in spell.effect:
-						attacker.cast_spell(spell, [defender])
-						return
-					# Shield
-					if role == 'shield':
-						target = min(party, key=lambda c: c.hp / c.armor_class)
-						attacker.cast_spell(spell, [target])
-						return
+					# delegate applicability decision to the handler
+					from combat.effects.base import CastContext
+					ctx = CastContext(caster=attacker, spell=spell)
+					targets = handler.applicable(ctx=ctx, allies=allies, enemies=[defender])
+					if not targets:
+						continue
+					# respect spell.multi_target: if False, pick first target
+					if not getattr(spell, 'multi_target', False):
+						targets = [targets[0]]
+					attacker.cast_spell(spell, targets)
+					return
 
-		# No spell chosen or cannot cast: melee attack
-		BattleSystem.melee_attack(attacker, [defender])
+		# No spell chosen or cannot cast: melee attack. Respect multi_attack attribute on Heroes/monsters.
+		attacks = getattr(attacker, 'multi_attack', 1)
+		for i in range(attacks):
+			# if attacker or defender died mid-sequence, stop
+			if defender.hp <= 0 or attacker.hp <= 0:
+				break
+			hit, dmg = BattleSystem.perform_attack(attacker, defender)
+			if hit:
+				defender.hp -= dmg
+				msg = f'{attacker.name} attaque (#{i+1}) et inflige {dmg} dégâts à {defender.name}.'
+			else:
+				msg = f'{attacker.name} attaque (#{i+1}) mais RATE {defender.name}.'
+			uprint(msg)

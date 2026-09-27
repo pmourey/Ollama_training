@@ -18,6 +18,8 @@ class Spell:
 	dc_type: str
 	dc_success: str  # "half", "none", or ""
 	description: str
+	# indique si le sort peut viser plusieurs cibles simultanément
+	multi_target: bool = False
 
 	def __eq__(self, other: object) -> bool:
 		return isinstance(other, Spell) and self.name == other.name

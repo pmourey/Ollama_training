@@ -12,6 +12,10 @@ class FallbackHandler(EffectHandler):
 	def apply(self, ctx: CastContext, target: Character) -> str:
 		return f'[Spell] {ctx.caster.name} casts {ctx.spell.name} on {target.name}!'
 
+	def applicable(self, ctx: CastContext, allies: list[Character], enemies: list[Character]) -> list[Character]:
+		# default fallback: target first enemy
+		return [enemies[0]] if enemies else []
+
 
 class DamageHandler(EffectHandler):
 	ai_role = 'damage'
@@ -41,6 +45,10 @@ class DamageHandler(EffectHandler):
 		)
 		return f'{msg} {note}'.strip()
 
+	def applicable(self, ctx: CastContext, allies: list[Character], enemies: list[Character]) -> list[Character]:
+		# Prefer the enemy with highest HP
+		return [max(enemies, key=lambda e: e.hp)] if enemies else []
+
 
 class HealHandler(EffectHandler):
 	ai_role = 'heal'
@@ -52,6 +60,13 @@ class HealHandler(EffectHandler):
 		heal_amount = ctx.spell.damage_dice.roll if ctx.spell.damage_dice else 0
 		target.hp = min(target.max_hp, target.hp + heal_amount)
 		return f'[Spell] {ctx.caster.name} heals {target.name} for {heal_amount} HP!'
+
+	def applicable(self, ctx: CastContext, allies: list[Character], enemies: list[Character]) -> list[Character]:
+		# target the most injured ally below a threshold
+		candidates = [a for a in allies if a.hp / a.max_hp <= 0.9]
+		if not candidates:
+			return []
+		return [min(candidates, key=lambda a: a.hp)]
 
 
 class BuffHandler(EffectHandler):
@@ -65,6 +80,15 @@ class BuffHandler(EffectHandler):
 		turns = scaled_duration(ctx.spell.level)
 		target.add_effect(ActiveEffect(kind='bless', turns=turns, spell_name=ctx.spell.name))
 		return f'[Spell] {ctx.caster.name} blesses {target.name} for {turns} round(s)!'
+
+	def applicable(self, ctx: CastContext, allies: list[Character], enemies: list[Character]) -> list[Character]:
+		# apply to all allies missing the buff (but respect spell.multi_target)
+		targets = [a for a in allies if not a.has_effect(self.ai_status)]
+		if not targets:
+			return []
+		if ctx.spell.multi_target:
+			return targets
+		return [targets[0]]
 
 
 class ShieldHandler(EffectHandler):
@@ -87,6 +111,15 @@ class ShieldHandler(EffectHandler):
 			f'(+{magnitude} AC for {turns} round(s))!'
 		)
 
+	def applicable(self, ctx: CastContext, allies: list[Character], enemies: list[Character]) -> list[Character]:
+		# give shield to allies missing it
+		targets = [a for a in allies if not a.has_effect('shield')]
+		if not targets:
+			return []
+		if ctx.spell.multi_target:
+			return targets
+		return [targets[0]]
+
 
 class CleanseHandler(EffectHandler):
 	ai_role = 'cleanse'
@@ -105,6 +138,11 @@ class CleanseHandler(EffectHandler):
 			f'[Spell] {ctx.caster.name} casts {ctx.spell.name} on {target.name}, '
 			f'but there is nothing to cleanse.'
 		)
+
+	def applicable(self, ctx: CastContext, allies: list[Character], enemies: list[Character]) -> list[Character]:
+		# target allies with negative effects
+		targets = [a for a in allies if a.has_negative_effect()]
+		return targets if ctx.spell.multi_target else ( [targets[0]] if targets else [] )
 
 
 class SmiteHandler(EffectHandler):
@@ -135,6 +173,10 @@ class SmiteHandler(EffectHandler):
 		if extra:
 			detail += ' and blinds on hit'
 		return f'[Spell] {ctx.caster.name} invokes {spell.name} ({detail})!'
+
+	def applicable(self, ctx: CastContext, allies: list[Character], enemies: list[Character]) -> list[Character]:
+		# smite applies to the (single) target enemy
+		return [enemies[0]] if enemies else []
 
 
 class ConditionHandler(EffectHandler):
@@ -167,3 +209,8 @@ class ConditionHandler(EffectHandler):
 		turns = scaled_duration(ctx.spell.level)
 		target.add_effect(ActiveEffect(kind=self.kind, turns=turns, spell_name=ctx.spell.name))
 		return f'[Spell] {ctx.spell.name}: {target.name} {self.verb} for {turns} round(s)!'
+
+	def applicable(self, ctx: CastContext, allies: list[Character], enemies: list[Character]) -> list[Character]:
+		# target the best enemy candidate that does not have the status
+		targets = [e for e in enemies if not e.has_effect(self.ai_status)]
+		return [targets[0]] if targets else []
