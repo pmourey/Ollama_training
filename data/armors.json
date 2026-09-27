@@ -3,5 +3,18 @@
   {"name": "Robe", "bonus": 1},
   {"name": "Chainmail Armor", "bonus": 3},
   {"name": "Cloth Armor", "bonus": 1},
-  {"name": "Scale Armor", "bonus": 4}
+  {"name": "Scale Armor", "bonus": 4},
+  {"name": "Plate Armor", "bonus": 6},
+  {"name": "Studded Leather Armor", "bonus": 3},
+  {"name": "Hide Armor", "bonus": 2},
+  {"name": "Ring Mail", "bonus": 4},
+  {"name": "Splint Armor", "bonus": 5},
+  {"name": "Half Plate Armor", "bonus": 5},
+  {"name": "Breastplate", "bonus": 4},
+  {"name": "Padded Armor", "bonus": 1},
+  {"name": "Chain Shirt", "bonus": 3},
+  {"name": "Gambeson", "bonus": 2},
+  {"name": "Brigandine", "bonus": 4},
+  {"name": "Lamellar Armor", "bonus": 5},
+  {"name": "Cuirass", "bonus": 6}
 ]
