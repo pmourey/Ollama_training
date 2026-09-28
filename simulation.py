@@ -40,6 +40,7 @@ def build_party_from_heroes(
 	shields,
 	spell_categories,
 	party_size: int = 6,
+	party_level: int = 1
 ) -> List[Hero]:
 	"""Build a party with 3 front-line melee and 3 back-line casters when possible.
 
@@ -132,14 +133,18 @@ def build_party_from_heroes(
 			hero.multi_attack = 1 + extra
 
 		if spellcasting_ability:
-			allowed = [s for s in spells if s.class_type == cls and s.level == 1]
+			allowed = [s for s in spells if s.class_type == cls and s.level <= party_level // 2]
 			hero.spells = _random.sample(allowed, min(_random.randint(1, 2), len(allowed))) if allowed else []
 			base_slots = class_info.get('base_spell_slots', 0)
 			hero.current_spell_slots = [0] * 10
 			hero.max_spell_slots = [0] * 10
 			hero.current_spell_slots[0] = copy(base_slots)
 			hero.max_spell_slots[0] = copy(base_slots)
+		else:
+			allowed = []
 
+		for _ in range(party_level - 1):
+			level_up(hero, allowed)
 		party.append(hero)
 	return party
 
@@ -432,10 +437,10 @@ def print_stats(killed_by_level, spells_cast) -> None:
 			print(f'Lvl {i + 1}: {nonzero}')
 
 
-def run(max_combats: int = 10000, party_size: int = 6, max_monsters: int = 2, batch_mode: bool = True, rest_freq: int = 30) -> None:
+def run(max_combats: int = 10000, party_size: int = 6, max_monsters: int = 2, batch_mode: bool = True, rest_freq: int = 30, party_level: int = 1) -> None:
 	"""Boucle principale de simulation batch."""
 	monster_types, spells, classes, races, weapons, armors, shields, heroes_data, spell_categories, magic_items, magic_config = (load_game_data())
-	party = build_party_from_heroes(heroes_data, spells, classes, races, weapons, armors, shields, spell_categories, party_size)
+	party = build_party_from_heroes(heroes_data, spells, classes, races, weapons, armors, shields, spell_categories, party_size, party_level)
 	if not party:
 		raise RuntimeError('Party vide : vérifie que data/heroes.json (et classes/armes/etc.) se chargent correctement.')
 
