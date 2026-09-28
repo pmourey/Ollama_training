@@ -42,6 +42,7 @@ class CharacterCard(QFrame):
     """Carte cliquable représentant un héros ou un monstre (cible d'action)."""
 
     clicked = Signal(object)
+    double_clicked = Signal(object)
 
     def __init__(self, character, subtitle_fn, extra_fn=None):
         super().__init__()
@@ -60,11 +61,12 @@ class CharacterCard(QFrame):
         layout.setSpacing(2)
 
         self.name_label = QLabel()
-        self.name_label.setStyleSheet('font-weight: bold; font-size: 13px;')
+        # Force a high-contrast text color so names remain readable on light backgrounds
+        self.name_label.setStyleSheet('font-weight: bold; font-size: 13px; color: #111;')
         layout.addWidget(self.name_label)
 
         self.subtitle_label = QLabel()
-        self.subtitle_label.setStyleSheet('color: #555; font-size: 10px;')
+        self.subtitle_label.setStyleSheet('color: #444; font-size: 10px;')
         layout.addWidget(self.subtitle_label)
 
         self.hp_bar = QProgressBar()
@@ -83,6 +85,12 @@ class CharacterCard(QFrame):
         if self.character.hp > 0:
             self.clicked.emit(self.character)
         super().mousePressEvent(event)
+
+    def mouseDoubleClickEvent(self, event):
+        # Emit a dedicated double-click signal to open detailed sheet dialogs.
+        if self.character.hp > 0:
+            self.double_clicked.emit(self.character)
+        super().mouseDoubleClickEvent(event)
 
     def set_selected(self, value: bool):
         self.selected = value
@@ -119,8 +127,82 @@ class CharacterCard(QFrame):
         self._apply_style()
 
 
+from PySide6.QtWidgets import QDialog, QDialogButtonBox, QTabWidget, QFormLayout, QListWidget, QTextBrowser
+
+
+class CharacterSheetDialog(QDialog):
+    """Dialog modal tabbed affichant fiche, inventaire et sorts d'un héros/monstre."""
+
+    def __init__(self, parent, character):
+        super().__init__(parent)
+        self.setWindowTitle(f"Fiche de {getattr(character, 'name', 'Personnage')}")
+        self.resize(520, 420)
+
+        layout = QVBoxLayout(self)
+        tabs = QTabWidget()
+
+        # Overview tab
+        overview = QWidget()
+        form = QFormLayout(overview)
+        form.addRow('Nom:', QLabel(getattr(character, 'name', '—')))
+        form.addRow('Niveau:', QLabel(str(getattr(character, 'level', '—'))))
+        form.addRow('Classe:', QLabel(str(character.class_type.value)))
+        form.addRow('Race:', QLabel(str(character.race.type.value)))
+        form.addRow('HP:', QLabel(f"{getattr(character, 'hp', '—')}/{getattr(character, 'max_hp', '—')}"))
+        form.addRow('AC:', QLabel(str(getattr(character, 'armor_class', '—'))))
+        # Stats safe access
+        # stats = ' '.join(str(getattr(character, s, '—')) for s in ('str', 'dex', 'con', 'int', 'wis', 'cha'))
+        # form.addRow('Stats (STR DEX CON INT WIS CHA):', QLabel(stats))
+        form.addRow('Strength:', QLabel(str(character.str)))
+        form.addRow('Dexterity:', QLabel(str(character.dex)))
+        form.addRow('Constitution:', QLabel(str(character.con)))
+        form.addRow('Intelligence:', QLabel(str(character.int)))
+        form.addRow('Wisdom:', QLabel(str(character.wis)))
+        form.addRow('Charism:', QLabel(str(character.cha)))
+
+        tabs.addTab(overview, 'Aperçu')
+
+        # Inventory tab
+        inv = QWidget()
+        inv_layout = QVBoxLayout(inv)
+        listw = QListWidget()
+        for it in getattr(character, 'inventory', []) or []:
+            listw.addItem(str(it))
+        inv_layout.addWidget(listw)
+        tabs.addTab(inv, 'Inventaire')
+
+        # Spells tab
+        spells = QWidget()
+        spells_layout = QVBoxLayout(spells)
+        tb = QTextBrowser()
+        spells_list = getattr(character, 'spells', None)
+        if spells_list:
+            lines = []
+            for s in spells_list:
+                # handle Spell-like objects or dicts
+                name = getattr(s, 'name', s.get('name') if isinstance(s, dict) else str(s))
+                lvl = getattr(s, 'level', s.get('level') if isinstance(s, dict) else '?')
+                desc = getattr(s, 'description', s.get('description') if isinstance(s, dict) else '')
+                lines.append(f"Niv.{lvl} {name}: {desc}")
+            tb.setText('\n\n'.join(lines))
+        else:
+            tb.setText('Aucun sort connu.')
+        spells_layout.addWidget(tb)
+        tabs.addTab(spells, 'Sorts')
+
+        layout.addWidget(tabs)
+
+        # Dialog buttons
+        buttons = QDialogButtonBox(QDialogButtonBox.Close)
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
+
+    def open(self):
+        return super().exec()
+
+
 def hero_subtitle(h: Hero) -> str:
-    return f'{h.class_type.value} • {h.race.type.value} • Niv.{h.level}'
+    return f'{h.class_type.value} • {h.race.type.value} • Niv.{h.level} • AC.{h.armor_class}'
 
 
 def hero_extra(h: Hero) -> str:
@@ -143,7 +225,7 @@ def monster_extra(m: Monster) -> str:
 
 
 class CombatWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, party_level=1):
         super().__init__()
         self.setWindowTitle('Gestion des Combats - Prototype')
         self.resize(1180, 760)
@@ -155,7 +237,7 @@ class CombatWindow(QMainWindow):
         self.party: list[Hero] = build_party_from_heroes(
             self.heroes_data, self.spells, self.classes, self.races,
             self.weapons, self.armors, self.shields, self.spell_categories,
-            party_size=6,
+            party_size=6, party_level=party_level
         )
         self.monsters: list[Monster] = []
 
@@ -250,6 +332,7 @@ class CombatWindow(QMainWindow):
         for idx, hero in enumerate(self.party):
             card = CharacterCard(hero, hero_subtitle, hero_extra)
             card.clicked.connect(self.on_target_clicked)
+            card.double_clicked.connect(self.show_character_sheet)
             self.hero_cards[hero.id] = card
             self.party_layout.addWidget(card, idx // 3, idx % 3)
 
@@ -280,6 +363,8 @@ class CombatWindow(QMainWindow):
         for monster in self.monsters:
             card = CharacterCard(monster, monster_subtitle, monster_extra)
             card.clicked.connect(self.on_target_clicked)
+            # monsters can also show a sheet on double-click (read-only)
+            card.double_clicked.connect(self.show_character_sheet)
             self.monster_cards.append(card)
             self.monsters_layout.addWidget(card)
         self.monsters_layout.addStretch()
@@ -294,6 +379,15 @@ class CombatWindow(QMainWindow):
         self.log_message('NOUVELLE RENCONTRE !')
         self.log_message('=' * 60)
         self.start_round()
+
+    def show_character_sheet(self, character):
+        """Open the modal character sheet dialog for a Hero/Monster."""
+        try:
+            dlg = CharacterSheetDialog(self, character)
+            dlg.open()
+        except Exception:
+            # Fallback quick message if dialog construction fails
+            QMessageBox.information(self, 'Fiche', str(getattr(character, 'name', repr(character))))
 
     def on_rest(self):
         for hero in self.party:
@@ -486,6 +580,6 @@ class CombatWindow(QMainWindow):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    window = CombatWindow()
+    window = CombatWindow(party_level=15)
     window.show()
     sys.exit(app.exec())
