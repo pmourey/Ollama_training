@@ -9,10 +9,14 @@ déroulantes.
 """
 from __future__ import annotations
 
+import os
+
+import pickle
+
 import random as pyrandom
 import sys
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, Signal, QSize
 from PySide6.QtWidgets import (
     QApplication, QFrame, QGridLayout, QGroupBox, QHBoxLayout, QLabel,
     QMainWindow, QMessageBox, QProgressBar, QPushButton, QScrollArea,
@@ -129,8 +133,98 @@ class CharacterCard(QFrame):
 
 from PySide6.QtWidgets import (
     QDialog, QDialogButtonBox, QTabWidget, QFormLayout, QListWidget,
-    QListWidgetItem, QTextBrowser, QComboBox
+    QListWidgetItem, QTextBrowser, QComboBox, QAbstractItemView
 )
+
+
+class ReorderableList(QListWidget):
+    """QListWidget that supports internal drag & drop and emits orderChanged(list_of_characters)."""
+
+    orderChanged = Signal(list)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        # Allow internal moving of items
+        self.setDragDropMode(QAbstractItemView.InternalMove)
+        self.setDefaultDropAction(Qt.MoveAction)
+        self.setSpacing(8)
+        self.setResizeMode(QListWidget.Adjust)
+
+    def dropEvent(self, event):
+        super().dropEvent(event)
+        order = []
+        for i in range(self.count()):
+            it = self.item(i)
+            w = self.itemWidget(it)
+            if hasattr(w, 'character'):
+                order.append(w.character)
+        try:
+            self.orderChanged.emit(order)
+        except Exception:
+            pass
+
+
+class ReorderDialog(QDialog):
+    """Modal dialog that allows reordering the party via up/down controls (no drag & drop)."""
+
+    def __init__(self, parent, party: list[Hero]):
+        super().__init__(parent)
+        self.setWindowTitle('Réordonner les héros')
+        self.resize(420, 420)
+        self.party = list(party)
+
+        layout = QVBoxLayout(self)
+        layout.addWidget(QLabel('Sélectionnez un héros puis utilisez Monter/Descendre. Cliquez OK pour appliquer.'))
+
+        # List of hero names (store hero object in Qt.UserRole)
+        self.listw = QListWidget(self)
+        self.listw.setSelectionMode(QListWidget.SingleSelection)
+        for hero in self.party:
+            it = QListWidgetItem(f'{hero.name} ({hero.class_type.value}, {hero.race.type.value}, Niv.{hero.level})')
+            it.setData(Qt.UserRole, hero)
+            self.listw.addItem(it)
+        layout.addWidget(self.listw)
+
+        # Up/Down controls
+        row = QHBoxLayout()
+        self.btn_up = QPushButton('↑ Monter')
+        self.btn_down = QPushButton('↓ Descendre')
+        self.btn_up.clicked.connect(self._on_move_up)
+        self.btn_down.clicked.connect(self._on_move_down)
+        row.addWidget(self.btn_up)
+        row.addWidget(self.btn_down)
+        layout.addLayout(row)
+
+        btns = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        btns.accepted.connect(self.accept)
+        btns.rejected.connect(self.reject)
+        layout.addWidget(btns)
+
+    def _on_move_up(self):
+        idx = self.listw.currentRow()
+        if idx <= 0:
+            return
+        item = self.listw.takeItem(idx)
+        self.listw.insertItem(idx - 1, item)
+        self.listw.setCurrentRow(idx - 1)
+
+    def _on_move_down(self):
+        idx = self.listw.currentRow()
+        if idx < 0 or idx >= self.listw.count() - 1:
+            return
+        item = self.listw.takeItem(idx)
+        self.listw.insertItem(idx + 1, item)
+        self.listw.setCurrentRow(idx + 1)
+
+    def get_order(self) -> list[Hero]:
+        order = []
+        for i in range(self.listw.count()):
+            it = self.listw.item(i)
+            hero = it.data(Qt.UserRole)
+            if hero is not None:
+                order.append(hero)
+        return order
+
 
 
 class CharacterSheetDialog(QDialog):
@@ -385,19 +479,37 @@ class CharacterSheetDialog(QDialog):
     def save_game(self):
         """Save minimal hero state to both JSON and (optionally) pickle for fidelity.
         NOTE: pickle is binary and should only be used locally; loading pickle executes code.
-        Includes killed_monsters and total_kills so stats persist between sessions.
+        This implementation preserves any existing keys in savegame.json by loading
+        and merging, preventing accidental deletion of unrelated fields (e.g. party_order).
         """
         try:
-            import json, os, pickle
-            data = {'heroes': []}
+            import json, pickle
+            # Load existing savegame as base to avoid removing unrelated keys
+            data = {}
+            if os.path.exists('savegame.json'):
+                try:
+                    with open('savegame.json', 'r', encoding='utf-8') as f:
+                        data = json.load(f) or {}
+                except Exception:
+                    data = {}
+            # Overwrite/ensure the hero-centric fields are up-to-date
+            heroes_list = []
             for h in self.party:
-                data['heroes'].append({
+                heroes_list.append({
                     'name': h.name,
                     'hp': h.hp,
                     'position': getattr(h, 'position', 'front'),
                     'inventory': getattr(h, 'inventory', []),
-                    'worn': getattr(h, 'worn', [])
+                    'worn': getattr(h, 'worn', []),
+                    'xp': getattr(h, 'xp', 0),
+                    'gold': getattr(h, 'gold', 0)
                 })
+            data['heroes'] = heroes_list
+            # persist explicit party order (by name)
+            try:
+                data['party_order'] = [h.name for h in self.party]
+            except Exception:
+                data['party_order'] = [h.name for h in getattr(self, 'party', [])]
             # include killed monsters stats
             data['killed_monsters'] = getattr(self, 'killed_monsters', {})
             data['total_kills'] = getattr(self, 'total_kills', 0)
@@ -571,7 +683,7 @@ class EmittingStream:
 
 
 class CombatWindow(QMainWindow):
-    def __init__(self, party_level=1):
+    def __init__(self, party_level: int, roster: list[Hero]):
         super().__init__()
         self.setWindowTitle('Gestion des Combats - Prototype')
         self.resize(1180, 760)
@@ -580,108 +692,22 @@ class CombatWindow(QMainWindow):
          self.armors, self.shields, self.heroes_data, self.spell_categories,
          self.magic_items, self.magic_config) = load_game_data()
 
-        self.party: list[Hero] = build_party_from_heroes(
-            self.heroes_data, self.spells, self.classes, self.races,
-            self.weapons, self.armors, self.shields, self.spell_categories,
-            party_size=6, party_level=party_level
-        )
-        # track monsters killed by party this session
-        # killed_monsters_counts maps monster name -> count
-        self.killed_monsters: dict = {}
-        self.total_kills: int = 0
-        self._killed_names: set = set()
-        # attempt to auto-load save file (prefer pickle for fidelity, fallback to json)
+        if not roster:
+            # If no roster provided, build a default party from heroes.json
+            self.party: list[Hero] = build_party_from_heroes(self.heroes_data, self.spells, self.classes, self.races, self.weapons, self.armors, self.shields, self.spell_categories, party_size=6, party_level=party_level)
+        else:
+            self.party: list[Hero] = roster
+
+        # Restore previously saved party order from savegame.json if present
         try:
-            import os, json, pickle
-            save_pkl = os.path.join('.', 'savegame.pkl')
-            save_json = os.path.join('.', 'savegame.json')
-            if os.path.exists(save_pkl):
-                # WARNING: loading pickle can execute arbitrary code. Only load trusted files.
-                try:
-                    with open(save_pkl, 'rb') as f:
-                        data = pickle.load(f)
-                    # expected structure: {'heroes': [hero_state_dicts...], 'killed_monsters': {...}, 'total_kills': N}
-                    for hs in data.get('heroes', []):
-                        for hero in self.party:
-                            if hero.name == hs.get('name'):
-                                # apply attributes that are safe/expected
-                                hero.hp = hs.get('hp', hero.hp)
-                                hero.position = hs.get('position', hero.position)
-                                if 'worn' in hs:
-                                    hero.worn = hs.get('worn', hero.worn)
-                                if 'inventory' in hs:
-                                    hero.inventory = hs.get('inventory', hero.inventory)
-                    # restore killed stats if present
-                    if 'killed_monsters' in data:
-                        try:
-                            self.killed_monsters = dict(data.get('killed_monsters') or {})
-                            self.total_kills = int(data.get('total_kills', 0))
-                        except Exception:
-                            pass
-                    if hasattr(self, 'log_message'):
-                        self.log_message('🔄 Partie chargée depuis savegame.pkl (pickle)')
-                    else:
-                        print('🔄 Partie chargée depuis savegame.pkl (pickle)')
-                except Exception as ex:
-                    # on failure, fall back to json
-                    print(f'⚠️ Échec du chargement pickle: {ex}')
-            elif os.path.exists(save_json):
-                with open(save_json, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                # apply saved state to party by matching names
-                for hs in data.get('heroes', []):
-                    for hero in self.party:
-                        if hero.name == hs.get('name'):
-                            hero.hp = hs.get('hp', hero.hp)
-                            hero.position = hs.get('position', hero.position)
-                            # restore worn and inventory if present
-                            if 'worn' in hs:
-                                hero.worn = hs.get('worn', hero.worn)
-                            if 'inventory' in hs:
-                                hero.inventory = hs.get('inventory', hero.inventory)
-                # restore killed stats from json if present
-                if 'killed_monsters' in data:
-                    try:
-                        self.killed_monsters = dict(data.get('killed_monsters') or {})
-                        self.total_kills = int(data.get('total_kills', 0))
-                    except Exception:
-                        pass
-                # log if UI ready, otherwise print
-                if hasattr(self, 'log_message'):
-                    try:
-                        self.log_message('🔄 Partie chargée depuis savegame.json')
-                    except Exception:
-                        print('🔄 Partie chargée depuis savegame.json')
-                else:
-                    print('🔄 Partie chargée depuis savegame.json')
-        except Exception as e:
-            if hasattr(self, 'log_message'):
-                try:
-                    self.log_message(f'⚠️ Échec du chargement de la sauvegarde: {e}')
-                except Exception:
-                    print(f'⚠️ Échec du chargement de la sauvegarde: {e}')
-            else:
-                print(f'⚠️ Échec du chargement de la sauvegarde: {e}')
-        # keep originals to restore on close
-        # Additional: ensure XP and gold from savegame.json (if any) are applied to heroes
-        try:
-            import os, json
-            if os.path.exists('savegame.json'):
-                with open('savegame.json', 'r', encoding='utf-8') as _f:
-                    _data = json.load(_f)
-                for hs in _data.get('heroes', []):
-                    for hero in self.party:
-                        if hero.name == hs.get('name'):
-                            try:
-                                hero.xp = hs.get('xp', getattr(hero, 'xp', 0))
-                            except Exception:
-                                pass
-                            try:
-                                hero.gold = hs.get('gold', getattr(hero, 'gold', 0))
-                            except Exception:
-                                pass
+            self._restore_party_order()
         except Exception:
             pass
+        # track monsters killed by party this session
+        # killed_monsters_counts maps monster name -> count
+        self.killed_monsters: dict[str, int] = {}
+        self.total_kills: int = 0
+        self._killed_names: set[str] = set()
 
         import sys as _sys
         self._orig_stdout = _sys.stdout
@@ -694,7 +720,7 @@ class CombatWindow(QMainWindow):
         self.order: list[Combatant] = []
         self.turn_index = 0
         self.current_hero: Hero | None = None
-        self.selected_target = None
+        self.selected_target: Combatant | None = None
         self.combat_over = True
         self.round_num = 0
 
@@ -787,6 +813,10 @@ class CombatWindow(QMainWindow):
         self.btn_show_kills = QPushButton('🗡️ Monstres tués')
         self.btn_show_kills.clicked.connect(self.show_killed_monsters)
         controls.addWidget(self.btn_show_kills)
+        # Reorder button to open dialog for changing party order
+        self.btn_reorder = QPushButton('🔀 Réordonner')
+        self.btn_reorder.clicked.connect(self.open_reorder_dialog)
+        controls.addWidget(self.btn_reorder)
         left.addLayout(controls)
 
         # Log panel
@@ -798,12 +828,7 @@ class CombatWindow(QMainWindow):
         right.addWidget(self.log)
 
         # Static party cards (6 slots, 3 columns x 2 rows)
-        for idx, hero in enumerate(self.party):
-            card = CharacterCard(hero, hero_subtitle, hero_extra)
-            card.clicked.connect(self.on_target_clicked)
-            card.double_clicked.connect(self.show_character_sheet)
-            self.hero_cards[hero.id] = card
-            self.party_layout.addWidget(card, idx // 3, idx % 3)
+        self._rebuild_party_grid()
 
     # --------------------------------------------------------------- Log
     def log_message(self, msg: str = ''):
@@ -887,6 +912,97 @@ class CombatWindow(QMainWindow):
                 self.save_game()
             except Exception:
                 pass
+
+    def open_reorder_dialog(self):
+        """Open modal dialog to let the user reorder the party in a controlled way."""
+        try:
+            dlg = ReorderDialog(self, self.party)
+            if dlg.exec() == QDialog.Accepted:
+                new_order = dlg.get_order()
+                if new_order and any(h is not None for h in new_order):
+                    # preserve same set but in new order
+                    # ensure all heroes present and no duplicates
+                    ordered = [h for h in new_order if h in self.party]
+                    ordered += [h for h in self.party if h not in ordered]
+                    self.party = ordered
+                    self.log_message(f'🔀 Ordre du groupe modifié: {[h.name for h in self.party]}')
+                    self._rebuild_party_grid()
+                    try:
+                        # Persist party order explicitly to savegame.json
+                        self._persist_party_order()
+                    except Exception as e:
+                        self.log_message(f'⚠️ Échec de la sauvegarde de l\'ordre: {e}')
+        except Exception as e:
+            self.log_message(f'⚠️ Échec du dialogue de réordonnancement: {e}')
+
+    def _persist_party_order(self):
+        """Write current party order to savegame.json (by hero name).
+
+        Logs the full JSON data before and after writing to help debugging when
+        savegame.json does not contain the expected keys.
+        """
+        try:
+            import json
+            data = {}
+            if os.path.exists('savegame.json'):
+                try:
+                    with open('savegame.json', 'r', encoding='utf-8') as f:
+                        data = json.load(f) or {}
+                except Exception:
+                    data = {}
+            data['party_order'] = [h.name for h in self.party]
+            # include killed monsters stats
+            data['killed_monsters'] = getattr(self, 'killed_monsters', {})
+            data['total_kills'] = getattr(self, 'total_kills', 0)
+            # # Log the full data being written (before write)
+            # try:
+            #     serialized_before = json.dumps(data, ensure_ascii=False, indent=2)
+            #     self.log_message('🔁 Données à écrire (avant):')
+            #     for line in serialized_before.splitlines():
+            #         self.log_message(line)
+            # except Exception as le:
+            #     self.log_message(f'⚠️ Échec sérialisation avant écriture: {le}')
+            # Write the file
+            with open('savegame.json', 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            # # Read back and log contents (after write)
+            # try:
+            #     with open('savegame.json', 'r', encoding='utf-8') as f:
+            #         read_back = json.load(f) or {}
+            #     serialized_after = json.dumps(read_back, ensure_ascii=False, indent=2)
+            #     self.log_message('🔁 Données lues (après écriture):')
+            #     for line in serialized_after.splitlines():
+            #         self.log_message(line)
+            # except Exception as re:
+            #     self.log_message(f'⚠️ Échec lecture après écriture: {re}')
+            self.log_message('💾 Ordre du groupe sauvegardé (savegame.json)')
+        except Exception as e:
+            self.log_message(f'⚠️ Impossible d\'écrire savegame.json: {e}')
+
+    def _restore_party_order(self):
+        """Load party_order from savegame.json and reorder self.party accordingly (by name)."""
+        try:
+            import json
+            if not os.path.exists('savegame.json'):
+                return
+            with open('savegame.json', 'r', encoding='utf-8') as f:
+                data = json.load(f) or {}
+            order = data.get('party_order')
+            if not order or not isinstance(order, list):
+                return
+            # Map current heroes by name for lookup
+            name_map = {h.name: h for h in self.party}
+            new_party = []
+            for nm in order:
+                if nm in name_map:
+                    new_party.append(name_map.pop(nm))
+            # Append any heroes not listed in saved order (preserve original instances)
+            new_party += list(name_map.values())
+            if new_party:
+                self.party = new_party
+                self.log_message(f'♻️ Ordre du groupe restauré depuis savegame.json: {[h.name for h in self.party]}')
+        except Exception as e:
+            self.log_message(f'⚠️ Impossible de restaurer l\'ordre depuis savegame.json: {e}')
 
     def on_rest(self):
         for hero in self.party:
@@ -1059,6 +1175,44 @@ class CombatWindow(QMainWindow):
             card.refresh()
             card.set_selected(card.character is self.selected_target)
 
+    # party order change handler
+    def _on_party_order_changed(self, order_chars):
+        """Backward-compatible handler (unused by grid) kept for safety."""
+        try:
+            new_party = [h for h in order_chars if h in self.party]
+            new_party += [h for h in self.party if h not in new_party]
+            self.party = new_party
+            self.log_message(f'🔀 Ordre du groupe modifié: {[h.name for h in self.party]}')
+            try:
+                self.save_game()
+            except Exception:
+                pass
+        except Exception as e:
+            self.log_message(f'⚠️ Erreur lors du réordonnancement: {e}')
+
+    def _rebuild_party_grid(self):
+        """(Re)build the static 3x2 grid of CharacterCard widgets from self.party."""
+        # Clear existing widgets from the grid layout
+        # Remove widgets but keep layout structure
+        for i in reversed(range(self.party_layout.count())):
+            item = self.party_layout.takeAt(i)
+            if item is None:
+                continue
+            w = item.widget()
+            if w is not None:
+                try:
+                    w.setParent(None)
+                except Exception:
+                    pass
+
+        self.hero_cards = {}
+        for idx, hero in enumerate(self.party):
+            card = CharacterCard(hero, hero_subtitle, hero_extra)
+            card.clicked.connect(self.on_target_clicked)
+            card.double_clicked.connect(self.show_character_sheet)
+            self.hero_cards[hero.id] = card
+            self.party_layout.addWidget(card, idx // 3, idx % 3)
+
     # ------------------------------------------------------------ Actions
     def update_action_buttons(self):
         can_act = not self.combat_over and self.current_hero is not None
@@ -1169,18 +1323,11 @@ class CombatWindow(QMainWindow):
         """
         try:
             import json, os, pickle
-            data = {'heroes': []}
-            for h in self.party:
-                data['heroes'].append({
-                    'name': h.name,
-                    'hp': h.hp,
-                    'position': getattr(h, 'position', 'front'),
-                    'inventory': getattr(h, 'inventory', []),
-                    'worn': getattr(h, 'worn', [])
-                })
-            # include killed monsters stats
+            data = dict()
+            # include killed monsters stats and party order for restoration
             data['killed_monsters'] = getattr(self, 'killed_monsters', {})
             data['total_kills'] = getattr(self, 'total_kills', 0)
+            data['party_order'] = [h.name for h in self.party]
             # write JSON (human-readable)
             with open('savegame.json', 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
@@ -1188,6 +1335,8 @@ class CombatWindow(QMainWindow):
             try:
                 with open('savegame.pkl', 'wb') as f:
                     pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
+                for hero in self.party:
+                    save_character(hero, 'gamestate')
             except Exception as e:
                 self.log_message(f"⚠️ Échec de l'écriture pickle: {e}")
             self.log_message('💾 Partie sauvegardée (savegame.json + savegame.pkl)')
@@ -1214,36 +1363,44 @@ class CombatWindow(QMainWindow):
         layout.addWidget(btns)
         dlg.exec()
 
+def load_party(_dir: str) -> list[Hero]:
+    try:
+        with open(f"{_dir}/party.dmp", "rb") as f1:
+            return pickle.load(f1)
+    except FileNotFoundError:
+        return []
+
+def save_party(party: list[Hero], _dir: str):
+    with open(f"{_dir}/party.dmp", "wb") as f1:
+        pickle.dump(party, f1)
+
+
+def save_character(char: Hero, _dir: str):
+    # print(f'Sauvegarde personnage {char.name}')
+    with open(f"{_dir}/{char.name}.dmp", "wb") as f1:
+        pickle.dump(char, f1)
+
+
+def load_character(char_name: str, _dir: str) -> Hero:
+    with open(f"{_dir}/{char_name}.dmp", "rb") as f1:
+        return pickle.load(f1)
+
+def get_roster(characters_dir: str) -> list[Hero]:
+    roster: list[Hero] = []
+    char_file_list = os.scandir(characters_dir)
+    for entry in char_file_list:
+        if entry.is_file() and entry.name.endswith(".dmp"):
+            with open(entry, "rb") as f1:
+                # print(f1)
+                # print(entry)
+                roster.append(pickle.load(f1))
+    return roster
 
 if __name__ == '__main__':
-    # Install global excepthook to capture unexpected exceptions to a log file
-    import traceback, os
-    def _log_exception(exc_type, exc_value, exc_tb):
-        try:
-            tb = ''.join(traceback.format_exception(exc_type, exc_value, exc_tb))
-            with open('debug_startup.log', 'a', encoding='utf-8') as f:
-                f.write(tb)
-            # also print to stderr for consoles
-            print(tb, file=sys.stderr)
-        except Exception:
-            pass
-    sys.excepthook = _log_exception
-
-    try:
-        app = QApplication(sys.argv)
-        window = CombatWindow(party_level=3)
-        window.show()
-        ret = app.exec()
-        # normal exit
-        sys.exit(ret)
-    except Exception as e:
-        # log startup exception to file for inspection
-        try:
-            with open('debug_startup.log', 'a', encoding='utf-8') as f:
-                f.write('=== Startup exception ===\n')
-                traceback.print_exc(file=f)
-                f.write('\n')
-        except Exception:
-            pass
-        # re-raise so IDE shows the error as well
-        raise
+    game_path = "gamestate"  # Replace with the actual path
+    app = QApplication(sys.argv)
+    window = CombatWindow(party_level=12, roster=get_roster(game_path))
+    window.show()
+    ret = app.exec()
+    # normal exit
+    sys.exit(ret)
