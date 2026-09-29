@@ -22,7 +22,7 @@ from models.abilities import Abilities
 from models.character import Hero
 from models.dice import DamageDice
 from models.enums import ClassType, RaceType
-from models.equipment import Armor, Shield, Weapon
+from models.equipment import Armor, Shield, Weapon, armor_to_item, shield_to_item, weapon_to_item
 from models.monster import Monster, MonsterType
 from models.race import Race
 from models.spell import Spell
@@ -118,6 +118,17 @@ def build_party_from_heroes(
 			hit_dice=hit_dice,
 			position='front' if idx < front_needed else 'back',
 		)
+
+		# Bug fix: the weapon/armor/shield equipped at load time used to only
+		# live as Hero attributes, invisible to the inventory (and therefore
+		# to the GUI's equip/unequip/remove-item actions). Register the
+		# starting gear as inventory records too, skipping bare defaults.
+		if weapon.name != 'Fists':
+			hero.inventory.append(weapon_to_item(weapon))
+		if armor.name not in ('Cloth', 'None'):
+			hero.inventory.append(armor_to_item(armor))
+		if shield.name != 'None':
+			hero.inventory.append(shield_to_item(shield))
 
 		# set initial multi_attack based on class and level
 		lvl = h.get('level', 1)
@@ -286,7 +297,12 @@ def distribute_loot(monsters: List[Monster], survivors: List[Hero], weapons: lis
 					return int(m.group(1))
 		return 0
 
-	# helper to auto-equip better items (must be defined before use)
+	# helper to auto-equip better items (must be defined before use).
+	#
+	# Note: this stays independent from Hero.equip_weapon/armor/shield (used by
+	# the GUI) because distribute_loot must also work with lightweight
+	# duck-typed heroes (see tests/test_distribute_loot_auto_equip.py) that
+	# only expose plain attributes, not the full Hero API.
 	def _try_auto_equip(hero: Hero, item: dict) -> None:
 		it_type = item.get('type')
 		name = item.get('name', 'Magic Item')
@@ -328,14 +344,17 @@ def distribute_loot(monsters: List[Monster], survivors: List[Hero], weapons: lis
 				# prefer explicit monster loot if provided
 				if getattr(m, 'loot', None):
 					# assume loot is a list and pick first (tests set single-item loot)
-					item = m.loot[0]
+					item = dict(m.loot[0])
 				else:
 					if item_type == 0 and weapons:
-						item = _random.choice(weapons)
+						item = dict(_random.choice(weapons))
+						item.setdefault('type', 'weapon')
 					elif item_type == 1 and armors:
-						item = _random.choice(armors)
+						item = dict(_random.choice(armors))
+						item.setdefault('type', 'armor')
 					elif shields:
-						item = _random.choice(shields)
+						item = dict(_random.choice(shields))
+						item.setdefault('type', 'shield')
 					else:
 						item = None
 				if item:
@@ -354,7 +373,7 @@ def distribute_loot(monsters: List[Monster], survivors: List[Hero], weapons: lis
 					# pick a magic item of this rarity if available
 					candidates = [it for it in magic_items if it.get('rarity') == rarity]
 					if candidates:
-						mi = _random.choice(candidates)
+						mi = dict(_random.choice(candidates))
 						owner = _random.choice(survivors)
 						owner.inventory.append(mi)
 						game_state.uprint(f'{owner.name} found magic item {mi.get("name")} (rarity {rarity}) on {m.name}!')
@@ -362,30 +381,6 @@ def distribute_loot(monsters: List[Monster], survivors: List[Hero], weapons: lis
 						_try_auto_equip(owner, mi)
 					break
 
-	# helper to auto-equip better items
-	def _try_auto_equip(hero: Hero, item: dict) -> None:
-		it_type = item.get('type')
-		name = item.get('name', 'Magic Item')
-		if it_type == 'weapon':
-			# compare expected damage if both sides have 'damage' field
-			cur = hero.weapon
-			cur_power = weapon_power({'damage': getattr(cur.damage_dice, 'roll_dice', None) or 4})
-			new_power = weapon_power(item)
-			if new_power > cur_power:
-				hero.weapon = Weapon(name=item.get('name', cur.name), damage_dice=DamageDice(1, int(item.get('damage', 4))))
-				game_state.uprint(f'{hero.name} auto-equips {name} (weapon).')
-		elif it_type == 'armor':
-			cur_bonus = hero.armor.bonus
-			new_bonus = item.get('bonus', cur_bonus)
-			if new_bonus > cur_bonus:
-				hero.armor = Armor(name=item.get('name', hero.armor.name), bonus=new_bonus)
-				game_state.uprint(f'{hero.name} auto-equips {name} (armor).')
-		elif it_type == 'shield':
-			cur_bonus = hero.shield.bonus
-			new_bonus = item.get('bonus', cur_bonus)
-			if new_bonus > cur_bonus:
-				hero.shield = Shield(name=item.get('name', hero.shield.name), bonus=new_bonus)
-				game_state.uprint(f'{hero.name} auto-equips {name} (shield).')
 
 def party_stats_msg(party: List[Hero], num_combats: int, killed_monsters: int, monsters=None) -> None:
 	print('=' * 100)

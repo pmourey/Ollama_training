@@ -3,7 +3,7 @@ from __future__ import annotations
 from random import choice, randint
 from typing import List
 
-from game_state import uprint
+import game_state
 from models.character import Character, Hero
 from models.enums import Condition
 from models.spell import Spell
@@ -40,7 +40,6 @@ class BattleSystem:
 		"""
 		from combat.effects.base import CastContext
 		from combat.effects import registry
-		from game_state import uprint
 
 		ctx = CastContext(caster=caster, spell=spell)
 		handler = registry.resolve(spell)
@@ -51,7 +50,7 @@ class BattleSystem:
 			except Exception:
 					# Fallback to a generic message if a handler fails unexpectedly
 					msg = f'[Spell] {caster.name} casts {spell.name} on {target.name}!'
-			uprint(msg)
+			game_state.uprint(msg)
 
 	@staticmethod
 	def melee_attack(attacker: Character, defenders: list[Character]) -> None:
@@ -102,7 +101,7 @@ class BattleSystem:
 						f'{attacker.name} (jet: {d20_roll} + {attack_bonus} = {total_attack}) '
 						f'RATE {defender.name} (CA: {ac}) !'
 					)
-			uprint(msg)
+			game_state.uprint(msg)
 
 	@staticmethod
 	def perform_attack(attacker: Character, defender: Character) -> tuple[bool, int]:
@@ -123,7 +122,7 @@ class BattleSystem:
 		if attacker.is_blessed:
 			d4 = randint(1, 4)
 			base_damage += d4
-			uprint(f'✨ Bless s\'applique ! +{d4} aux dégâts.')
+			game_state.uprint(f'✨ Bless s\'applique ! +{d4} aux dégâts.')
 		if is_critical:
 			base_damage *= 2
 		return max(1, base_damage)
@@ -186,4 +185,4 @@ class BattleSystem:
 				msg = f'{attacker.name} attaque (#{i+1}) et inflige {dmg} dégâts à {defender.name}.'
 			else:
 				msg = f'{attacker.name} attaque (#{i+1}) mais RATE {defender.name}.'
-			uprint(msg)
+			game_state.uprint(msg)

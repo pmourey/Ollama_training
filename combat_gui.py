@@ -127,51 +127,184 @@ class CharacterCard(QFrame):
         self._apply_style()
 
 
-from PySide6.QtWidgets import QDialog, QDialogButtonBox, QTabWidget, QFormLayout, QListWidget, QTextBrowser
+from PySide6.QtWidgets import (
+    QDialog, QDialogButtonBox, QTabWidget, QFormLayout, QListWidget,
+    QListWidgetItem, QTextBrowser,
+)
 
 
 class CharacterSheetDialog(QDialog):
-    """Dialog modal tabbed affichant fiche, inventaire et sorts d'un héros/monstre."""
+    """Dialog modal tabbed affichant fiche, inventaire et sorts d'un héros/monstre.
+
+    Pour les héros, l'onglet Inventaire permet d'équiper/déséquiper des armes,
+    armures et boucliers, et de supprimer des objets de l'inventaire.
+    """
 
     def __init__(self, parent, character):
         super().__init__(parent)
+        self.character = character
+        self.is_hero = isinstance(character, Hero)
         self.setWindowTitle(f"Fiche de {getattr(character, 'name', 'Personnage')}")
-        self.resize(520, 420)
+        self.resize(560, 460)
 
         layout = QVBoxLayout(self)
-        tabs = QTabWidget()
+        self.tabs = QTabWidget()
 
-        # Overview tab
+        self._build_overview_tab()
+        self._build_inventory_tab()
+        self._build_spells_tab()
+
+        layout.addWidget(self.tabs)
+
+        # Dialog buttons
+        buttons = QDialogButtonBox(QDialogButtonBox.Close)
+        buttons.rejected.connect(self.reject)
+        buttons.accepted.connect(self.accept)
+        layout.addWidget(buttons)
+
+    # ------------------------------------------------------------ Overview
+    def _build_overview_tab(self):
+        character = self.character
         overview = QWidget()
-        form = QFormLayout(overview)
-        form.addRow('Nom:', QLabel(getattr(character, 'name', '—')))
-        form.addRow('Niveau:', QLabel(str(getattr(character, 'level', '—'))))
-        form.addRow('Classe:', QLabel(str(character.class_type.value)))
-        form.addRow('Race:', QLabel(str(character.race.type.value)))
-        form.addRow('HP:', QLabel(f"{getattr(character, 'hp', '—')}/{getattr(character, 'max_hp', '—')}"))
-        form.addRow('AC:', QLabel(str(getattr(character, 'armor_class', '—'))))
-        # Stats safe access
-        # stats = ' '.join(str(getattr(character, s, '—')) for s in ('str', 'dex', 'con', 'int', 'wis', 'cha'))
-        # form.addRow('Stats (STR DEX CON INT WIS CHA):', QLabel(stats))
-        form.addRow('Strength:', QLabel(str(character.str)))
-        form.addRow('Dexterity:', QLabel(str(character.dex)))
-        form.addRow('Constitution:', QLabel(str(character.con)))
-        form.addRow('Intelligence:', QLabel(str(character.int)))
-        form.addRow('Wisdom:', QLabel(str(character.wis)))
-        form.addRow('Charism:', QLabel(str(character.cha)))
+        self.overview_form = QFormLayout(overview)
+        self.overview_form.addRow('Nom:', QLabel(getattr(character, 'name', '—')))
+        self.overview_form.addRow('Niveau:', QLabel(str(getattr(character, 'level', '—'))))
+        if self.is_hero:
+            self.overview_form.addRow('Classe:', QLabel(str(character.class_type.value)))
+            self.overview_form.addRow('Race:', QLabel(str(character.race.type.value)))
+        self.overview_form.addRow('HP:', QLabel(f"{getattr(character, 'hp', '—')}/{getattr(character, 'max_hp', '—')}"))
+        self.ac_label = QLabel(str(getattr(character, 'armor_class', '—')))
+        self.overview_form.addRow('AC:', self.ac_label)
+        if self.is_hero:
+            self.weapon_label = QLabel(str(character.weapon))
+            self.armor_label = QLabel(str(character.armor.name))
+            self.shield_label = QLabel(str(character.shield.name))
+            self.overview_form.addRow('Arme équipée:', self.weapon_label)
+            self.overview_form.addRow('Armure équipée:', self.armor_label)
+            self.overview_form.addRow('Bouclier équipé:', self.shield_label)
+        self.overview_form.addRow('Strength:', QLabel(str(character.str)))
+        self.overview_form.addRow('Dexterity:', QLabel(str(character.dex)))
+        self.overview_form.addRow('Constitution:', QLabel(str(character.con)))
+        self.overview_form.addRow('Intelligence:', QLabel(str(character.int)))
+        self.overview_form.addRow('Wisdom:', QLabel(str(character.wis)))
+        self.overview_form.addRow('Charisme:', QLabel(str(character.cha)))
+        self.tabs.addTab(overview, 'Aperçu')
 
-        tabs.addTab(overview, 'Aperçu')
+    def _refresh_overview(self):
+        character = self.character
+        self.ac_label.setText(str(getattr(character, 'armor_class', '—')))
+        if self.is_hero:
+            self.weapon_label.setText(str(character.weapon))
+            self.armor_label.setText(str(character.armor.name))
+            self.shield_label.setText(str(character.shield.name))
 
-        # Inventory tab
+    # ------------------------------------------------------------ Inventory
+    def _build_inventory_tab(self):
+        character = self.character
         inv = QWidget()
         inv_layout = QVBoxLayout(inv)
-        listw = QListWidget()
-        for it in getattr(character, 'inventory', []) or []:
-            listw.addItem(str(it))
-        inv_layout.addWidget(listw)
-        tabs.addTab(inv, 'Inventaire')
+        self.inv_list = QListWidget()
+        inv_layout.addWidget(self.inv_list)
 
-        # Spells tab
+        if self.is_hero:
+            self.status_label = QLabel('')
+            self.status_label.setStyleSheet('color: #2b7de9;')
+            inv_layout.addWidget(self.status_label)
+
+            btn_row = QHBoxLayout()
+            self.btn_equip = QPushButton('✅ Équiper')
+            self.btn_equip.clicked.connect(self._on_equip_clicked)
+            btn_row.addWidget(self.btn_equip)
+            self.btn_unequip_weapon = QPushButton('🗡️ Déséquiper arme')
+            self.btn_unequip_weapon.clicked.connect(self._on_unequip_weapon)
+            btn_row.addWidget(self.btn_unequip_weapon)
+            self.btn_unequip_armor = QPushButton('🛡️ Déséquiper armure')
+            self.btn_unequip_armor.clicked.connect(self._on_unequip_armor)
+            btn_row.addWidget(self.btn_unequip_armor)
+            self.btn_unequip_shield = QPushButton('🔰 Déséquiper bouclier')
+            self.btn_unequip_shield.clicked.connect(self._on_unequip_shield)
+            btn_row.addWidget(self.btn_unequip_shield)
+            inv_layout.addLayout(btn_row)
+
+            btn_row2 = QHBoxLayout()
+            self.btn_remove = QPushButton('🗑️ Supprimer de l\'inventaire')
+            self.btn_remove.clicked.connect(self._on_remove_clicked)
+            btn_row2.addWidget(self.btn_remove)
+            inv_layout.addLayout(btn_row2)
+
+        self.tabs.addTab(inv, 'Inventaire')
+        self._refresh_inventory_list()
+
+    def _refresh_inventory_list(self):
+        self.inv_list.clear()
+        for item in getattr(self.character, 'inventory', []) or []:
+            equipped = self.is_hero and self.character._is_equipped(item)
+            label = self._format_item(item) + (' (équipé)' if equipped else '')
+            list_item = QListWidgetItem(label)
+            list_item.setData(Qt.UserRole, item)
+            self.inv_list.addItem(list_item)
+
+    @staticmethod
+    def _format_item(item: dict) -> str:
+        name = item.get('name', 'Objet')
+        kind = item.get('type', '')
+        if kind == 'weapon':
+            return f"{name} (arme, dégâts 1d{item.get('damage', 4)})"
+        if kind == 'armor':
+            return f"{name} (armure, bonus +{item.get('bonus', 0)})"
+        if kind == 'shield':
+            return f"{name} (bouclier, bonus +{item.get('bonus', 0)})"
+        rarity = item.get('rarity')
+        suffix = f" ({rarity})" if rarity else ''
+        return f"{name}{suffix}"
+
+    def _selected_item(self) -> dict | None:
+        list_item = self.inv_list.currentItem()
+        if list_item is None:
+            return None
+        return list_item.data(Qt.UserRole)
+
+    def _on_equip_clicked(self):
+        item = self._selected_item()
+        if item is None:
+            self.status_label.setText('Sélectionnez un objet à équiper.')
+            return
+        if item.get('type') not in ('weapon', 'armor', 'shield'):
+            self.status_label.setText(f"{item.get('name', 'Objet')} ne peut pas être équipé.")
+            return
+        msg = self.character.equip_item(item)
+        self.status_label.setText(msg)
+        self._refresh_overview()
+        self._refresh_inventory_list()
+
+    def _on_unequip_weapon(self):
+        self.status_label.setText(self.character.unequip_weapon())
+        self._refresh_overview()
+        self._refresh_inventory_list()
+
+    def _on_unequip_armor(self):
+        self.status_label.setText(self.character.unequip_armor())
+        self._refresh_overview()
+        self._refresh_inventory_list()
+
+    def _on_unequip_shield(self):
+        self.status_label.setText(self.character.unequip_shield())
+        self._refresh_overview()
+        self._refresh_inventory_list()
+
+    def _on_remove_clicked(self):
+        item = self._selected_item()
+        if item is None:
+            self.status_label.setText('Sélectionnez un objet à supprimer.')
+            return
+        msg = self.character.remove_from_inventory(item)
+        self.status_label.setText(msg)
+        self._refresh_overview()
+        self._refresh_inventory_list()
+
+    # --------------------------------------------------------------- Spells
+    def _build_spells_tab(self):
+        character = self.character
         spells = QWidget()
         spells_layout = QVBoxLayout(spells)
         tb = QTextBrowser()
@@ -188,14 +321,7 @@ class CharacterSheetDialog(QDialog):
         else:
             tb.setText('Aucun sort connu.')
         spells_layout.addWidget(tb)
-        tabs.addTab(spells, 'Sorts')
-
-        layout.addWidget(tabs)
-
-        # Dialog buttons
-        buttons = QDialogButtonBox(QDialogButtonBox.Close)
-        buttons.rejected.connect(self.reject)
-        layout.addWidget(buttons)
+        self.tabs.addTab(spells, 'Sorts')
 
     def open(self):
         return super().exec()
@@ -224,6 +350,26 @@ def monster_extra(m: Monster) -> str:
     return '' if m.condition == Condition.OK else f'⚠ {m.condition.value}'
 
 
+class EmittingStream:
+    """File-like object that redirects writes to a callable (GUI log)."""
+
+    def __init__(self, write_callable):
+        self.write_callable = write_callable
+
+    def write(self, text):
+        # ignore empty writes
+        if text and not text.isspace():
+            # Ensure newline separation
+            for line in str(text).splitlines():
+                try:
+                    self.write_callable(line)
+                except Exception:
+                    pass
+
+    def flush(self):
+        pass
+
+
 class CombatWindow(QMainWindow):
     def __init__(self, party_level=1):
         super().__init__()
@@ -239,6 +385,13 @@ class CombatWindow(QMainWindow):
             self.weapons, self.armors, self.shields, self.spell_categories,
             party_size=6, party_level=party_level
         )
+        # keep originals to restore on close
+        import sys as _sys
+        self._orig_stdout = _sys.stdout
+        self._orig_stderr = _sys.stderr
+        # Redirect stdout/stderr to GUI log
+        _sys.stdout = EmittingStream(self.log_message)
+        _sys.stderr = EmittingStream(self.log_message)
         self.monsters: list[Monster] = []
 
         self.order: list[Combatant] = []
@@ -258,6 +411,18 @@ class CombatWindow(QMainWindow):
         game_state.uprint = self.log_message
 
         self.new_encounter()
+
+    def closeEvent(self, event):
+        # restore stdout/stderr
+        try:
+            import sys as _sys
+            if hasattr(self, '_orig_stdout') and _sys.stdout is not self._orig_stdout:
+                _sys.stdout = self._orig_stdout
+            if hasattr(self, '_orig_stderr') and _sys.stderr is not self._orig_stderr:
+                _sys.stderr = self._orig_stderr
+        except Exception:
+            pass
+        super().closeEvent(event)
 
     # ------------------------------------------------------------------ UI
     def _build_ui(self):
@@ -385,9 +550,16 @@ class CombatWindow(QMainWindow):
         try:
             dlg = CharacterSheetDialog(self, character)
             dlg.open()
-        except Exception:
+        except Exception as e:
             # Fallback quick message if dialog construction fails
-            QMessageBox.information(self, 'Fiche', str(getattr(character, 'name', repr(character))))
+            QMessageBox.information(self, 'Fiche', f"{getattr(character, 'name', repr(character))}\n{e}")
+        finally:
+            # Equip/unequip actions performed in the dialog change AC/weapon;
+            # refresh the on-screen card so the party panel stays in sync.
+            if isinstance(character, Hero) and character.id in self.hero_cards:
+                self.hero_cards[character.id].refresh()
+            self.refresh_all_cards()
+            self.update_action_buttons()
 
     def on_rest(self):
         for hero in self.party:
@@ -454,6 +626,7 @@ class CombatWindow(QMainWindow):
             self.log_message(f'{target.name} est tombé au combat !')
 
     def check_combat_end(self) -> bool:
+        # Victory: all monsters dead
         if all(m.hp <= 0 for m in self.monsters):
             self.log_message('*** VICTOIRE ! ***')
             self.combat_over = True
@@ -462,7 +635,21 @@ class CombatWindow(QMainWindow):
             self.clear_spell_buttons()
             self.refresh_all_cards()
             self.update_action_buttons()
+            # Distribute loot like console simulation
+            try:
+                from simulation import distribute_loot
+                survivors = [h for h in self.party if h.hp > 0]
+                # Use weapons/armors/shields/magic_items loaded at start
+                distribute_loot(self.monsters, survivors, self.weapons, self.armors, self.shields, self.magic_items)
+                self.log_message('🧰 Loot distribué aux survivants.')
+                # Refresh hero cards to show new equipment/inventory
+                for card in self.hero_cards.values():
+                    card.refresh()
+            except Exception as e:
+                self.log_message(f'⚠️ Erreur lors de la distribution du butin: {e}')
             return True
+
+        # Defeat: all heroes dead
         if all(h.hp <= 0 for h in self.party):
             self.log_message('*** DÉFAITE... tout le groupe est tombé. ***')
             self.combat_over = True
@@ -580,6 +767,6 @@ class CombatWindow(QMainWindow):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    window = CombatWindow(party_level=15)
+    window = CombatWindow(party_level=20)
     window.show()
     sys.exit(app.exec())

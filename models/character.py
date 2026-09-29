@@ -4,9 +4,14 @@ from dataclasses import dataclass, field
 from random import randint
 from typing import List
 
+import game_state
 from models.abilities import Abilities
 from models.enums import ClassType, Condition
-from models.equipment import Armor, Equipment, Shield, Weapon
+from models.equipment import (
+	Armor, Equipment, Shield, Weapon,
+	armor_from_item, shield_from_item, weapon_from_item,
+)
+from models.dice import DamageDice
 from models.race import Race
 from models.spell import Spell
 from models.status import NEGATIVE_EFFECTS, ActiveEffect
@@ -243,19 +248,131 @@ class Hero(Character):
 	def cast_spell(self, spell: Spell, targets: list[Character]) -> None:
 		"""Cast a spell; delegates effect resolution to BattleSystem."""
 		from combat.battle import BattleSystem
-		from game_state import spells_cast, uprint
 
 		if self.current_spell_slots[spell.level - 1] <= 0:
-			uprint(f'[Spell] {self.name} cannot cast {spell.name} (insufficient slots)!')
+			game_state.uprint(f'[Spell] {self.name} cannot cast {spell.name} (insufficient slots)!')
 			return
 
 		self.current_spell_slots[spell.level - 1] -= 1
 		level_idx = spell.level - 1
-		while len(spells_cast) <= level_idx:
-			spells_cast.append({})
-		spells_cast[level_idx][spell.name] = spells_cast[level_idx].get(spell.name, 0) + 1
+		while len(game_state.spells_cast) <= level_idx:
+			game_state.spells_cast.append({})
+		game_state.spells_cast[level_idx][spell.name] = game_state.spells_cast[level_idx].get(spell.name, 0) + 1
 		BattleSystem.spells_inc()
 		BattleSystem.resolve_spell_effect(self, targets, spell)
+
+	# ------------------------------------------------------------ Equipment
+	#
+	# Design note: the inventory is a persistent record of every item a hero
+	# has ever found (including items currently equipped). Equipping an item
+	# from the inventory does NOT remove it from the list; it only updates
+	# the corresponding weapon/armor/shield slot. This keeps the inventory
+	# consistent with items shown/equipped at character creation (see
+	# simulation.build_party_from_heroes) and lets the GUI freely re-equip
+	# past gear. Use remove_from_inventory() to actually delete an item.
+	def _find_inventory_index(self, item: dict) -> int | None:
+		"""Locate an inventory item by identity first, then by equality."""
+		for idx, it in enumerate(self.inventory):
+			if it is item:
+				return idx
+		for idx, it in enumerate(self.inventory):
+			if it == item:
+				return idx
+		return None
+
+	def _is_equipped(self, item: dict) -> bool:
+		item_type = item.get('type')
+		name = item.get('name')
+		if item_type == 'weapon':
+			return self.weapon is not None and self.weapon.name == name
+		if item_type == 'armor':
+			return self.armor is not None and self.armor.name == name
+		if item_type == 'shield':
+			return self.shield is not None and self.shield.name == name
+		return False
+
+	def remove_from_inventory(self, item: dict) -> str:
+		"""Delete an item from the inventory (used by the GUI 'Supprimer' action).
+
+		If the removed item happens to be currently equipped, the corresponding
+		slot is reset to its bare default so the hero is never left referencing
+		a deleted item.
+		"""
+		idx = self._find_inventory_index(item)
+		if idx is None:
+			return f"Objet introuvable dans l'inventaire de {self.name}."
+		removed = self.inventory.pop(idx)
+		msg = f"{removed.get('name', 'Objet')} supprimé de l'inventaire de {self.name}."
+		if self._is_equipped(removed):
+			item_type = removed.get('type')
+			if item_type == 'weapon':
+				self.weapon = Weapon(name='Fists', damage_dice=DamageDice(1, 4))
+			elif item_type == 'armor':
+				self.armor = Armor(name='Cloth', bonus=0)
+			elif item_type == 'shield':
+				self.shield = Shield(name='None', bonus=0)
+			msg += ' (déséquipé)'
+		game_state.uprint(msg)
+		return msg
+
+	def equip_item(self, item: dict) -> str:
+		"""Equip an inventory item, dispatching by its 'type' field."""
+		item_type = item.get('type')
+		if item_type == 'weapon':
+			return self.equip_weapon(item)
+		if item_type == 'armor':
+			return self.equip_armor(item)
+		if item_type == 'shield':
+			return self.equip_shield(item)
+		return f"{item.get('name', 'Objet')} ne peut pas être équipé."
+
+	def equip_weapon(self, item: dict) -> str:
+		new_weapon = weapon_from_item(item)
+		self.weapon = new_weapon
+		msg = f'{self.name} équipe {new_weapon.name}.'
+		game_state.uprint(msg)
+		return msg
+
+	def equip_armor(self, item: dict) -> str:
+		new_armor = armor_from_item(item)
+		self.armor = new_armor
+		msg = f'{self.name} équipe {new_armor.name}.'
+		game_state.uprint(msg)
+		return msg
+
+	def equip_shield(self, item: dict) -> str:
+		new_shield = shield_from_item(item)
+		self.shield = new_shield
+		msg = f'{self.name} équipe {new_shield.name}.'
+		game_state.uprint(msg)
+		return msg
+
+	def unequip_weapon(self) -> str:
+		old = self.weapon
+		if old is None or old.name == 'Fists':
+			return f'{self.name} ne porte aucune arme à retirer.'
+		self.weapon = Weapon(name='Fists', damage_dice=DamageDice(1, 4))
+		msg = f'{self.name} range {old.name}.'
+		game_state.uprint(msg)
+		return msg
+
+	def unequip_armor(self) -> str:
+		old = self.armor
+		if old is None or old.name in ('Cloth', 'None'):
+			return f'{self.name} ne porte aucune armure à retirer.'
+		self.armor = Armor(name='Cloth', bonus=0)
+		msg = f'{self.name} retire {old.name}.'
+		game_state.uprint(msg)
+		return msg
+
+	def unequip_shield(self) -> str:
+		old = self.shield
+		if old is None or old.name == 'None':
+			return f'{self.name} ne porte aucun bouclier à retirer.'
+		self.shield = Shield(name='None', bonus=0)
+		msg = f'{self.name} range {old.name}.'
+		game_state.uprint(msg)
+		return msg
 
 	@property
 	def dc_value(self) -> int:
