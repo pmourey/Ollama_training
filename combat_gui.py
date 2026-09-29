@@ -20,7 +20,7 @@ from PySide6.QtCore import Qt, Signal, QSize
 from PySide6.QtWidgets import (
     QApplication, QFrame, QGridLayout, QGroupBox, QHBoxLayout, QLabel,
     QMainWindow, QMessageBox, QProgressBar, QPushButton, QScrollArea,
-    QSizePolicy, QTextEdit, QVBoxLayout, QWidget,
+    QSizePolicy, QTextEdit, QVBoxLayout, QWidget, QInputDialog,
 )
 
 import game_state
@@ -693,8 +693,19 @@ class CombatWindow(QMainWindow):
          self.magic_items, self.magic_config) = load_game_data()
 
         if not roster:
-            # If no roster provided, build a default party from heroes.json
-            self.party: list[Hero] = build_party_from_heroes(self.heroes_data, self.spells, self.classes, self.races, self.weapons, self.armors, self.shields, self.spell_categories, party_size=6, party_level=party_level)
+            # If no roster provided, ask user for the desired party level and build a default party.
+            try:
+                level, ok = QInputDialog.getInt(self, 'Niveau du groupe',
+                                                'Choisissez le niveau du groupe à générer :',
+                                                party_level, 1, 20, 1)
+                if not ok:
+                    level = party_level
+            except Exception:
+                level = party_level
+            self.party: list[Hero] = build_party_from_heroes(
+                self.heroes_data, self.spells, self.classes, self.races,
+                self.weapons, self.armors, self.shields, self.spell_categories,
+                party_size=6, party_level=level)
         else:
             self.party: list[Hero] = roster
 
