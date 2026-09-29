@@ -122,12 +122,13 @@ def build_party_from_heroes(
 		# Bug fix: the weapon/armor/shield equipped at load time used to only
 		# live as Hero attributes, invisible to the inventory (and therefore
 		# to the GUI's equip/unequip/remove-item actions). Register the
-		# starting gear as inventory records too, skipping bare defaults.
-		if weapon.name != 'Fists':
+		# starting gear as inventory records too, skipping bare defaults and
+		# any malformed (None) names.
+		if weapon.name and weapon.name != 'Fists':
 			hero.inventory.append(weapon_to_item(weapon))
-		if armor.name not in ('Cloth', 'None'):
+		if armor.name and armor.name not in ('Cloth', 'None'):
 			hero.inventory.append(armor_to_item(armor))
-		if shield.name != 'None':
+		if shield.name and shield.name != 'None':
 			hero.inventory.append(shield_to_item(shield))
 
 		# set initial multi_attack based on class and level
@@ -358,11 +359,16 @@ def distribute_loot(monsters: List[Monster], survivors: List[Hero], weapons: lis
 					else:
 						item = None
 				if item:
-					owner = _random.choice(survivors)
-					owner.inventory.append(item)
-					game_state.uprint(f'{owner.name} found {item.get("name","an item")} on {m.name}!')
-					# attempt to auto-equip non-magical equipment immediately
-					_try_auto_equip(owner, item)
+					# Skip malformed items with no name
+					if not item.get('name'):
+					    game_state.uprint(f'⚠️ Found malformed loot (no name) on {m.name}; skipping.')
+					else:
+					    owner = _random.choice(survivors)
+					    owner.inventory.append(item)
+					    name = item.get('name') or 'an item'
+					    game_state.uprint(f'{owner.name} found {name} on {m.name}!')
+					    # attempt to auto-equip non-magical equipment immediately
+					    _try_auto_equip(owner, item)
 
 			# magic item drop attempt based on rarity table
 			r = random()
@@ -374,11 +380,16 @@ def distribute_loot(monsters: List[Monster], survivors: List[Hero], weapons: lis
 					candidates = [it for it in magic_items if it.get('rarity') == rarity]
 					if candidates:
 						mi = dict(_random.choice(candidates))
-						owner = _random.choice(survivors)
-						owner.inventory.append(mi)
-						game_state.uprint(f'{owner.name} found magic item {mi.get("name")} (rarity {rarity}) on {m.name}!')
-						# auto-equip if beneficial
-						_try_auto_equip(owner, mi)
+						# Skip malformed magic items without a name
+						if not mi.get('name'):
+						    game_state.uprint(f"⚠️ Found malformed magic loot (no name) on {m.name}; skipping.")
+						else:
+						    owner = _random.choice(survivors)
+						    owner.inventory.append(mi)
+						    name = mi.get('name') or 'magic item'
+						    game_state.uprint(f'{owner.name} found magic item {name} (rarity {rarity}) on {m.name}!')
+						    # auto-equip if beneficial
+						    _try_auto_equip(owner, mi)
 					break
 
 

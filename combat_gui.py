@@ -129,7 +129,7 @@ class CharacterCard(QFrame):
 
 from PySide6.QtWidgets import (
     QDialog, QDialogButtonBox, QTabWidget, QFormLayout, QListWidget,
-    QListWidgetItem, QTextBrowser,
+    QListWidgetItem, QTextBrowser, QComboBox
 )
 
 
@@ -179,9 +179,27 @@ class CharacterSheetDialog(QDialog):
             self.weapon_label = QLabel(str(character.weapon))
             self.armor_label = QLabel(str(character.armor.name))
             self.shield_label = QLabel(str(character.shield.name))
+            # Spell points (only for casters)
+            has_spell_slots = any(getattr(character, 'max_spell_slots', []) or []) or bool(getattr(character, 'spells', None))
+            if has_spell_slots:
+                sp_total = sum(getattr(character, 'current_spell_slots', []) or [])
+                self.sp_label = QLabel(str(sp_total))
+                self.overview_form.addRow('Spell Points:', self.sp_label)
+            else:
+                self.sp_label = None
             self.overview_form.addRow('Arme équipée:', self.weapon_label)
             self.overview_form.addRow('Armure équipée:', self.armor_label)
             self.overview_form.addRow('Bouclier équipé:', self.shield_label)
+            # Gold and XP
+            self.gold_label = QLabel(str(getattr(character, 'gold', 0)))
+            self.xp_label = QLabel(str(getattr(character, 'xp', 0)))
+            self.overview_form.addRow('Gold:', self.gold_label)
+            self.overview_form.addRow('XP:', self.xp_label)
+            # Worn items (rings, wondrous)
+            worn_txt = '\n'.join([w.get('name') for w in getattr(character, 'worn', [])]) or '—'
+            self.worn_label = QLabel(worn_txt)
+            self.worn_label.setWordWrap(True)
+            self.overview_form.addRow('Équipements portés:', self.worn_label)
         self.overview_form.addRow('Strength:', QLabel(str(character.str)))
         self.overview_form.addRow('Dexterity:', QLabel(str(character.dex)))
         self.overview_form.addRow('Constitution:', QLabel(str(character.con)))
@@ -197,6 +215,17 @@ class CharacterSheetDialog(QDialog):
             self.weapon_label.setText(str(character.weapon))
             self.armor_label.setText(str(character.armor.name))
             self.shield_label.setText(str(character.shield.name))
+            # update spell points only if label exists (caster)
+            if getattr(self, 'sp_label', None) is not None:
+                sp_total = sum(getattr(character, 'current_spell_slots', []) or [])
+                self.sp_label.setText(str(sp_total))
+            # update gold/xp
+            if getattr(self, 'gold_label', None) is not None:
+                self.gold_label.setText(str(getattr(character, 'gold', 0)))
+            if getattr(self, 'xp_label', None) is not None:
+                self.xp_label.setText(str(getattr(character, 'xp', 0)))
+            worn_txt = '\n'.join([w.get('name') for w in getattr(character, 'worn', [])]) or '—'
+            self.worn_label.setText(worn_txt)
 
     # ------------------------------------------------------------ Inventory
     def _build_inventory_tab(self):
@@ -215,16 +244,32 @@ class CharacterSheetDialog(QDialog):
             self.btn_equip = QPushButton('✅ Équiper')
             self.btn_equip.clicked.connect(self._on_equip_clicked)
             btn_row.addWidget(self.btn_equip)
-            self.btn_unequip_weapon = QPushButton('🗡️ Déséquiper arme')
-            self.btn_unequip_weapon.clicked.connect(self._on_unequip_weapon)
-            btn_row.addWidget(self.btn_unequip_weapon)
-            self.btn_unequip_armor = QPushButton('🛡️ Déséquiper armure')
-            self.btn_unequip_armor.clicked.connect(self._on_unequip_armor)
-            btn_row.addWidget(self.btn_unequip_armor)
-            self.btn_unequip_shield = QPushButton('🔰 Déséquiper bouclier')
-            self.btn_unequip_shield.clicked.connect(self._on_unequip_shield)
-            btn_row.addWidget(self.btn_unequip_shield)
+            self.btn_use = QPushButton('🧪 Utiliser')
+            self.btn_use.setEnabled(False)
+            self.btn_use.clicked.connect(self._on_use_clicked)
+            btn_row.addWidget(self.btn_use)
+            # Single contextual unequip button: enabled when selected item is currently equipped/worn
+            self.btn_unequip = QPushButton('🔄 Déséquiper')
+            self.btn_unequip.setEnabled(False)
+            self.btn_unequip.clicked.connect(self._on_unequip_selected)
+            btn_row.addWidget(self.btn_unequip)
             inv_layout.addLayout(btn_row)
+
+            # Transfer controls: choose recipient and transfer selected (non-equipped) item
+            transfer_row = QHBoxLayout()
+            self.transfer_recipient = QComboBox()
+            # populate with other party members' names
+            # parent may be the main CombatWindow; guard if not available
+            p = self.parent()
+            others = [h for h in getattr(p, 'party', []) if h is not self.character]
+            for h in others:
+                self.transfer_recipient.addItem(h.name, h)
+            transfer_row.addWidget(QLabel('Transférer à:'))
+            transfer_row.addWidget(self.transfer_recipient)
+            self.btn_transfer = QPushButton('➡️ Transférer')
+            self.btn_transfer.clicked.connect(self._on_transfer_clicked)
+            transfer_row.addWidget(self.btn_transfer)
+            inv_layout.addLayout(transfer_row)
 
             btn_row2 = QHBoxLayout()
             self.btn_remove = QPushButton('🗑️ Supprimer de l\'inventaire')
@@ -242,7 +287,15 @@ class CharacterSheetDialog(QDialog):
             label = self._format_item(item) + (' (équipé)' if equipped else '')
             list_item = QListWidgetItem(label)
             list_item.setData(Qt.UserRole, item)
+            # tooltip shows description when hovering
+            desc = item.get('desc') or item.get('description') or ''
+            if desc:
+                list_item.setToolTip(desc)
             self.inv_list.addItem(list_item)
+        # enable/disable Use/Unequip button when selection changes
+        self.inv_list.currentItemChanged.connect(self._on_inv_selection_changed)
+        # ensure initial state
+        self._on_inv_selection_changed()
 
     @staticmethod
     def _format_item(item: dict) -> str:
@@ -264,12 +317,41 @@ class CharacterSheetDialog(QDialog):
             return None
         return list_item.data(Qt.UserRole)
 
+    def _on_inv_selection_changed(self, current=None, previous=None):
+        item = self._selected_item()
+        if not item:
+            if hasattr(self, 'btn_use'):
+                self.btn_use.setEnabled(False)
+            if hasattr(self, 'btn_unequip'):
+                self.btn_unequip.setEnabled(False)
+            if hasattr(self, 'btn_transfer'):
+                self.btn_transfer.setEnabled(False)
+            return
+        # Enable Use for potions only
+        if hasattr(self, 'btn_use'):
+            self.btn_use.setEnabled(item.get('type') == 'potion')
+        # Enable unequip if selected item is equipped/worn
+        if hasattr(self, 'btn_unequip'):
+            is_equipped = False
+            # check hero slots
+            if self.is_hero:
+                itype = item.get('type')
+                if itype in ('weapon', 'armor', 'shield'):
+                    is_equipped = self.character._is_equipped(item)
+                elif itype in ('ring', 'wondrous'):
+                    is_equipped = any(w.get('name') == item.get('name') for w in getattr(self.character, 'worn', []))
+            self.btn_unequip.setEnabled(is_equipped)
+        # Enable transfer only for non-equipped items
+        if hasattr(self, 'btn_transfer'):
+            can_transfer = not self.character._is_equipped(item) if self.is_hero else False
+            self.btn_transfer.setEnabled(can_transfer)
+
     def _on_equip_clicked(self):
         item = self._selected_item()
         if item is None:
             self.status_label.setText('Sélectionnez un objet à équiper.')
             return
-        if item.get('type') not in ('weapon', 'armor', 'shield'):
+        if item.get('type') not in ('weapon', 'armor', 'shield', 'ring', 'wondrous'):
             self.status_label.setText(f"{item.get('name', 'Objet')} ne peut pas être équipé.")
             return
         msg = self.character.equip_item(item)
@@ -277,20 +359,81 @@ class CharacterSheetDialog(QDialog):
         self._refresh_overview()
         self._refresh_inventory_list()
 
-    def _on_unequip_weapon(self):
-        self.status_label.setText(self.character.unequip_weapon())
+    # Unified unequip handler for selected item (weapon/armor/shield/ring/wondrous)
+    def _on_unequip_selected(self):
+        item = self._selected_item()
+        if item is None:
+            # if nothing selected, try to unequip nothing
+            self.status_label.setText('Sélectionnez un objet équipé à déséquiper.')
+            return
+        itype = item.get('type')
+        if itype == 'weapon':
+            self.status_label.setText(self.character.unequip_weapon())
+        elif itype == 'armor':
+            self.status_label.setText(self.character.unequip_armor())
+        elif itype == 'shield':
+            self.status_label.setText(self.character.unequip_shield())
+        elif itype in ('ring', 'wondrous'):
+            # remove from worn by name
+            name = item.get('name')
+            self.status_label.setText(self.character.unequip_worn(name))
+        else:
+            self.status_label.setText(f"{item.get('name','Objet')} ne peut pas être déséquipé.")
         self._refresh_overview()
         self._refresh_inventory_list()
 
-    def _on_unequip_armor(self):
-        self.status_label.setText(self.character.unequip_armor())
-        self._refresh_overview()
-        self._refresh_inventory_list()
+    def save_game(self):
+        """Save minimal hero state to both JSON and (optionally) pickle for fidelity.
+        NOTE: pickle is binary and should only be used locally; loading pickle executes code.
+        Includes killed_monsters and total_kills so stats persist between sessions.
+        """
+        try:
+            import json, os, pickle
+            data = {'heroes': []}
+            for h in self.party:
+                data['heroes'].append({
+                    'name': h.name,
+                    'hp': h.hp,
+                    'position': getattr(h, 'position', 'front'),
+                    'inventory': getattr(h, 'inventory', []),
+                    'worn': getattr(h, 'worn', [])
+                })
+            # include killed monsters stats
+            data['killed_monsters'] = getattr(self, 'killed_monsters', {})
+            data['total_kills'] = getattr(self, 'total_kills', 0)
+            # write JSON (human-readable)
+            with open('savegame.json', 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            # write pickle for a more complete snapshot (protocol highest)
+            try:
+                with open('savegame.pkl', 'wb') as f:
+                    pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
+            except Exception as e:
+                # non-fatal
+                self.log_message(f"⚠️ Échec de l'écriture pickle: {e}")
+            self.log_message('💾 Partie sauvegardée (savegame.json + savegame.pkl)')
+        except Exception as e:
+            self.log_message(f'⚠️ Échec de la sauvegarde: {e}')
 
-    def _on_unequip_shield(self):
-        self.status_label.setText(self.character.unequip_shield())
-        self._refresh_overview()
-        self._refresh_inventory_list()
+    def show_killed_monsters(self):
+        dlg = QDialog(self)
+        dlg.setWindowTitle('Monstres tués')
+        dlg.resize(420, 360)
+        layout = QVBoxLayout(dlg)
+        total = getattr(self, 'total_kills', 0)
+        lbl = QLabel(f'Total tués: {total}')
+        layout.addWidget(lbl)
+        listw = QListWidget()
+        items = sorted(getattr(self, 'killed_monsters', {}).items(), key=lambda kv: kv[1], reverse=True)
+        if not items:
+            listw.addItem("Aucun monstre tué pour l'instant.")
+        for name, count in items:
+            listw.addItem(f"{name}: {count}")
+        layout.addWidget(listw)
+        btns = QDialogButtonBox(QDialogButtonBox.Close)
+        btns.rejected.connect(dlg.reject)
+        layout.addWidget(btns)
+        dlg.exec()
 
     def _on_remove_clicked(self):
         item = self._selected_item()
@@ -301,6 +444,63 @@ class CharacterSheetDialog(QDialog):
         self.status_label.setText(msg)
         self._refresh_overview()
         self._refresh_inventory_list()
+
+    def _on_transfer_clicked(self):
+        item = self._selected_item()
+        if item is None:
+            self.status_label.setText('Sélectionnez un objet à transférer.')
+            return
+        # cannot transfer equipped items
+        if self.character._is_equipped(item):
+            self.status_label.setText("Impossible de transférer un objet équipé. Déséquipez-le d'abord.")
+            return
+        recipient = None
+        if hasattr(self, 'transfer_recipient'):
+            recipient = self.transfer_recipient.currentData()
+        if recipient is None:
+            self.status_label.setText('Sélectionnez un destinataire valide.')
+            return
+        # perform transfer: remove from current inventory (by identity) and append to recipient
+        idx = self.character._find_inventory_index(item)
+        if idx is None:
+            self.status_label.setText('Objet introuvable pour transfert.')
+            return
+        transferred = self.character.inventory.pop(idx)
+        recipient.inventory.append(transferred)
+        self.status_label.setText(f"{transferred.get('name','Objet')} transféré à {recipient.name}.")
+        # refresh both dialogs/cards
+        self._refresh_inventory_list()
+        parent = self.parent()
+        try:
+            # refresh recipient card if present
+            if hasattr(parent, 'hero_cards') and recipient.id in parent.hero_cards:
+                parent.hero_cards[recipient.id].refresh()
+        except Exception:
+            pass
+        # autosave
+        try:
+            self.save_game()
+        except Exception:
+            pass
+
+    def _on_use_clicked(self):
+        item = self._selected_item()
+        if item is None:
+            self.status_label.setText('Sélectionnez un objet à utiliser.')
+            return
+        # Delegate full gameplay effect to Hero.use_item
+        msg = self.character.use_item(item)
+        self.status_label.setText(msg)
+        # if item is consumable, remove it from inventory
+        if item.get('type') in ('potion', 'consumable'):
+            self.character.remove_from_inventory(item)
+        self._refresh_overview()
+        self._refresh_inventory_list()
+        # autosave after using an item
+        try:
+            self.save_game()
+        except Exception:
+            pass
 
     # --------------------------------------------------------------- Spells
     def _build_spells_tab(self):
@@ -385,7 +585,104 @@ class CombatWindow(QMainWindow):
             self.weapons, self.armors, self.shields, self.spell_categories,
             party_size=6, party_level=party_level
         )
+        # track monsters killed by party this session
+        # killed_monsters_counts maps monster name -> count
+        self.killed_monsters: dict = {}
+        self.total_kills: int = 0
+        self._killed_names: set = set()
+        # attempt to auto-load save file (prefer pickle for fidelity, fallback to json)
+        try:
+            import os, json, pickle
+            save_pkl = os.path.join('.', 'savegame.pkl')
+            save_json = os.path.join('.', 'savegame.json')
+            if os.path.exists(save_pkl):
+                # WARNING: loading pickle can execute arbitrary code. Only load trusted files.
+                try:
+                    with open(save_pkl, 'rb') as f:
+                        data = pickle.load(f)
+                    # expected structure: {'heroes': [hero_state_dicts...], 'killed_monsters': {...}, 'total_kills': N}
+                    for hs in data.get('heroes', []):
+                        for hero in self.party:
+                            if hero.name == hs.get('name'):
+                                # apply attributes that are safe/expected
+                                hero.hp = hs.get('hp', hero.hp)
+                                hero.position = hs.get('position', hero.position)
+                                if 'worn' in hs:
+                                    hero.worn = hs.get('worn', hero.worn)
+                                if 'inventory' in hs:
+                                    hero.inventory = hs.get('inventory', hero.inventory)
+                    # restore killed stats if present
+                    if 'killed_monsters' in data:
+                        try:
+                            self.killed_monsters = dict(data.get('killed_monsters') or {})
+                            self.total_kills = int(data.get('total_kills', 0))
+                        except Exception:
+                            pass
+                    if hasattr(self, 'log_message'):
+                        self.log_message('🔄 Partie chargée depuis savegame.pkl (pickle)')
+                    else:
+                        print('🔄 Partie chargée depuis savegame.pkl (pickle)')
+                except Exception as ex:
+                    # on failure, fall back to json
+                    print(f'⚠️ Échec du chargement pickle: {ex}')
+            elif os.path.exists(save_json):
+                with open(save_json, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                # apply saved state to party by matching names
+                for hs in data.get('heroes', []):
+                    for hero in self.party:
+                        if hero.name == hs.get('name'):
+                            hero.hp = hs.get('hp', hero.hp)
+                            hero.position = hs.get('position', hero.position)
+                            # restore worn and inventory if present
+                            if 'worn' in hs:
+                                hero.worn = hs.get('worn', hero.worn)
+                            if 'inventory' in hs:
+                                hero.inventory = hs.get('inventory', hero.inventory)
+                # restore killed stats from json if present
+                if 'killed_monsters' in data:
+                    try:
+                        self.killed_monsters = dict(data.get('killed_monsters') or {})
+                        self.total_kills = int(data.get('total_kills', 0))
+                    except Exception:
+                        pass
+                # log if UI ready, otherwise print
+                if hasattr(self, 'log_message'):
+                    try:
+                        self.log_message('🔄 Partie chargée depuis savegame.json')
+                    except Exception:
+                        print('🔄 Partie chargée depuis savegame.json')
+                else:
+                    print('🔄 Partie chargée depuis savegame.json')
+        except Exception as e:
+            if hasattr(self, 'log_message'):
+                try:
+                    self.log_message(f'⚠️ Échec du chargement de la sauvegarde: {e}')
+                except Exception:
+                    print(f'⚠️ Échec du chargement de la sauvegarde: {e}')
+            else:
+                print(f'⚠️ Échec du chargement de la sauvegarde: {e}')
         # keep originals to restore on close
+        # Additional: ensure XP and gold from savegame.json (if any) are applied to heroes
+        try:
+            import os, json
+            if os.path.exists('savegame.json'):
+                with open('savegame.json', 'r', encoding='utf-8') as _f:
+                    _data = json.load(_f)
+                for hs in _data.get('heroes', []):
+                    for hero in self.party:
+                        if hero.name == hs.get('name'):
+                            try:
+                                hero.xp = hs.get('xp', getattr(hero, 'xp', 0))
+                            except Exception:
+                                pass
+                            try:
+                                hero.gold = hs.get('gold', getattr(hero, 'gold', 0))
+                            except Exception:
+                                pass
+        except Exception:
+            pass
+
         import sys as _sys
         self._orig_stdout = _sys.stdout
         self._orig_stderr = _sys.stderr
@@ -483,6 +780,13 @@ class CombatWindow(QMainWindow):
         self.btn_rest = QPushButton('🏕️ Repos complet')
         self.btn_rest.clicked.connect(self.on_rest)
         controls.addWidget(self.btn_rest)
+        # Save/Load buttons
+        self.btn_save = QPushButton('💾 Sauvegarder')
+        self.btn_save.clicked.connect(self.save_game)
+        controls.addWidget(self.btn_save)
+        self.btn_show_kills = QPushButton('🗡️ Monstres tués')
+        self.btn_show_kills.clicked.connect(self.show_killed_monsters)
+        controls.addWidget(self.btn_show_kills)
         left.addLayout(controls)
 
         # Log panel
@@ -503,10 +807,25 @@ class CombatWindow(QMainWindow):
 
     # --------------------------------------------------------------- Log
     def log_message(self, msg: str = ''):
+        """Append a message to GUI log if available; fallback to print before UI ready."""
         for line in str(msg).splitlines() or ['']:
-            self.log.append(line)
-        bar = self.log.verticalScrollBar()
-        bar.setValue(bar.maximum())
+            try:
+                if hasattr(self, 'log') and self.log is not None:
+                    self.log.append(line)
+                else:
+                    print(line)
+            except Exception:
+                # Final fallback
+                try:
+                    print(line)
+                except Exception:
+                    pass
+        try:
+            if hasattr(self, 'log') and self.log is not None:
+                bar = self.log.verticalScrollBar()
+                bar.setValue(bar.maximum())
+        except Exception:
+            pass
 
     # ---------------------------------------------------------- Encounter
     def new_encounter(self):
@@ -518,6 +837,9 @@ class CombatWindow(QMainWindow):
         party_level = sum(h.level for h in alive_heroes) / len(alive_heroes) if alive_heroes else 1
         selection = [m for m in self.monster_types if party_level - 1 < m.level <= party_level] or self.monster_types
         self.monsters = create_sample_monsters(selection, count)
+        # note: do NOT clear killed_monsters here so the list accumulates across encounters
+        # (clearing was causing previously recorded kills to be lost each victory)
+        # self.killed_monsters.clear()
 
         # Rebuild monster cards
         for card in self.monster_cards:
@@ -554,12 +876,17 @@ class CombatWindow(QMainWindow):
             # Fallback quick message if dialog construction fails
             QMessageBox.information(self, 'Fiche', f"{getattr(character, 'name', repr(character))}\n{e}")
         finally:
-            # Equip/unequip actions performed in the dialog change AC/weapon;
+            # Equip/unequip/actions performed in the dialog change AC/weapon/worn;
             # refresh the on-screen card so the party panel stays in sync.
             if isinstance(character, Hero) and character.id in self.hero_cards:
                 self.hero_cards[character.id].refresh()
             self.refresh_all_cards()
             self.update_action_buttons()
+            # auto-save after changes to character sheet
+            try:
+                self.save_game()
+            except Exception:
+                pass
 
     def on_rest(self):
         for hero in self.party:
@@ -624,6 +951,28 @@ class CombatWindow(QMainWindow):
         BattleSystem.combat(monster, target, self.party)
         if target.is_dead:
             self.log_message(f'{target.name} est tombé au combat !')
+        # If monster died during combat resolution, record it for stats
+        if monster.hp <= 0:
+            # record kill via helper to avoid duplicates
+            try:
+                self._record_kill(monster)
+            except Exception:
+                pass
+
+    def _record_kill(self, monster: Monster):
+        """Record a monster kill: increment per-type counts and total.
+        Uses name as key; duplicates are allowed and counted (multiple same-name kills).
+        """
+        try:
+            name = monster.name or 'Unknown'
+            lvl = getattr(monster, 'level', None)
+            # increment count for this monster type
+            self.killed_monsters[name] = self.killed_monsters.get(name, 0) + 1
+            self.total_kills = getattr(self, 'total_kills', 0) + 1
+            # also keep _killed_names for previously-seen types (not strictly required now)
+            self._killed_names.add(name)
+        except Exception:
+            pass
 
     def check_combat_end(self) -> bool:
         # Victory: all monsters dead
@@ -635,18 +984,44 @@ class CombatWindow(QMainWindow):
             self.clear_spell_buttons()
             self.refresh_all_cards()
             self.update_action_buttons()
-            # Distribute loot like console simulation
+            # ensure any newly-dead monsters are recorded
+            for m in self.monsters:
+                if m.hp <= 0:
+                    self._record_kill(m)
+            # Compute XP/GP totals like encounter.start_combat and distribute to survivors
             try:
-                from simulation import distribute_loot
+                total_xp = sum((m.xp or 0) for m in self.monsters if m.hp <= 0)
+                total_gp = sum((m.gold or 0) for m in self.monsters if m.hp <= 0)
                 survivors = [h for h in self.party if h.hp > 0]
+                if survivors and (total_xp > 0 or total_gp > 0):
+                    per_xp = total_xp // len(survivors)
+                    extra_xp = total_xp - per_xp * len(survivors)
+                    per_gp = total_gp // len(survivors)
+                    extra_gp = total_gp - per_gp * len(survivors)
+                    for i, h in enumerate(survivors):
+                        add_xp = per_xp + (extra_xp if i == 0 else 0)
+                        add_gp = per_gp + (extra_gp if i == 0 else 0)
+                        try:
+                            h.xp = getattr(h, 'xp', 0) + add_xp
+                            h.gold = getattr(h, 'gold', 0) + add_gp
+                        except Exception:
+                            pass
+                        self.log_message(f'🏅 {h.name} reçoit {add_xp} XP et {add_gp} gp')
+                # Distribute loot like console simulation
+                from simulation import distribute_loot
                 # Use weapons/armors/shields/magic_items loaded at start
                 distribute_loot(self.monsters, survivors, self.weapons, self.armors, self.shields, self.magic_items)
                 self.log_message('🧰 Loot distribué aux survivants.')
                 # Refresh hero cards to show new equipment/inventory
                 for card in self.hero_cards.values():
                     card.refresh()
+                # autosave stats and hero state after victory so killed_monsters persist
+                try:
+                    self.save_game()
+                except Exception:
+                    pass
             except Exception as e:
-                self.log_message(f'⚠️ Erreur lors de la distribution du butin: {e}')
+                self.log_message(f'⚠️ Erreur lors de la distribution du butin/XP: {e}')
             return True
 
         # Defeat: all heroes dead
@@ -734,6 +1109,17 @@ class CombatWindow(QMainWindow):
             if hero.hp <= 0 or target.hp <= 0:
                 break
             BattleSystem.melee_attack(hero, [target])
+            # if target died from this attack, announce and record
+            if target.hp <= 0:
+                try:
+                    self.log_message(f'{target.name} est vaincu !')
+                except Exception:
+                    pass
+                try:
+                    self._record_kill(target)
+                except Exception:
+                    pass
+                break
         self.finish_hero_action()
 
     def on_cast_spell(self, spell: Spell):
@@ -754,6 +1140,17 @@ class CombatWindow(QMainWindow):
                 return
 
         hero.cast_spell(spell, targets)
+        # after spells, check for defeated targets to announce and record
+        for t in targets:
+            if getattr(t, 'hp', 1) <= 0:
+                try:
+                    self.log_message(f'{t.name} est vaincu !')
+                except Exception:
+                    pass
+                try:
+                    self._record_kill(t)
+                except Exception:
+                    pass
         self.finish_hero_action()
 
     def finish_hero_action(self):
@@ -764,9 +1161,89 @@ class CombatWindow(QMainWindow):
             return
         self.advance()
 
+    # Persistence: save/load minimal hero state
+    def save_game(self):
+        """Save minimal hero state to both JSON and (optionally) pickle for fidelity.
+        NOTE: pickle is binary and should only be used locally; loading pickle executes code.
+        Includes killed_monsters and total_kills so stats persist between sessions.
+        """
+        try:
+            import json, os, pickle
+            data = {'heroes': []}
+            for h in self.party:
+                data['heroes'].append({
+                    'name': h.name,
+                    'hp': h.hp,
+                    'position': getattr(h, 'position', 'front'),
+                    'inventory': getattr(h, 'inventory', []),
+                    'worn': getattr(h, 'worn', [])
+                })
+            # include killed monsters stats
+            data['killed_monsters'] = getattr(self, 'killed_monsters', {})
+            data['total_kills'] = getattr(self, 'total_kills', 0)
+            # write JSON (human-readable)
+            with open('savegame.json', 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            # try to write pickle for fidelity; ignore failure
+            try:
+                with open('savegame.pkl', 'wb') as f:
+                    pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
+            except Exception as e:
+                self.log_message(f"⚠️ Échec de l'écriture pickle: {e}")
+            self.log_message('💾 Partie sauvegardée (savegame.json + savegame.pkl)')
+        except Exception as e:
+            self.log_message(f'⚠️ Échec de la sauvegarde: {e}')
+
+    def show_killed_monsters(self):
+        dlg = QDialog(self)
+        dlg.setWindowTitle('Monstres tués')
+        dlg.resize(420, 360)
+        layout = QVBoxLayout(dlg)
+        total = getattr(self, 'total_kills', 0)
+        lbl = QLabel(f'Total tués: {total}')
+        layout.addWidget(lbl)
+        listw = QListWidget()
+        items = sorted(getattr(self, 'killed_monsters', {}).items(), key=lambda kv: kv[1], reverse=True)
+        if not items:
+            listw.addItem("Aucun monstre tué pour l'instant.")
+        for name, count in items:
+            listw.addItem(f"{name}: {count}")
+        layout.addWidget(listw)
+        btns = QDialogButtonBox(QDialogButtonBox.Close)
+        btns.rejected.connect(dlg.reject)
+        layout.addWidget(btns)
+        dlg.exec()
+
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    window = CombatWindow(party_level=20)
-    window.show()
-    sys.exit(app.exec())
+    # Install global excepthook to capture unexpected exceptions to a log file
+    import traceback, os
+    def _log_exception(exc_type, exc_value, exc_tb):
+        try:
+            tb = ''.join(traceback.format_exception(exc_type, exc_value, exc_tb))
+            with open('debug_startup.log', 'a', encoding='utf-8') as f:
+                f.write(tb)
+            # also print to stderr for consoles
+            print(tb, file=sys.stderr)
+        except Exception:
+            pass
+    sys.excepthook = _log_exception
+
+    try:
+        app = QApplication(sys.argv)
+        window = CombatWindow(party_level=3)
+        window.show()
+        ret = app.exec()
+        # normal exit
+        sys.exit(ret)
+    except Exception as e:
+        # log startup exception to file for inspection
+        try:
+            with open('debug_startup.log', 'a', encoding='utf-8') as f:
+                f.write('=== Startup exception ===\n')
+                traceback.print_exc(file=f)
+                f.write('\n')
+        except Exception:
+            pass
+        # re-raise so IDE shows the error as well
+        raise

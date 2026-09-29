@@ -232,6 +232,9 @@ class Hero(Character):
 	weapon: Weapon
 	shield: Shield
 	inventory: List[Equipment] = field(default_factory=list)
+	# worn holds rings and wondrous items that are 'worn' rather than in a single slot
+	worn: List[dict] = field(default_factory=list)
+
 	spellcasting_ability: str = ''
 	spells: List[Spell] = field(default_factory=list)
 	max_spell_slots: list[int] = field(default_factory=lambda: [0] * 10)
@@ -289,6 +292,9 @@ class Hero(Character):
 			return self.armor is not None and self.armor.name == name
 		if item_type == 'shield':
 			return self.shield is not None and self.shield.name == name
+		# rings & wondrous items are stored in worn list
+		if item_type in ('ring', 'wondrous'):
+			return any(w.get('name') == name for w in self.worn)
 		return False
 
 	def remove_from_inventory(self, item: dict) -> str:
@@ -324,7 +330,36 @@ class Hero(Character):
 			return self.equip_armor(item)
 		if item_type == 'shield':
 			return self.equip_shield(item)
+		if item_type in ('ring', 'wondrous'):
+			return self.equip_worn(item)
 		return f"{item.get('name', 'Objet')} ne peut pas être équipé."
+
+	def equip_worn(self, item: dict) -> str:
+		"""Wear an item (ring or wondrous). Multiple rings allowed; duplicates prevented by name."""
+		name = item.get('name')
+		if any(w.get('name') == name for w in self.worn):
+			msg = f"{self.name} porte déjà {name}."
+			game_state.uprint(msg)
+			return msg
+		self.worn.append(item.copy())
+		msg = f"{self.name} porte maintenant {name}."
+		game_state.uprint(msg)
+		return msg
+
+	def unequip_worn(self, name: str) -> str:
+		found = None
+		for w in list(self.worn):
+			if w.get('name') == name:
+				found = w
+				self.worn.remove(w)
+				break
+		if not found:
+			msg = f"{self.name} ne porte pas {name}."
+			game_state.uprint(msg)
+			return msg
+		msg = f"{self.name} arrête de porter {name}."
+		game_state.uprint(msg)
+		return msg
 
 	def equip_weapon(self, item: dict) -> str:
 		new_weapon = weapon_from_item(item)
@@ -346,6 +381,57 @@ class Hero(Character):
 		msg = f'{self.name} équipe {new_shield.name}.'
 		game_state.uprint(msg)
 		return msg
+
+	def use_item(self, item: dict) -> str:
+		"""Apply an item's effect in gameplay (potions, consumables).
+		Supported keys:
+		- 'heal': integer healing amount
+		- 'cure': boolean flag to remove negative effects
+		- 'buff': dict with temporary effect e.g. {'kind':'shield','magnitude':2,'turns':3}
+		"""
+		if item.get('type') != 'potion' and item.get('type') != 'consumable':
+			return f"{item.get('name','Objet')} n'est pas consommable."
+		name = item.get('name', 'Potion')
+		# Healing: explicit 'heal' field or dice notation in 'desc' (e.g. 'Heals 2d4+2 HP')
+		if 'heal' in item:
+			amount = int(item.get('heal', 0))
+			old = self.hp
+			self.hp = min(self.max_hp, self.hp + amount)
+			game_state.uprint(f"[Potion] {self.name} uses {name} and recovers {self.hp - old} HP.")
+			return f"{self.name} récupère {self.hp - old} PV."
+		# try parsing dice expression from description if no explicit 'heal'
+		desc = item.get('desc', '') or item.get('description', '')
+		m = None
+		import re
+		m = re.search(r"(\d+)d(\d+)(?:\s*\+\s*(\d+))?", str(desc))
+		if m:
+			n = int(m.group(1))
+			d = int(m.group(2))
+			bonus = int(m.group(3) or 0)
+			# roll dice
+			healed = 0
+			from random import randint as _randint
+			for _ in range(n):
+				healed += _randint(1, d)
+			healed += bonus
+			old = self.hp
+			self.hp = min(self.max_hp, self.hp + healed)
+			game_state.uprint(f"[Potion] {self.name} uses {name} and recovers {self.hp - old} HP ({healed} rolled).")
+			return f"{self.name} récupère {self.hp - old} PV."
+		if 'cure' in item:
+			removed = self.cleanse_negative()
+			if removed:
+				game_state.uprint(f"[Potion] {self.name} uses {name} and is cured: {', '.join(removed)}")
+				return f"Guéri: {', '.join(removed)}"
+			return f"{self.name} boit {name} mais rien à guérir."
+		if 'buff' in item:
+			b = item.get('buff')
+			if isinstance(b, dict):
+				eff = ActiveEffect(kind=b.get('kind','buff'), magnitude=int(b.get('magnitude',1)), turns=int(b.get('turns',1)), spell_name=name)
+				self.add_effect(eff)
+				game_state.uprint(f"[Potion] {self.name} uses {name} and gains {eff.kind} (+{eff.magnitude}) for {eff.turns} turns.")
+				return f"Gain d'effet: {eff.kind} (+{eff.magnitude}) {eff.turns}t."
+		return f"{name} n'a aucun effet implémenté."
 
 	def unequip_weapon(self) -> str:
 		old = self.weapon
