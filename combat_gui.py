@@ -34,12 +34,10 @@ from models.monster import Monster
 from models.spell import Spell
 from simulation import build_party_from_heroes, create_sample_monsters
 
-BENEFICIAL_EFFECTS = {'heal', 'buff', 'shield', 'cleanse', 'revive'}
 
 
-def is_beneficial(spell: Spell) -> bool:
-    """Sorts qui doivent viser un allié plutôt qu'un monstre."""
-    return spell.effect in BENEFICIAL_EFFECTS
+
+
 
 
 class CharacterCard(QFrame):
@@ -1242,7 +1240,7 @@ class CombatWindow(QMainWindow):
             # Cleanse spells with these names are revive spells that target dead characters
             is_revive = spell.effect == 'cleanse' and spell.name in ('Resurrection', 'Revivify')
             return is_revive and isinstance(self.selected_target, Hero)
-        if is_beneficial(spell):
+        if spell.is_beneficial():
             return isinstance(self.selected_target, Hero)
         return isinstance(self.selected_target, Monster)
 
@@ -1259,7 +1257,7 @@ class CombatWindow(QMainWindow):
         for spell in self.current_hero.spells:
             slots_left = self.current_hero.current_spell_slots[spell.level - 1]
             slots_max = self.current_hero.max_spell_slots[spell.level - 1]
-            icon = '💚' if is_beneficial(spell) else '🔥'
+            icon = '💚' if spell.is_beneficial() else '🔥'
             label = f'{icon} {spell.name}\nNiv.{spell.level} ({slots_left}/{slots_max})'
             btn = QPushButton(label)
             btn.setMinimumSize(140, 70)
@@ -1295,7 +1293,7 @@ class CombatWindow(QMainWindow):
         hero = self.current_hero
         if not hero:
             return
-        beneficial = is_beneficial(spell)
+        beneficial = spell.is_beneficial()
         pool = [h for h in self.party if (h.hp > 0 or (spell.effect == 'cleanse' and spell.name in ('Resurrection', 'Revivify')))] if beneficial else [m for m in self.monsters if m.hp > 0]
 
         if spell.multi_target:

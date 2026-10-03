@@ -157,14 +157,18 @@ class BattleSystem:
 				pairs.sort(key=lambda sv: getattr(sv[1], 'ai_priority', 50))
 
 				# utility predicates
-				allies = [a for a in party if a.hp > 0]
+				allies = party
 				heal_threshold = 0.9
 
 				for spell, handler in pairs:
 					# delegate applicability decision to the handler
 					from combat.effects.base import CastContext
 					ctx = CastContext(caster=attacker, spell=spell)
-					targets = handler.applicable(ctx=ctx, allies=allies, enemies=[defender])
+					# Use is_beneficial to ensure we target allies for beneficial spells
+					if spell.is_beneficial():
+						targets = handler.applicable(ctx=ctx, allies=allies, enemies=[])
+					else:
+						targets = handler.applicable(ctx=ctx, allies=[], enemies=[defender])
 					if not targets:
 						continue
 					# respect spell.multi_target: if False, pick first target

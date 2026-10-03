@@ -31,3 +31,7 @@ class Spell:
 			return 0.0
 		average_roll = (1 + dice.roll_dice) / 2
 		return (dice.num_dice * average_roll) + dice.bonus
+
+	def is_beneficial(self) -> bool:
+		"""Sorts qui doivent viser un allié plutôt qu'un monstre."""
+		return self.effect in {'heal', 'buff', 'shield', 'cleanse', 'revive'}

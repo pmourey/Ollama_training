@@ -98,6 +98,13 @@ class ReviveHandler(EffectHandler):
 			f'but there is nothing to restore.'
 		)
 
+	def applicable(self, ctx: CastContext, allies: list[Character], enemies: list[Character]) -> list[Character]:
+		# target dead allies first, then allies with negative effects
+		dead = [a for a in allies if a.hp <= 0]
+		if dead:
+			return dead if ctx.spell.multi_target else [dead[0]]
+		return super().applicable(ctx, allies, enemies)
+
 
 class MiracleHandler(EffectHandler):
 	"""Wish / Absolute Salvation : soins complets et dissipation."""
@@ -109,3 +116,13 @@ class MiracleHandler(EffectHandler):
 		target.hp = target.max_hp
 		cleansed = f' Cleansed: {", ".join(removed)}.' if removed else ''
 		return f'[Spell] {ctx.spell.name} fully restores {target.name}!{cleansed}'
+
+	def applicable(self, ctx: CastContext, allies: list[Character], enemies: list[Character]) -> list[Character]:
+		# target dead allies first, then injured, then negative effects
+		dead = [a for a in allies if a.hp <= 0]
+		if dead:
+			return dead if ctx.spell.multi_target else [dead[0]]
+		injured = [a for a in allies if a.hp > 0 and a.hp / a.max_hp <= 0.9]
+		if injured:
+			return injured if ctx.spell.multi_target else [injured[0]]
+		return super().applicable(ctx, allies, enemies)
