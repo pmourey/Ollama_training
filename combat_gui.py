@@ -34,7 +34,7 @@ from models.monster import Monster
 from models.spell import Spell
 from simulation import build_party_from_heroes, create_sample_monsters
 
-BENEFICIAL_EFFECTS = {'heal', 'buff', 'shield'}
+BENEFICIAL_EFFECTS = {'heal', 'buff', 'shield', 'cleanse', 'revive'}
 
 
 def is_beneficial(spell: Spell) -> bool:
@@ -86,13 +86,13 @@ class CharacterCard(QFrame):
         self.refresh()
 
     def mousePressEvent(self, event):
-        if self.character.hp > 0:
+        if True:  # Changed to allow clicking dead characters for revive
             self.clicked.emit(self.character)
         super().mousePressEvent(event)
 
     def mouseDoubleClickEvent(self, event):
         # Emit a dedicated double-click signal to open detailed sheet dialogs.
-        if self.character.hp > 0:
+        if True:  # Changed to allow clicking dead characters for revive
             self.double_clicked.emit(self.character)
         super().mouseDoubleClickEvent(event)
 
@@ -1236,8 +1236,12 @@ class CombatWindow(QMainWindow):
             btn.setEnabled(can_act and slots_left > 0 and ok_target)
 
     def _target_matches(self, spell: Spell) -> bool:
-        if self.selected_target is None or self.selected_target.hp <= 0:
+        if self.selected_target is None:
             return False
+        if self.selected_target.hp <= 0:
+            # Cleanse spells with these names are revive spells that target dead characters
+            is_revive = spell.effect == 'cleanse' and spell.name in ('Resurrection', 'Revivify')
+            return is_revive and isinstance(self.selected_target, Hero)
         if is_beneficial(spell):
             return isinstance(self.selected_target, Hero)
         return isinstance(self.selected_target, Monster)
@@ -1292,7 +1296,7 @@ class CombatWindow(QMainWindow):
         if not hero:
             return
         beneficial = is_beneficial(spell)
-        pool = [h for h in self.party if h.hp > 0] if beneficial else [m for m in self.monsters if m.hp > 0]
+        pool = [h for h in self.party if (h.hp > 0 or (spell.effect == 'cleanse' and spell.name in ('Resurrection', 'Revivify')))] if beneficial else [m for m in self.monsters if m.hp > 0]
 
         if spell.multi_target:
             targets = pool
