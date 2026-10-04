@@ -31,7 +31,7 @@ from loaders.game_data import load_game_data
 from models.character import Hero
 from models.enums import Condition
 from models.monster import Monster
-from models.spell import Spell
+from models.spell import Spell, is_beneficial
 from simulation import build_party_from_heroes, create_sample_monsters
 
 
@@ -1240,7 +1240,7 @@ class CombatWindow(QMainWindow):
             # Cleanse spells with these names are revive spells that target dead characters
             is_revive = spell.effect == 'cleanse' and spell.name in ('Resurrection', 'Revivify')
             return is_revive and isinstance(self.selected_target, Hero)
-        if spell.is_beneficial():
+        if is_beneficial(spell):
             return isinstance(self.selected_target, Hero)
         return isinstance(self.selected_target, Monster)
 
@@ -1257,7 +1257,7 @@ class CombatWindow(QMainWindow):
         for spell in self.current_hero.spells:
             slots_left = self.current_hero.current_spell_slots[spell.level - 1]
             slots_max = self.current_hero.max_spell_slots[spell.level - 1]
-            icon = '💚' if spell.is_beneficial() else '🔥'
+            icon = '💚' if is_beneficial(spell) else '🔥'
             label = f'{icon} {spell.name}\nNiv.{spell.level} ({slots_left}/{slots_max})'
             btn = QPushButton(label)
             btn.setMinimumSize(140, 70)
@@ -1293,7 +1293,7 @@ class CombatWindow(QMainWindow):
         hero = self.current_hero
         if not hero:
             return
-        beneficial = spell.is_beneficial()
+        beneficial = is_beneficial(spell)
         pool = [h for h in self.party if (h.hp > 0 or (spell.effect == 'cleanse' and spell.name in ('Resurrection', 'Revivify')))] if beneficial else [m for m in self.monsters if m.hp > 0]
 
         if spell.multi_target:

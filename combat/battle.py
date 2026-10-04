@@ -6,7 +6,7 @@ from typing import List
 import game_state
 from models.character import Character, Hero
 from models.enums import Condition
-from models.spell import Spell
+from models.spell import Spell, is_beneficial
 
 
 class BattleSystem:
@@ -164,8 +164,7 @@ class BattleSystem:
 					# delegate applicability decision to the handler
 					from combat.effects.base import CastContext
 					ctx = CastContext(caster=attacker, spell=spell)
-					# Use is_beneficial to ensure we target allies for beneficial spells
-					if spell.is_beneficial():
+					if is_beneficial(spell):
 						targets = handler.applicable(ctx=ctx, allies=allies, enemies=[])
 					else:
 						targets = handler.applicable(ctx=ctx, allies=[], enemies=[defender])
