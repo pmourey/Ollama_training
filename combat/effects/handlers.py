@@ -63,7 +63,7 @@ class HealHandler(EffectHandler):
 
 	def applicable(self, ctx: CastContext, allies: list[Character], enemies: list[Character]) -> list[Character]:
 		# target the most injured ally below a threshold
-		candidates = [a for a in allies if a.hp / a.max_hp <= 0.9]
+		candidates = [a for a in allies if a.hp > 0 and a.hp / a.max_hp <= 0.9]
 		if not candidates:
 			return []
 		return [min(candidates, key=lambda a: a.hp)]
@@ -83,7 +83,7 @@ class BuffHandler(EffectHandler):
 
 	def applicable(self, ctx: CastContext, allies: list[Character], enemies: list[Character]) -> list[Character]:
 		# apply to all allies missing the buff (but respect spell.multi_target)
-		targets = [a for a in allies if not a.has_effect(self.ai_status)]
+		targets = [a for a in allies if a.hp > 0 and not a.has_effect(self.ai_status)]
 		if not targets:
 			return []
 		if ctx.spell.multi_target:
@@ -113,7 +113,7 @@ class ShieldHandler(EffectHandler):
 
 	def applicable(self, ctx: CastContext, allies: list[Character], enemies: list[Character]) -> list[Character]:
 		# give shield to allies missing it
-		targets = [a for a in allies if not a.has_effect('shield')]
+		targets = [a for a in allies if a.hp > 0 and not a.has_effect('shield')]
 		if not targets:
 			return []
 		if ctx.spell.multi_target:
@@ -141,7 +141,7 @@ class CleanseHandler(EffectHandler):
 
 	def applicable(self, ctx: CastContext, allies: list[Character], enemies: list[Character]) -> list[Character]:
 		# target allies with negative effects
-		targets = [a for a in allies if a.has_negative_effect()]
+		targets = [a for a in allies if a.hp > 0 and a.has_negative_effect()]
 		return targets if ctx.spell.multi_target else ( [targets[0]] if targets else [] )
 
 

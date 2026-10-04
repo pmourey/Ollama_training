@@ -31,15 +31,13 @@ from loaders.game_data import load_game_data
 from models.character import Hero
 from models.enums import Condition
 from models.monster import Monster
-from models.spell import Spell
+from models.spell import Spell, is_beneficial
 from simulation import build_party_from_heroes, create_sample_monsters
 
-BENEFICIAL_EFFECTS = {'heal', 'buff', 'shield', 'cleanse', 'revive'}
 
 
-def is_beneficial(spell: Spell) -> bool:
-    """Sorts qui doivent viser un allié plutôt qu'un monstre."""
-    return spell.effect in BENEFICIAL_EFFECTS
+
+
 
 
 class CharacterCard(QFrame):
